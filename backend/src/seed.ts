@@ -79,7 +79,7 @@ if (require.main === module) {
       console.log('All done!');
       process.exit(0);
     })
-    .catch((error) => {
+    .catch((error: any) => {
       console.error('Seed failed:', error);
       process.exit(1);
     });

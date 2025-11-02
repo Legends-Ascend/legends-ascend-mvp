@@ -220,7 +220,9 @@ export const TeamLineup: React.FC = () => {
       const newTeam = await teamApi.create(newTeamName);
       setNewTeamName('');
       await fetchTeams();
-      setSelectedTeamId(newTeam.id!);
+      if (newTeam.id) {
+        setSelectedTeamId(newTeam.id);
+      }
     } catch (err) {
       setError('Failed to create team');
     }

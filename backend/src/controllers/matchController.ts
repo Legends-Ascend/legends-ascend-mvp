@@ -118,6 +118,7 @@ export const simulateMatchAsync = async (req: Request, res: Response) => {
     );
 
     // Simulate match asynchronously (with a small delay to demonstrate async behavior)
+    // Note: For production, replace setTimeout with a proper job queue system (Bull, BullMQ)
     setTimeout(async () => {
       try {
         const { homeScore, awayScore } = await simulateMatch(
@@ -134,50 +135,27 @@ export const simulateMatchAsync = async (req: Request, res: Response) => {
         );
 
         // Update team statistics
-        const points = {
-          home: homeScore > awayScore ? 3 : homeScore === awayScore ? 1 : 0,
-          away: awayScore > homeScore ? 3 : homeScore === awayScore ? 1 : 0,
+        const updateTeamStats = async (teamId: number, goalsFor: number, goalsAgainst: number) => {
+          const points = goalsFor > goalsAgainst ? 3 : goalsFor === goalsAgainst ? 1 : 0;
+          const wins = goalsFor > goalsAgainst ? 1 : 0;
+          const draws = goalsFor === goalsAgainst ? 1 : 0;
+          const losses = goalsFor < goalsAgainst ? 1 : 0;
+
+          await query(
+            `UPDATE teams
+             SET points = points + $1,
+                 wins = wins + $2,
+                 draws = draws + $3,
+                 losses = losses + $4,
+                 goals_for = goals_for + $5,
+                 goals_against = goals_against + $6
+             WHERE id = $7`,
+            [points, wins, draws, losses, goalsFor, goalsAgainst, teamId]
+          );
         };
 
-        await query(
-          `UPDATE teams
-           SET points = points + $1,
-               wins = wins + $2,
-               draws = draws + $3,
-               losses = losses + $4,
-               goals_for = goals_for + $5,
-               goals_against = goals_against + $6
-           WHERE id = $7`,
-          [
-            points.home,
-            homeScore > awayScore ? 1 : 0,
-            homeScore === awayScore ? 1 : 0,
-            homeScore < awayScore ? 1 : 0,
-            homeScore,
-            awayScore,
-            match.home_team_id,
-          ]
-        );
-
-        await query(
-          `UPDATE teams
-           SET points = points + $1,
-               wins = wins + $2,
-               draws = draws + $3,
-               losses = losses + $4,
-               goals_for = goals_for + $5,
-               goals_against = goals_against + $6
-           WHERE id = $7`,
-          [
-            points.away,
-            awayScore > homeScore ? 1 : 0,
-            homeScore === awayScore ? 1 : 0,
-            awayScore < homeScore ? 1 : 0,
-            awayScore,
-            homeScore,
-            match.away_team_id,
-          ]
-        );
+        await updateTeamStats(match.home_team_id, homeScore, awayScore);
+        await updateTeamStats(match.away_team_id, awayScore, homeScore);
 
         console.log(`Match ${id} completed: ${match.home_team_name} ${homeScore} - ${awayScore} ${match.away_team_name}`);
       } catch (error) {
