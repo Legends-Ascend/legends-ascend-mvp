@@ -31,6 +31,8 @@ A football manager game MVP built with React, TypeScript, Node.js, Express, and 
 
 ## 🚀 Getting Started
 
+> **Quick Setup**: For detailed step-by-step instructions and troubleshooting, see [SETUP.md](./SETUP.md)
+
 ### 1. Clone the Repository
 
 ```bash
