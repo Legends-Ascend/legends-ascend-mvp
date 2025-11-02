@@ -387,9 +387,11 @@ export const PlayerRoster: React.FC = () => {
               </StatRow>
             </PlayerInfo>
             <div style={{ marginTop: '10px' }}>
-              <DeleteButton onClick={() => handleDelete(player.id!)}>
-                Delete
-              </DeleteButton>
+              {player.id && (
+                <DeleteButton onClick={() => handleDelete(player.id)}>
+                  Delete
+                </DeleteButton>
+              )}
             </div>
           </PlayerCard>
         ))}
