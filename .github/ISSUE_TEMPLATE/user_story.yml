@@ -1,0 +1,63 @@
+name: User Story
+description: Create a new user story
+body:
+  - type: input
+    id: title
+    attributes:
+      label: Story Title
+      placeholder: "[Xpts] US-XXX: As a user I want..."
+    validations:
+      required: true
+  
+  - type: textarea
+    id: description
+    attributes:
+      label: Full Story Description
+      placeholder: |
+        ## User Story
+        **As a** [user type]
+        **I want** [functionality] 
+        **So that** [benefit]
+
+        ## Acceptance Criteria
+        - [ ] Criterion 1
+        - [ ] Criterion 2
+        
+        ## Definition of Ready
+        - [ ] Acceptance Criteria are clear and testable
+        - [ ] Dependencies resolved
+        - [ ] Designs attached (if needed)
+        - [ ] Estimation provided
+
+        ## Technical Notes
+        - Note 1
+        - Note 2
+    validations:
+      required: true
+      
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - MUST
+        - SHOULD  
+        - COULD
+        - WON'T
+    validations:
+      required: true
+      
+  - type: dropdown
+    id: story_points
+    attributes:
+      label: Story Points
+      options:
+        - "1"
+        - "2" 
+        - "3"
+        - "5"
+        - "8"
+        - "13"
+        - "21"
+    validations:
+      required: true

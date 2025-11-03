@@ -1,0 +1,49 @@
+name: Bug
+description: File a software bug
+body:
+  - type: input
+    id: bug_title
+    attributes:
+      label: Bug Title
+      placeholder: "[BUG] B-XXX: Short summary"
+    validations:
+      required: true
+
+  - type: textarea
+    id: bug_details
+    attributes:
+      label: Bug Details
+      placeholder: |
+        ## Bug Description
+        _Describe the problem and expected outcome._
+
+        ## Steps to Reproduce
+        1. 
+        2. 
+        3.
+
+        ## Environment
+        - Web/Mobile: [specify]
+        - Browser/OS: [specify]
+
+        ## Severity
+        - [ ] Critical (blocks development or beta)
+        - [ ] Major (main flow broken)
+        - [ ] Minor (cosmetic/convenience)
+
+        ## Attachments
+        - Screenshot/Logs (if any)
+    validations:
+      required: true
+      
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - MUST
+        - SHOULD
+        - COULD
+        - WON'T
+    validations:
+      required: true
