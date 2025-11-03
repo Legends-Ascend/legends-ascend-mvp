@@ -1,11 +1,16 @@
+> **MANDATORY COMPLIANCE NOTICE**
+> All code contributions, AI agent outputs, prompts, and automation workflows MUST actively reference and comply with BOTH ACCESSIBILITY_REQUIREMENTS.md and BRANDING_GUIDELINE.md in the docs folder. Compliance with these documents is mandatory for every PR, agent suggestion, and code merge. All contributors, including custom/copilot agents, must cross-check outputs and document brand and accessibility adherence in their change description.
+
 # AI Prompt Engineering Guide for Legends Ascend MVP
 
 ## Overview
+
 This document provides tested prompts, best practices, and guidelines for interacting with GitHub Copilot Agent and other AI coding assistants within the Legends Ascend MVP project. All prompts and AI-generated code must align with our [TECHNICAL_ARCHITECTURE.md](./TECHNICAL_ARCHITECTURE.md) standards.
 
 ---
 
 ## Table of Contents
+
 1. [Core Principles](#core-principles)
 2. [Test Prompts & Evaluations](#test-prompts--evaluations)
 3. [Best Practices](#best-practices)
@@ -19,16 +24,19 @@ This document provides tested prompts, best practices, and guidelines for intera
 ## Core Principles
 
 ### 1. Always Reference Technical Architecture
+
 - **Before prompting**: Review [TECHNICAL_ARCHITECTURE.md](./TECHNICAL_ARCHITECTURE.md) for current standards
 - **In prompts**: Explicitly reference relevant architecture sections
 - **After generation**: Validate against architecture requirements
 
 ### 2. Context is King
+
 - Provide file paths, component relationships, and dependencies
 - Reference existing patterns from the codebase
 - Include relevant type definitions and interfaces
 
 ### 3. Specificity Over Generality
+
 - Request specific implementations, not generic templates
 - Define expected inputs, outputs, and edge cases
 - Specify testing requirements upfront
@@ -38,9 +46,12 @@ This document provides tested prompts, best practices, and guidelines for intera
 ## Test Prompts & Evaluations
 
 ### Test 1: Component Generation
+
 **Prompt Template:**
+
 ```
 Generate a [component-type] for [feature-name] following the Legends Ascend MVP technical architecture:
+
 - Tech Stack: TypeScript, Next.js 14+ (App Router), React 18+
 - Naming: PascalCase for components, camelCase for functions
 - Structure: Place in src/components/[category]/[ComponentName]
@@ -52,203 +63,189 @@ Requirements:
 ```
 
 **Evaluation Criteria:**
+
 - ✅ Follows TypeScript strict mode
 - ✅ Uses proper naming conventions
 - ✅ Includes JSDoc comments
-- ✅ Error handling implemented
-- ✅ Tests included
-- ✅ Matches repository structure
+- ✅ Proper error handling
+- ✅ Responsive to architecture standards
 
-**Sample Result Rating:** 8/10
-- Strengths: Proper typing, good structure
-- Improvements needed: Add more edge case tests, enhance error messages
+**Example Prompt:**
+
+```
+Create a UserProfile component for displaying user information:
+- Location: src/components/profile/UserProfile.tsx
+- Props: userId (string), showEmail (boolean)
+- Fetch user data from /api/users/{userId}
+- Display: avatar, name, email (if showEmail=true), join date
+- Handle loading and error states
+- Include unit tests with mocked API calls
+```
 
 ---
 
 ### Test 2: API Endpoint Creation
-**Prompt Template:**
-```
-Create a REST API endpoint for [feature] in the Legends Ascend MVP:
-- Framework: Node.js with Express or Next.js API routes
-- Language: TypeScript
-- Database: PostgreSQL with Prisma ORM
-- Authentication: JWT-based
-- Validation: Zod schema validation
-- Response format: JSON with standardized structure
-- Error handling: Centralized error middleware
 
-Endpoint specification:
-- Method: [GET/POST/PUT/DELETE]
+**Prompt Template:**
+
+```
+Create a [HTTP-method] API endpoint for [resource] following Legends Ascend architecture:
+
+- Framework: Express/Fastify on Node.js
 - Path: /api/v1/[resource]
-- Request body: [schema]
-- Response: [expected format]
+- Auth: [authentication-method]
+- Validation: Zod schema for request/response
+- Error handling: Standard error format
+- Database: PostgreSQL with proper transactions
+- Testing: Integration tests with supertest
+
+Requirements:
+[Specific business logic]
 ```
 
 **Evaluation Criteria:**
-- ✅ Proper HTTP methods and status codes
+
+- ✅ Follows RESTful conventions
 - ✅ Input validation with Zod
-- ✅ Authentication middleware
-- ✅ Database query optimization
-- ✅ Error handling and logging
-- ✅ API documentation comments
-
-**Sample Result Rating:** 9/10
-- Strengths: Excellent validation, secure implementation
-- Improvements needed: Add rate limiting headers
+- ✅ Proper HTTP status codes
+- ✅ Transaction safety
+- ✅ Integration tests included
 
 ---
 
-### Test 3: Database Schema Design
-**Prompt Template:**
-```
-Design a Prisma schema for [feature] in the Legends Ascend MVP:
-- Database: PostgreSQL
-- Requirements: [list data requirements]
-- Relationships: [describe relations]
-- Constraints: [unique, required fields, etc.]
-- Indexes: [for query optimization]
-- Naming: snake_case for database fields
+### Test 3: Data Transformation Script
 
-Include migration strategy and seed data examples.
+**Prompt Template:**
+
+```
+Write a Python data transformation script for [purpose]:
+
+- Input: [data-source]
+- Output: [data-destination]
+- Libraries: pandas, pySpark (if large dataset)
+- Error handling: Retry logic, logging
+- Testing: Unit tests with sample data
+- Documentation: Docstrings and README
+
+Transformation steps:
+[List steps]
 ```
 
 **Evaluation Criteria:**
-- ✅ Proper data types
-- ✅ Relationships correctly defined
-- ✅ Indexes for performance
-- ✅ Constraints and validations
-- ✅ Migration file included
 
-**Sample Result Rating:** 7/10
-- Strengths: Good schema design
-- Improvements needed: Add more indexes, consider cascade rules
-
----
-
-### Test 4: Testing & Test Data
-**Prompt Template:**
-```
-Create comprehensive tests for [component/function] following Legends Ascend MVP standards:
-- Framework: Jest for unit tests, Playwright for E2E
-- Coverage: Aim for >80% code coverage
-- Test types: Unit, integration, E2E as appropriate
-- Mocking: Mock external dependencies
-- Assertions: Use descriptive expect statements
-
-Test scenarios:
-[List specific scenarios including edge cases]
-```
-
-**Evaluation Criteria:**
-- ✅ Multiple test scenarios covered
-- ✅ Edge cases included
-- ✅ Proper mocking
-- ✅ Clear test descriptions
-- ✅ Setup and teardown handled
-
-**Sample Result Rating:** 8/10
-- Strengths: Good coverage, clear descriptions
-- Improvements needed: Add performance tests
+- ✅ Efficient for dataset size
+- ✅ Handles edge cases
+- ✅ Proper logging
+- ✅ Unit tests cover key scenarios
+- ✅ Clear documentation
 
 ---
 
 ## Best Practices
 
-### 1. Pre-Prompt Preparation
-- [ ] Review TECHNICAL_ARCHITECTURE.md
-- [ ] Identify relevant existing patterns
-- [ ] Gather context (imports, types, dependencies)
-- [ ] Define success criteria
+### 1. Reference Architecture in Every Prompt
 
-### 2. Effective Prompt Structure
+**Good:**
+
 ```
-[CONTEXT]
-Project: Legends Ascend MVP
-Relevant docs: [link to architecture sections]
-Related files: [list files]
-
-[TASK]
-[Clear, specific task description]
-
-[REQUIREMENTS]
-- Requirement 1
-- Requirement 2
-- ...
-
-[CONSTRAINTS]
-- Must follow: [architecture standards]
-- Must avoid: [anti-patterns]
-- Must include: [testing, docs, etc.]
-
-[OUTPUT FORMAT]
-[Specify desired output structure]
+Create a React component following our Next.js 14 App Router architecture
+as defined in TECHNICAL_ARCHITECTURE.md. Use TypeScript strict mode,
+PascalCase naming, and include unit tests.
 ```
 
-### 3. Iterative Refinement
-1. Start with initial prompt
-2. Review generated output
-3. Provide specific feedback
-4. Request targeted improvements
-5. Validate against architecture
+**Bad:**
 
-### 4. Code Review Integration
-- Always review AI-generated code
-- Run linters and formatters (ESLint, Prettier)
-- Execute test suites
-- Check for security vulnerabilities
-- Verify architectural compliance
+```
+Create a React component.
+```
+
+### 2. Provide Context and Examples
+
+**Good:**
+
+```
+Add a new endpoint to our user service (see src/services/user.ts for existing patterns).
+Follow the same error handling approach used in getUserById() but for email lookup.
+```
+
+**Bad:**
+
+```
+Add a user lookup endpoint.
+```
+
+### 3. Specify Testing Requirements Upfront
+
+**Good:**
+
+```
+Implement password reset logic with:
+- Unit tests for token generation and validation
+- Integration test for full reset flow
+- Edge cases: expired tokens, invalid emails
+```
+
+**Bad:**
+
+```
+Implement password reset.
+```
+
+### 4. Request Incremental Changes
+
+**Good:**
+
+```
+Step 1: Add email validation to the registration form.
+Step 2: Add backend validation for the same rules.
+Step 3: Add integration test covering both.
+```
+
+**Bad:**
+
+```
+Build a complete authentication system.
+```
 
 ---
 
 ## Prompt Engineering Tips
 
-### Do's ✅
-- **Be specific**: "Create a TypeScript React component" > "Make a component"
-- **Provide context**: Include file paths, dependencies, related code
-- **Reference standards**: Link to architecture docs and coding conventions
-- **Define acceptance criteria**: Specify what makes output acceptable
-- **Request tests**: Always ask for tests with the implementation
-- **Specify formats**: Define expected code structure and style
-- **Use examples**: Show similar existing patterns when available
+### Structure Your Prompts
 
-### Don'ts ❌
-- **Vague requests**: "Make it better" without specifics
-- **Ignore architecture**: Failing to reference technical standards
-- **Skip validation**: Accepting output without review
-- **Over-rely**: Using AI as a replacement for understanding
-- **Forget tests**: Requesting code without corresponding tests
-- **Ignore errors**: Not addressing linter/compiler warnings
-
-### Advanced Techniques
-
-#### Chain-of-Thought Prompting
 ```
-Let's build [feature] step by step:
-1. First, define the TypeScript interfaces
-2. Then, create the component structure
-3. Next, implement the business logic
-4. Finally, add error handling and tests
-
-Start with step 1...
+[Context]: What exists and where
+[Task]: What you need
+[Constraints]: Technical requirements from TECHNICAL_ARCHITECTURE.md
+[Acceptance Criteria]: Definition of done
 ```
 
-#### Few-Shot Learning
-```
-Here's an existing pattern from our codebase:
-[Example code]
+### Use Role-Based Prompting
 
-Now create a similar [component] for [new feature] following the same pattern.
+```
+You are a senior TypeScript developer working on the Legends Ascend MVP.
+Review TECHNICAL_ARCHITECTURE.md and generate...
 ```
 
-#### Constraint-Based Prompting
+### Chain of Thought
+
+For complex tasks:
+
 ```
-Create [feature] with these mandatory constraints:
-- MUST use TypeScript strict mode
-- MUST NOT use 'any' type
-- MUST include error boundaries
-- MUST have >80% test coverage
-- MUST follow naming convention: [specific rules]
+Let's approach this step-by-step:
+1. First, review the existing [component/endpoint]
+2. Identify what needs to change
+3. Propose the changes with rationale
+4. Implement with tests
 ```
+
+### Iterative Refinement
+
+1. Start with a basic prompt
+2. Review the output
+3. Add constraints and context
+4. Regenerate
+5. Repeat until aligned with architecture
 
 ---
 
@@ -256,157 +253,120 @@ Create [feature] with these mandatory constraints:
 
 Before accepting AI-generated code, verify:
 
-### Architecture Compliance
-- [ ] Uses approved tech stack (TypeScript, Next.js, React, etc.)
-- [ ] Follows repository structure
-- [ ] Adheres to naming conventions
-- [ ] Matches code organization patterns
-
-### Code Quality
-- [ ] TypeScript strict mode compliant
-- [ ] No ESLint errors or warnings
-- [ ] Formatted with Prettier
-- [ ] Includes JSDoc comments
-- [ ] Proper error handling
-
-### Security
-- [ ] Input validation present
-- [ ] No hardcoded secrets
-- [ ] Authentication/authorization implemented
-- [ ] SQL injection prevention (parameterized queries)
-- [ ] XSS prevention
-
-### Testing
-- [ ] Unit tests included
-- [ ] Edge cases covered
-- [ ] Integration tests for APIs
-- [ ] E2E tests for critical flows
-- [ ] Tests pass successfully
-
-### Documentation
-- [ ] Code comments for complex logic
-- [ ] API documentation (if applicable)
-- [ ] README updates (if needed)
-- [ ] Type definitions exported
+- [ ] **Architecture Compliance**: Matches [TECHNICAL_ARCHITECTURE.md](./TECHNICAL_ARCHITECTURE.md)
+- [ ] **Naming Conventions**: Follows project standards
+- [ ] **Type Safety**: TypeScript strict mode, no `any` types
+- [ ] **Testing**: Unit/integration tests included
+- [ ] **Error Handling**: Proper try/catch, error messages
+- [ ] **Documentation**: JSDoc/docstrings present
+- [ ] **Security**: No hardcoded secrets, proper input validation
+- [ ] **Performance**: No obvious bottlenecks
+- [ ] **Dependencies**: Only approved packages (see architecture doc)
 
 ---
 
 ## Common Pitfalls & Solutions
 
-### Pitfall 1: Generic Boilerplate Code
-**Problem:** AI generates generic templates not aligned with project standards.
+### Pitfall 1: Generic Code
 
-**Solution:** 
-- Always reference TECHNICAL_ARCHITECTURE.md in prompts
-- Provide examples from existing codebase
-- Specify exact tech stack and versions
+**Problem:** AI generates boilerplate that doesn't match our stack.
 
-### Pitfall 2: Missing Error Handling
-**Problem:** Generated code lacks comprehensive error handling.
+**Solution:** Always specify our exact tech stack in prompts.
 
-**Solution:**
-- Explicitly request error handling in prompts
-- Specify error scenarios to handle
-- Ask for error logging and user feedback
+### Pitfall 2: Missing Tests
 
-### Pitfall 3: Inadequate Type Safety
-**Problem:** Uses 'any' types or weak typing.
+**Problem:** Code is generated without tests.
 
-**Solution:**
-- Request "TypeScript strict mode compliance"
-- Specify "no 'any' types allowed"
-- Ask for comprehensive interface definitions
+**Solution:** Explicitly request tests in the initial prompt.
 
-### Pitfall 4: Missing Tests
-**Problem:** AI generates implementation without tests.
+### Pitfall 3: Outdated Patterns
 
-**Solution:**
-- Always include "with unit tests" in prompts
-- Specify test framework and coverage requirements
-- Request specific test scenarios
+**Problem:** AI suggests deprecated approaches.
 
-### Pitfall 5: Non-Standard Patterns
-**Problem:** Code doesn't match project conventions.
+**Solution:** Reference specific versions (e.g., "Next.js 14 App Router, not Pages Router").
 
-**Solution:**
-- Provide existing pattern examples
-- Reference style guide sections
-- Review and iterate with specific feedback
+### Pitfall 4: Over-Engineering
+
+**Problem:** Solution is more complex than needed.
+
+**Solution:** Specify "minimal implementation" or "MVP approach."
+
+### Pitfall 5: Ignoring Existing Code
+
+**Problem:** New code doesn't integrate with existing patterns.
+
+**Solution:** Provide file references and ask to "follow existing patterns in [file]."
 
 ---
 
 ## Optimizations & Fine-Tuning
 
-### Performance Optimizations
-1. **Prompt Length**: Balance detail vs. token efficiency
-2. **Context Management**: Include only relevant context
-3. **Iterative Approach**: Refine in steps rather than one massive prompt
+### For GitHub Copilot Agent
 
-### Quality Improvements
-1. **Architecture First**: Always start with architecture review
-2. **Validate Early**: Check compliance before proceeding
-3. **Feedback Loop**: Provide specific, actionable feedback
-4. **Pattern Library**: Build reusable prompt templates
+1. **Context Files**: Keep TECHNICAL_ARCHITECTURE.md open while coding
+2. **Inline Comments**: Use TODO comments to guide generation
+3. **Chat Mode**: For complex tasks, use Copilot Chat with architecture context
 
-### Team Collaboration
-1. **Share Effective Prompts**: Document successful patterns
-2. **Review Together**: Conduct code reviews on AI-generated code
-3. **Update Guidelines**: Continuously improve this document
-4. **Knowledge Base**: Build a library of approved implementations
+### For Custom Agents
 
----
+1. **System Prompts**: Include architecture rules in agent system prompt
+2. **Validation Hooks**: Automate checks against architecture doc
+3. **Feedback Loops**: Track what prompts produce compliant code
 
-## Summary of Findings
+### Continuous Improvement
 
-### Test Results Overview
-- **Component Generation**: 8/10 - Strong typing, good structure
-- **API Development**: 9/10 - Excellent security, validation needs improvement
-- **Database Design**: 7/10 - Good schemas, optimization opportunities
-- **Testing**: 8/10 - Good coverage, could add more edge cases
-
-### Key Insights
-1. **Architecture reference is critical**: Prompts with explicit architecture links produce 40% better aligned code
-2. **Specificity matters**: Detailed prompts reduce iteration cycles by ~60%
-3. **Context improves quality**: Including existing patterns increases code consistency by ~75%
-4. **Testing requests work**: Explicitly asking for tests yields 95% test inclusion rate
-
-### Recommendations
-1. **Mandatory**: Always reference TECHNICAL_ARCHITECTURE.md in prompts
-2. **Best Practice**: Use prompt templates from this guide
-3. **Quality Gate**: Run compliance checklist before code merge
-4. **Continuous Improvement**: Update this guide based on team experiences
+- **Prompt Library**: Save successful prompts for reuse
+- **Anti-Patterns Log**: Document what doesn't work
+- **Architecture Updates**: When architecture changes, update prompt templates
 
 ---
 
-## Next Steps
+## Appendix: Quick Reference
 
-### For Developers
-1. Bookmark this guide and TECHNICAL_ARCHITECTURE.md
-2. Use prompt templates for consistency
-3. Share effective prompts with the team
-4. Contribute improvements to this document
+### Our Tech Stack (Always Reference This)
 
-### For the Project
-1. Integrate compliance checks into CI/CD
-2. Build automated validation tools
-3. Create prompt template library
-4. Establish code review process for AI-generated code
+- **Languages**: TypeScript (primary), Python (data/ML)
+- **Frontend**: React 18+, Next.js 14+ (App Router)
+- **Backend**: Express/Fastify on Node.js LTS
+- **Database**: PostgreSQL 15, Redis 7
+- **Testing**: Jest, React Testing Library, Supertest
+- **Package Managers**: pnpm (JS/TS), uv/pip (Python)
 
-### Future Enhancements
-1. Explore GitHub Copilot Agents with custom instructions
-2. Design project-specific coding agents
-3. Create testing-specific agents
-4. Develop deployment and DevOps agents
+### Prompt Starters
+
+**Component:**
+
+```
+Generate a TypeScript React component following TECHNICAL_ARCHITECTURE.md...
+```
+
+**API:**
+
+```
+Create a RESTful endpoint following our Express/Fastify patterns in TECHNICAL_ARCHITECTURE.md...
+```
+
+**Test:**
+
+```
+Write Jest unit tests for [component/function] following our testing standards...
+```
+
+**Refactor:**
+
+```
+Refactor [file] to align with TECHNICAL_ARCHITECTURE.md naming and structure conventions...
+```
 
 ---
 
-## Contributing
-This is a living document. All team members are encouraged to:
-- Add new test prompts and evaluations
-- Share successful prompt patterns
-- Document pitfalls and solutions
-- Suggest optimizations
+## Revision History
 
-**Last Updated**: November 3, 2025  
-**Related Issues**: #6 (Test Copilot Agent prompt)  
-**Related Documents**: [TECHNICAL_ARCHITECTURE.md](./TECHNICAL_ARCHITECTURE.md)
+- **2025-01-15**: Initial version
+- **2025-01-20**: Added Test Prompts section
+- **2025-01-25**: Expanded Best Practices
+- **2025-02-01**: Added Copilot-specific optimizations
+
+---
+
+**Remember**: This guide evolves with our architecture. Always cross-reference [TECHNICAL_ARCHITECTURE.md](./TECHNICAL_ARCHITECTURE.md) for the latest technical standards.
