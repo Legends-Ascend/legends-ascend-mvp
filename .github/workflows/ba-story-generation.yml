@@ -42,12 +42,29 @@ jobs:
             Issue Title: ${{ github.event.issue.title }}
             Issue Body:\n${{ steps.extract.outputs.raw }}
 
-      - name: Create user story issue from template
-        uses: peter-evans/create-issue-from-file@v5
+      - name: Create user story issue with generated content
+        id: backlog
+        uses: actions/github-script@v7
         with:
-          title: "US: Generated - ${{ github.event.issue.title }}"
-          content-filepath: .github/ISSUE_TEMPLATE/user_story.yml
-          labels: user-story, generated
+          script: |
+            const output = `${{ steps.ba.outputs.response || steps.ba.outputs.text || '' }}`.trim()
+            if (output.length === 0) {
+              core.setFailed('BA agent returned empty response')
+              return
+            }
+
+            const title = `US: Generated - ${context.payload.issue.title}`
+            const body = output.startsWith('```') ? output : `### BA Agent Generated Story\n\n${output}`
+
+            const { data: issue } = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title,
+              body,
+              labels: ['user-story', 'generated']
+            })
+
+            core.setOutput('issue_number', issue.number)
 
       - name: Post generated content as comment
         uses: actions/github-script@v7
