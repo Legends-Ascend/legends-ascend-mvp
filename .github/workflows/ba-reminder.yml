@@ -1,0 +1,26 @@
+name: BA Request Copilot Reminder
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  issues: write
+
+jobs:
+  ba_reminder:
+    if: |
+      github.event.issue.body && (
+        contains(github.event.issue.title, 'BA:') || contains(github.event.issue.body, 'Request: BA Story Generation')
+      )
+    runs-on: ubuntu-latest
+    steps:
+      - name: Post Copilot assignment reminder
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.payload.issue.number,
+              body: ":bulb: To generate a DoR-compliant user story for this request, use the right sidebar’s Copilot panel and assign the `business-analyst-agent`."
+            })
