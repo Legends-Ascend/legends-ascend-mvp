@@ -1,0 +1,67 @@
+name: BA Story Generation
+on:
+  issues:
+    types: [opened]
+
+jobs:
+  generate-story:
+    if: |
+      github.event.issue.body && contains(github.event.issue.body, 'Raw requirement') && (
+        contains(github.event.issue.body, 'Request: BA Story Generation') || contains(github.event.issue.title, 'BA:')
+      )
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Extract request fields
+        id: extract
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = context.payload.issue.body || ''
+            function extract(id) {
+              const re = new RegExp(`\n\s*${id}.*?\n[\\/\-*#\s:]*`, 'i')
+              return body
+            }
+            core.setOutput('raw', body)
+
+      - name: Run BA Agent to generate DoR-compliant story
+        id: ba
+        uses: github/copilot/agents/run@v1
+        with:
+          agent_file: .github/agents/business-analyst-agent.yaml
+          prompt: |
+            Transform the following unrefined requirement into one or more DoR-compliant user stories using the Output Template.
+
+            Repository foundation documents are available in /docs.
+
+            Issue Title: ${{ github.event.issue.title }}
+            Issue Body:\n${{ steps.extract.outputs.raw }}
+
+      - name: Create user story issue from template
+        uses: peter-evans/create-issue-from-file@v5
+        with:
+          title: "US: Generated - ${{ github.event.issue.title }}"
+          content-filepath: .github/ISSUE_TEMPLATE/user_story.yml
+          labels: user-story, generated
+
+      - name: Post generated content as comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const output = `${{ steps.ba.outputs.response || steps.ba.outputs.text || '' }}`.trim()
+            const issue_number = context.payload.issue.number
+            if (output.length === 0) {
+              core.setFailed('BA agent returned empty response')
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number,
+                body: `### BA Agent Generated Story\n\n${output}`
+              })
+            }
