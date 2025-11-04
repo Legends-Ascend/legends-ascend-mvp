@@ -3,82 +3,67 @@ on:
   issues:
     types: [opened]
 
+permissions:
+  issues: write
+  contents: read
+
 jobs:
   generate-story:
-    if: |
-      github.event.issue.body && contains(github.event.issue.body, 'Raw requirement') && (
-        contains(github.event.issue.body, 'Request: BA Story Generation') || contains(github.event.issue.title, 'BA:')
-      )
+    if: contains(github.event.issue.title, 'BA:') || contains(github.event.issue.body, 'Request: BA Story Generation')
     runs-on: ubuntu-latest
-    permissions:
-      issues: write
-      contents: read
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Extract request fields
-        id: extract
+      - name: Build BA prompt
+        id: build
         uses: actions/github-script@v7
         with:
           script: |
+            const title = context.payload.issue.title || ''
             const body = context.payload.issue.body || ''
-            function extract(id) {
-              const re = new RegExp(`\n\s*${id}.*?\n[\\/\-*#\s:]*`, 'i')
-              return body
-            }
-            core.setOutput('raw', body)
+            const prompt = `
+You are the business-analyst-agent for the Legends Ascend project.
+Transform the following BA request into one or more DoR-compliant user stories using the Output Template defined in .github/agents/business-analyst-agent.yaml. Reference foundation docs in /docs without duplicating content (DoR, Technical Architecture, Branding Guideline, Accessibility Requirements, AI Prompt Engineering). Use UK English, metric, and international football terminology.
 
-      - name: Run BA Agent to generate DoR-compliant story
-        id: ba
-        uses: github/copilot/agents/run@v1
-        with:
-          agent_file: .github/agents/business-analyst-agent.yaml
-          prompt: |
-            Transform the following unrefined requirement into one or more DoR-compliant user stories using the Output Template.
+Issue Title: ${title}
+Issue Body:
+${body}
+            `.trim()
+            core.setOutput('prompt', prompt)
 
-            Repository foundation documents are available in /docs.
-
-            Issue Title: ${{ github.event.issue.title }}
-            Issue Body:\n${{ steps.extract.outputs.raw }}
-
-      - name: Create user story issue with generated content
-        id: backlog
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const output = `${{ steps.ba.outputs.response || steps.ba.outputs.text || '' }}`.trim()
-            if (output.length === 0) {
-              core.setFailed('BA agent returned empty response')
-              return
-            }
-
-            const title = `US: Generated - ${context.payload.issue.title}`
-            const body = output.startsWith('```') ? output : `### BA Agent Generated Story\n\n${output}`
-
-            const { data: issue } = await github.rest.issues.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              title,
-              body,
-              labels: ['user-story', 'generated']
-            })
-
-            core.setOutput('issue_number', issue.number)
+      - name: Generate with OpenAI
+        id: llm
+        env:
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        run: |
+          BODY=$(jq -n --arg p "${{ steps.build.outputs.prompt }}" \
+            '{model:"gpt-4o-mini",messages:[{role:"system",content:"You are a BA agent for Legends Ascend."},{role:"user",content:$p}],temperature:0.2}')
+          curl -sS https://api.openai.com/v1/chat/completions \
+           -H "Authorization: Bearer ${OPENAI_API_KEY}" \
+           -H "Content-Type: application/json" \
+           -d "$BODY" | jq -r '.choices[0].message.content' > ba_output.txt
 
       - name: Post generated content as comment
         uses: actions/github-script@v7
         with:
           script: |
-            const output = `${{ steps.ba.outputs.response || steps.ba.outputs.text || '' }}`.trim()
-            const issue_number = context.payload.issue.number
-            if (output.length === 0) {
-              core.setFailed('BA agent returned empty response')
+            const fs = require('fs')
+            const output = fs.readFileSync('ba_output.txt','utf8').trim()
+            if (!output) {
+              core.setFailed('BA output is empty')
             } else {
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                issue_number,
-                body: `### BA Agent Generated Story\n\n${output}`
+                issue_number: context.payload.issue.number,
+                body: "### BA Agent Generated Story\n\n" + output
               })
             }
+
+      - name: Create User Story issue from template
+        uses: peter-evans/create-issue-from-file@v5
+        with:
+          title: "US: Generated – ${{ github.event.issue.title }}"
+          content-filepath: .github/ISSUE_TEMPLATE/user_story.yml
+          labels: user-story, generated
