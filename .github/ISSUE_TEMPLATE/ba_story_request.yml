@@ -1,0 +1,50 @@
+name: "Request: BA Story Generation"
+description: "Submit a raw requirement to generate a DoR-compliant user story"
+title: "BA: [Short requirement summary]"
+labels: ["business-analyst", "story-generation", "triage"]
+assignees: []
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Provide an unrefined requirement. The BA agent will generate a DoR-compliant user story aligned with foundation documents.
+        - Uses UK English and metric system
+        - References: DEFINITION_OF_READY, TECHNICAL_ARCHITECTURE, BRANDING_GUIDELINE, ACCESSIBILITY_REQUIREMENTS, AI_PROMPT_ENGINEERING
+  - type: input
+    id: epic
+    attributes:
+      label: Epic/Feature (optional)
+      description: Link or name of epic/feature area
+      placeholder: e.g., "Match Engine" or link to epic
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority (MoSCoW)
+      options:
+        - MUST
+        - SHOULD
+        - COULD
+        - WON'T
+      default: 1
+  - type: textarea
+    id: raw_requirement
+    attributes:
+      label: Raw requirement
+      description: Describe the need/problem in free form. Include constraints or examples if known.
+      placeholder: e.g., "Managers need to set formations and tactics before matches"
+    validations:
+      required: true
+  - type: textarea
+    id: constraints
+    attributes:
+      label: Constraints and assumptions (optional)
+      description: List any known constraints, assumptions, or dependencies
+  - type: checkboxes
+    id: consent
+    attributes:
+      label: Confirmations
+      options:
+        - label: I acknowledge this story must comply with DEFINITION_OF_READY
+          required: true
+        - label: I acknowledge branding and accessibility requirements apply
+          required: true
