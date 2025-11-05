@@ -17,16 +17,6 @@ jobs:
         with:
           fetch-depth: 1
 
-      - name: Find Copilot-generated user stories
-        id: find
-        run: |
-          set -e
-          ADDED=$(jq -r '.pull_request.number' "$GITHUB_EVENT_PATH")
-          echo "PR: ${{ github.event.number }}"
-          git fetch origin ${{ github.base_ref }} --depth=1
-          git diff --name-only origin/${{ github.base_ref }}...HEAD | grep '^docs/user-stories/.*\.md$' || true
-        shell: bash
-
       - name: Gather story files
         id: gather
         uses: actions/github-script@v7
