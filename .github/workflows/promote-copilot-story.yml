@@ -15,185 +15,67 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Promote user stories to issues (master + sub-issues)
+      - name: Create lean reference issues (single master per story)
         uses: actions/github-script@v7
         with:
           script: |
             try {
               const pr = context.payload.pull_request
-              if (!pr) {
-                core.info('No PR in context; skipping')
-                return
-              }
+              if (!pr) { core.info('No PR context'); return }
 
               const files = await github.paginate(
                 github.rest.pulls.listFiles,
-                { owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  pull_number: pr.number,
-                  per_page: 100 }
+                { owner: context.repo.owner, repo: context.repo.repo, pull_number: pr.number, per_page: 100 }
               )
 
-              const storyFiles = files
-                .map(function(f){ return f.filename })
-                .filter(function(p){ return p.indexOf('docs/user-stories/') === 0 && p.slice(-3) === '.md' && p !== 'docs/user-stories/README.md' })
+              const storyFiles = files.map(f => f.filename)
+                .filter(p => p.startsWith('docs/user-stories/') && p.endsWith('.md') && p !== 'docs/user-stories/README.md')
+              if (!storyFiles.length) { core.info('No story files'); return }
 
-              if (!storyFiles.length) {
-                core.info('No docs/user-stories/*.md files found; nothing to promote.')
-                return
-              }
-
-              // Group files by story ID (US-001, US-002, etc.)
-              const storyGroups = {}
+              // Group by US-XXX id
+              const groups = {}
               for (const path of storyFiles) {
-                const match = path.match(/US-(\d+)/)
-                const storyId = match ? 'US-' + match[1] : 'general'
-                if (!storyGroups[storyId]) storyGroups[storyId] = []
-                storyGroups[storyId].push(path)
+                const m = path.match(/US-(\d+)/)
+                const id = m ? `US-${m[1]}` : 'general'
+                groups[id] = groups[id] || []
+                groups[id].push(path)
               }
 
               const fs = require('fs')
-              for (const storyId of Object.keys(storyGroups)) {
-                const paths = storyGroups[storyId]
-                
-                // Find main story file (longest name with story details)
-                const mainFile = paths.reduce(function(longest, current) {
-                  return current.length > longest.length ? current : longest
-                })
-                const supportingFiles = paths.filter(function(p) { return p !== mainFile })
+              for (const id of Object.keys(groups)) {
+                const paths = groups[id]
+                // choose main file (longest filename heuristic)
+                const main = paths.reduce((a,b)=> (b.length>a.length?b:a))
+                if (!fs.existsSync(main)) continue
+                const content = fs.readFileSync(main,'utf8')
+                const titleMatch = content.match(/^#\s+(.+)$/m)
+                const title = titleMatch ? `US: ${titleMatch[1]}` : `US: ${id}`
 
-                if (!fs.existsSync(mainFile)) {
-                  core.info('Main file not found at checkout: ' + mainFile)
-                  continue
-                }
+                // Build lean body with references only
+                let body = `This is a lean reference issue for ${id}.\n\n`+
+                  `The BA agent produced a comprehensive specification stored in repository files. `+
+                  `Use the documents below as the single source of truth.\n\n`+
+                  `## Documents in repo\n`+
+                  paths.map(p=>`- \\`${p}\\``).join('\n') +
+                  `\n\n## Notes for Coding Agent\n`+
+                  `- Read all files listed above for full requirements, ACs, diagrams, and guides.\n`+
+                  `- Adhere to TECHNICAL_ARCHITECTURE.md, BRANDING_GUIDELINE.md, ACCESSIBILITY_REQUIREMENTS.md.\n`
 
-                // Read main content
-                const mainContent = fs.readFileSync(mainFile, 'utf8')
-                const match = mainContent.match(/^#\s+(.+)$/m)
-                const issueTitle = match ? ('US: ' + match[1]) : ('US: ' + storyId)
-
-                // Check if we need to split due to size limits
-                const GITHUB_ISSUE_LIMIT = 65000 // Leave some buffer
-                let masterBody = mainContent
-                const subIssueData = []
-
-                // Calculate total size to determine if split is needed
-                let totalSize = mainContent.length
-                for (const supportPath of supportingFiles) {
-                  if (fs.existsSync(supportPath)) {
-                    totalSize += fs.readFileSync(supportPath, 'utf8').length + 200 // headers overhead
-                  }
-                }
-
-                if (totalSize > GITHUB_ISSUE_LIMIT) {
-                  // Truncate main content if too long by itself
-                  if (mainContent.length > GITHUB_ISSUE_LIMIT - 3000) {
-                    masterBody = mainContent.substring(0, GITHUB_ISSUE_LIMIT - 3000)
-                    masterBody += '\n\n**[Content truncated - see linked sub-issues for complete documentation]**'
-                  }
-                  
-                  masterBody += '\n\n---\n\n## Complete Documentation Suite\n\n'
-                  masterBody += 'This user story includes comprehensive documentation:\n\n'
-                  
-                  // Prepare sub-issues for supporting files
-                  for (const supportPath of supportingFiles) {
-                    if (fs.existsSync(supportPath)) {
-                      const supportContent = fs.readFileSync(supportPath, 'utf8')
-                      const fileName = supportPath.replace(/^.*\//, '').replace(/\.md$/, '')
-                      const cleanName = fileName.replace(/^US-\d+-/, '').replace(/-/g, ' ')
-                      const subTitle = storyId + ': ' + cleanName
-                      
-                      subIssueData.push({
-                        title: subTitle,
-                        body: supportContent,
-                        fileName: fileName,
-                        cleanName: cleanName
-                      })
-                    }
-                  }
-                } else {
-                  // Small enough - combine everything in master
-                  if (supportingFiles.length > 0) {
-                    masterBody += '\n\n---\n\n## Supporting Documentation\n\n'
-                    for (const supportPath of supportingFiles) {
-                      if (fs.existsSync(supportPath)) {
-                        const supportContent = fs.readFileSync(supportPath, 'utf8')
-                        const fileName = supportPath.replace(/^.*\//, '')
-                        masterBody += '### ' + fileName + '\n\n' + supportContent + '\n\n'
-                      }
-                    }
-                  }
-                }
-
-                // Create master issue
-                const masterIssue = await github.rest.issues.create({
+                await github.rest.issues.create({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
-                  title: issueTitle,
-                  body: masterBody,
-                  labels: ['user-story', 'generated', storyId.toLowerCase()]
+                  title,
+                  body,
+                  labels: ['user-story','generated', id.toLowerCase()]
                 })
 
-                // Create sub-issues and establish parent-child relationships
-                const createdSubIssues = []
-                for (const subData of subIssueData) {
-                  const subBody = '**Parent Story:** #' + masterIssue.data.number + '\n\n---\n\n' + subData.body
-                  
-                  const subIssue = await github.rest.issues.create({
-                    owner: context.repo.owner,
-                    repo: context.repo.repo,
-                    title: subData.title,
-                    body: subBody,
-                    labels: ['user-story-section', 'generated', storyId.toLowerCase()]
-                  })
-                  
-                  createdSubIssues.push({
-                    number: subIssue.data.number,
-                    title: subData.title,
-                    cleanName: subData.cleanName
-                  })
-                  
-                  // Add sub-issue relationship (if your repo supports it)
-                  try {
-                    await github.rest.issues.createComment({
-                      owner: context.repo.owner,
-                      repo: context.repo.repo,
-                      issue_number: masterIssue.data.number,
-                      body: 'Related: #' + subIssue.data.number + ' (' + subData.cleanName + ')'
-                    })
-                  } catch (e) {
-                    // Ignore if sub-issue API not available
-                  }
-                }
-
-                // Update master issue with sub-issue links if created
-                if (createdSubIssues.length > 0) {
-                  let linksSection = '\n\n## Related Sub-Issues\n\n'
-                  for (const sub of createdSubIssues) {
-                    linksSection += '- [' + sub.cleanName + '](#' + sub.number + ')\n'
-                  }
-                  linksSection += '\n**Note for Coding Agent:** When assigned to this issue, reference all sub-issues above and files in `/docs/user-stories/' + storyId + '-*` for complete implementation context.\n'
-                  
-                  const finalBody = masterBody + linksSection
-                  if (finalBody.length < GITHUB_ISSUE_LIMIT) {
-                    await github.rest.issues.update({
-                      owner: context.repo.owner,
-                      repo: context.repo.repo,
-                      issue_number: masterIssue.data.number,
-                      body: finalBody
-                    })
-                  }
-                }
-
-                const totalFiles = paths.length
-                const totalIssues = 1 + createdSubIssues.length
                 await github.rest.issues.createComment({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   issue_number: pr.number,
-                  body: 'Promoted ' + storyId + ' (' + totalFiles + ' files) to ' + totalIssues + ' linked issues. Master: #' + masterIssue.data.number + (createdSubIssues.length > 0 ? ', Sub-issues: #' + createdSubIssues.map(s => s.number).join(', #') : '')
+                  body: `Created lean story issue for ${id} from ${paths.length} document(s).`
                 })
               }
-            } catch (err) {
-              core.setFailed('Promotion failed: ' + (err && err.message ? err.message : String(err)))
+            } catch (e) {
+              core.setFailed('Lean promotion failed: '+(e?.message||String(e)))
             }
