@@ -15,8 +15,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Collect changed files via API
-        id: files
+      - name: Promote user stories to issues
         uses: actions/github-script@v7
         with:
           script: |
@@ -31,17 +30,9 @@ jobs:
             const storyFiles = files
               .map(f => f.filename)
               .filter(p => p.startsWith('docs/user-stories/') && p.endsWith('.md'))
-            core.setOutput('files', JSON.stringify(storyFiles))
 
-      - name: Create issues from stories
-        if: steps.files.outputs.files != '[]'
-        uses: actions/github-script@v7
-        with:
-          files: ${{ steps.files.outputs.files }}
-          script: |
             const fs = require('fs')
-            const paths = JSON.parse(core.getInput('files', { required: true }))
-            for (const path of paths) {
+            for (const path of storyFiles) {
               if (!fs.existsSync(path)) continue
               const content = fs.readFileSync(path, 'utf8')
               const m = content.match(/^#\s+(.+)$/m)
@@ -56,6 +47,6 @@ jobs:
               await github.rest.issues.createComment({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                issue_number: context.payload.pull_request.number,
+                issue_number: pr.number,
                 body: `Promoted ${path} to issue #${issue.number}.`
               })
