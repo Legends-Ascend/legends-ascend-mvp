@@ -14,40 +14,43 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 1
 
-      - name: Gather story files
-        id: gather
+      - name: Collect changed files via API
+        id: files
         uses: actions/github-script@v7
         with:
           script: |
-            const base = context.payload.pull_request.base.ref
-            const { execSync } = require('child_process')
-            const files = execSync(`git diff --name-only origin/${base}...HEAD`).toString().split('\n').filter(f => f.startsWith('docs/user-stories/') && f.endsWith('.md'))
-            core.setOutput('files', JSON.stringify(files))
+            const pr = context.payload.pull_request
+            const files = await github.paginate(
+              github.rest.pulls.listFiles,
+              { owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: pr.number,
+                per_page: 100 }
+            )
+            const storyFiles = files
+              .map(f => f.filename)
+              .filter(p => p.startsWith('docs/user-stories/') && p.endsWith('.md'))
+            core.setOutput('files', JSON.stringify(storyFiles))
 
       - name: Create issues from stories
-        if: steps.gather.outputs.files != '[]'
+        if: steps.files.outputs.files != '[]'
         uses: actions/github-script@v7
         with:
-          files: ${{ steps.gather.outputs.files }}
+          files: ${{ steps.files.outputs.files }}
           script: |
             const fs = require('fs')
-            const files = JSON.parse(core.getInput('files', { required: true }))
-            for (const path of files) {
+            const paths = JSON.parse(core.getInput('files', { required: true }))
+            for (const path of paths) {
               if (!fs.existsSync(path)) continue
               const content = fs.readFileSync(path, 'utf8')
-              // Extract first heading as title, fallback to filename
               const m = content.match(/^#\s+(.+)$/m)
               const title = m ? `US: ${m[1]}` : `US: ${path.replace(/^.*\//,'').replace(/\.md$/,'')}`
-              // Truncate body if enormous, but keep full by default
-              const body = content
               const { data: issue } = await github.rest.issues.create({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 title,
-                body,
+                body: content,
                 labels: ['user-story','generated']
               })
               await github.rest.issues.createComment({
@@ -56,4 +59,3 @@ jobs:
                 issue_number: context.payload.pull_request.number,
                 body: `Promoted ${path} to issue #${issue.number}.`
               })
-            }
