@@ -1,0 +1,59 @@
+name: Task
+description: Create a new project or dev task
+body:
+  - type: input
+    id: task_title
+    attributes:
+      label: Task Title
+      placeholder: "[TASK] T-XXX: Short summary of task"
+    validations:
+      required: true
+  
+  - type: textarea
+    id: task_details
+    attributes:
+      label: Task Details
+      placeholder: |
+        ## Task Description
+        _Describe the work to be done, context if needed._
+
+        ## Acceptance Criteria
+        - [ ] Criterion 1
+        - [ ] Criterion 2
+
+        ## Dependencies
+        - [ ] Linked Story/Task (if any)
+
+        ## Technical Notes
+        - Note 1
+        - Note 2
+    validations:
+      required: true
+      
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Priority
+      options:
+        - MUST
+        - SHOULD
+        - COULD
+        - WON'T
+    validations:
+      required: true
+      
+  - type: dropdown
+    id: estimate
+    attributes:
+      label: Estimated Effort (Hrs/PTs)
+      options:
+        - "0.5"
+        - "1"
+        - "2"
+        - "3"
+        - "5"
+        - "8"
+        - "13"
+        - "21"
+    validations:
+      required: true

@@ -1,317 +1,245 @@
 # Legends Ascend MVP
 
-A football manager game MVP built with React, TypeScript, Node.js, Express, and PostgreSQL. Manage players, build team lineups, simulate matches, and track your standings on the leaderboard.
+## Project Overview
 
-## 🎮 Features
+Legends Ascend is an innovative football (soccer) manager game powered by AI-driven development. This repository contains the Minimum Viable Product (MVP) codebase for the game, where players can build and manage their dream football team, make strategic decisions, and compete in an immersive simulation environment.
 
-- **Player Roster System**: Create, view, and manage players with detailed stats (pace, shooting, passing, dribbling, defending, physical)
-- **Team Lineup Manager**: Create teams and build custom lineups with your players
-- **Async Match Simulator**: Simulate matches between teams with realistic scoring based on player stats
-- **Leaderboard**: Track team standings with points, wins, draws, losses, and goal differences
+Our vision is to create a next-generation football management experience that combines traditional game mechanics with cutting-edge AI technology to deliver dynamic gameplay, intelligent opponent behavior, and personalized player experiences.
 
-## 🛠️ Tech Stack
+## Project Goals
 
-### Frontend
-- React 18 with TypeScript
-- Vite for build tooling
-- Styled Components for styling
-- Modern responsive UI
+- **MVP Launch**: Develop a functional MVP with core gameplay features including team management, match simulation, and basic player interactions
+- **AI Integration**: Leverage AI for intelligent game mechanics, opponent behavior, and content generation
+- **Community Building**: Create an engaged community of football management enthusiasts
+- **Scalable Architecture**: Build a robust foundation that can scale as the game grows
+- **User Experience**: Deliver an intuitive and enjoyable user interface for players of all skill levels
 
-### Backend
-- Node.js with Express
-- TypeScript
-- PostgreSQL database
-- RESTful API design
+## Architecture Overview
 
-## 📋 Prerequisites
+### Technology Stack
+
+- **Frontend**: Modern web framework (to be specified based on implementation)
+- **Backend**: RESTful API architecture
+- **Database**: Relational database for game data and user management
+- **AI/ML**: Integration with AI services for game intelligence
+- **Deployment**: Cloud-based hosting with CI/CD pipeline
+
+### Key Components
+
+1. **User Management**: Authentication, profiles, and account management
+2. **Team Management**: Squad building, formations, and tactics
+3. **Match Engine**: Core simulation logic for match outcomes
+4. **AI System**: Intelligent opponent behavior and game recommendations
+5. **Data Layer**: Player statistics, team data, and game history
+
+## Getting Started
+
+### Prerequisites
+
+Before you begin, ensure you have the following installed:
 
 - Node.js (v18 or higher)
-- PostgreSQL (v14 or higher)
-- npm or yarn
+- npm or yarn package manager
+- Git for version control
+- A code editor (VS Code recommended)
 
-## 🚀 Getting Started
+### Installation
 
-> **Quick Start**: Want to get running fast? See [QUICKSTART.md](./QUICKSTART.md)  
-> **Detailed Setup**: For step-by-step instructions and troubleshooting, see [SETUP.md](./SETUP.md)
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/Legends-Ascend/legends-ascend-mvp.git
+   cd legends-ascend-mvp
+   ```
 
-### 1. Clone the Repository
+2. **Install dependencies**
+   ```bash
+   npm install
+   # or
+   yarn install
+   ```
 
-```bash
-git clone https://github.com/Legends-Ascend/legends-ascend-mvp.git
-cd legends-ascend-mvp
-```
+3. **Set up environment variables**
+   ```bash
+   cp .env.example .env
+   # Edit .env with your configuration
+   ```
 
-### 2. Set Up the Database
+4. **Run the development server**
+   ```bash
+   npm run dev
+   # or
+   yarn dev
+   ```
 
-Create a PostgreSQL database:
+5. **Access the application**
+   - Open your browser and navigate to `http://localhost:3000`
 
-```bash
-createdb legends_ascend
-```
-
-Or using psql:
-
-```sql
-CREATE DATABASE legends_ascend;
-```
-
-### 3. Configure Backend
-
-```bash
-cd backend
-cp .env.example .env
-```
-
-Edit `.env` with your database credentials:
-
-```env
-PORT=3000
-DATABASE_URL=postgresql://your_user:your_password@localhost:5432/legends_ascend
-NODE_ENV=development
-```
-
-Install backend dependencies:
+### Building for Production
 
 ```bash
-npm install
+npm run build
+npm run start
 ```
 
-### 4. Configure Frontend
+## Contribution Guidelines
+
+We welcome contributions from the community! Here's how you can help:
+
+### How to Contribute
+
+1. **Fork the repository** and create your branch from `main`
+   ```bash
+   git checkout -b feature/your-feature-name
+   ```
+
+2. **Make your changes** following our coding standards:
+   - Write clean, readable code with meaningful variable names
+   - Add comments for complex logic
+   - Follow existing code style and formatting
+   - Write tests for new features
+
+3. **Commit your changes** with clear, descriptive messages
+   ```bash
+   git commit -m "Add: brief description of your changes"
+   ```
+
+4. **Push to your fork** and submit a pull request
+   ```bash
+   git push origin feature/your-feature-name
+   ```
+
+5. **Pull Request Process**:
+   - Provide a clear description of the changes
+   - Link any related issues
+   - Ensure all tests pass
+   - Wait for code review and address feedback
+
+### Code Standards
+
+- Follow the project's linting rules
+- Write meaningful commit messages (use conventional commits format)
+- Keep pull requests focused on a single feature or fix
+- Update documentation for new features
+- Add tests for bug fixes and new features
+
+### Reporting Issues
+
+Found a bug or have a feature request? Please:
+
+1. Check if the issue already exists in our [Issues](https://github.com/Legends-Ascend/legends-ascend-mvp/issues) page
+2. If not, create a new issue with:
+   - Clear title and description
+   - Steps to reproduce (for bugs)
+   - Expected vs actual behavior
+   - Screenshots if applicable
+   - Your environment details (OS, browser, Node version)
+
+### Community Guidelines
+
+- Be respectful and constructive in discussions
+- Help other contributors when possible
+- Follow our Code of Conduct
+- Ask questions if something is unclear
+
+## Development Workflow
+
+### Branch Strategy
+
+- `main`: Production-ready code
+- `develop`: Integration branch for features
+- `feature/*`: New features
+- `bugfix/*`: Bug fixes
+- `hotfix/*`: Urgent production fixes
+
+### Testing
 
 ```bash
-cd ../frontend
-cp .env.example .env
+# Run all tests
+npm test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run tests with coverage
+npm run test:coverage
 ```
 
-The default configuration points to `http://localhost:3000/api`. Modify if needed.
-
-Install frontend dependencies:
+### Linting and Formatting
 
 ```bash
-npm install
+# Run linter
+npm run lint
+
+# Fix linting issues
+npm run lint:fix
+
+# Format code
+npm run format
 ```
 
-### 5. Start the Application
-
-**Terminal 1 - Start Backend:**
-
-```bash
-cd backend
-npm run dev
-```
-
-The backend server will start on `http://localhost:3000` and automatically create database tables.
-
-**Terminal 2 - Start Frontend:**
-
-```bash
-cd frontend
-npm run dev
-```
-
-The frontend will start on `http://localhost:5173`
-
-### 6. Access the Application
-
-Open your browser and navigate to `http://localhost:5173`
-
-## 📚 API Endpoints
-
-### Players
-
-- `GET /api/players` - Get all players
-- `GET /api/players/:id` - Get player by ID
-- `POST /api/players` - Create a new player
-- `PUT /api/players/:id` - Update a player
-- `DELETE /api/players/:id` - Delete a player
-
-### Teams
-
-- `GET /api/teams` - Get all teams
-- `GET /api/teams/:id` - Get team by ID
-- `POST /api/teams` - Create a new team
-- `GET /api/teams/:id/lineup` - Get team lineup
-- `POST /api/teams/:id/lineup` - Add player to lineup
-- `DELETE /api/teams/:id/lineup/:playerId` - Remove player from lineup
-- `GET /api/teams/leaderboard/all` - Get leaderboard standings
-
-### Matches
-
-- `GET /api/matches` - Get all matches
-- `GET /api/matches/:id` - Get match by ID
-- `POST /api/matches` - Create a new match
-- `POST /api/matches/:id/simulate` - Simulate a match (async)
-
-## 🎯 How to Use
-
-### 1. Create Players
-
-1. Navigate to the "Players" tab
-2. Click "Add New Player"
-3. Fill in player details (name, position, stats)
-4. Click "Create Player"
-
-### 2. Build Your Team
-
-1. Navigate to the "Team Lineup" tab
-2. Create a new team or select an existing one
-3. Add players to your lineup by selecting them and choosing their position
-4. Build a balanced squad with the right mix of skills
-
-### 3. Simulate Matches
-
-1. Navigate to the "Match Simulator" tab
-2. Select home and away teams
-3. Click "Create Match"
-4. Click "Simulate Match" to run the simulation
-5. Match results are calculated based on team strength and player stats
-
-### 4. Check the Leaderboard
-
-1. Navigate to the "Leaderboard" tab
-2. View team standings sorted by points
-3. See detailed stats: matches played, wins, draws, losses, goals, goal difference
-
-## 🏗️ Project Structure
+## Project Structure
 
 ```
 legends-ascend-mvp/
-├── backend/
-│   ├── src/
-│   │   ├── config/
-│   │   │   └── database.ts       # Database configuration and initialization
-│   │   ├── controllers/
-│   │   │   ├── playerController.ts
-│   │   │   ├── teamController.ts
-│   │   │   └── matchController.ts
-│   │   ├── models/
-│   │   │   ├── Player.ts
-│   │   │   ├── Team.ts
-│   │   │   └── Match.ts
-│   │   ├── routes/
-│   │   │   ├── playerRoutes.ts
-│   │   │   ├── teamRoutes.ts
-│   │   │   └── matchRoutes.ts
-│   │   └── index.ts              # Main server file
-│   ├── package.json
-│   └── tsconfig.json
-│
-├── frontend/
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── PlayerRoster/
-│   │   │   │   └── PlayerRoster.tsx
-│   │   │   ├── TeamLineup/
-│   │   │   │   └── TeamLineup.tsx
-│   │   │   ├── MatchSimulator/
-│   │   │   │   └── MatchSimulator.tsx
-│   │   │   └── Leaderboard/
-│   │   │       └── Leaderboard.tsx
-│   │   ├── services/
-│   │   │   └── api.ts            # API service layer
-│   │   ├── types/
-│   │   │   └── index.ts          # TypeScript type definitions
-│   │   ├── App.tsx               # Main app component
-│   │   └── main.tsx              # Entry point
-│   ├── package.json
-│   └── tsconfig.json
-│
-└── README.md
+├── src/                 # Source code
+│   ├── components/      # Reusable components
+│   ├── pages/          # Application pages
+│   ├── services/       # API and business logic
+│   ├── utils/          # Utility functions
+│   └── types/          # TypeScript types
+├── public/             # Static assets
+├── tests/              # Test files
+├── .env.example        # Environment variables template
+├── .gitignore          # Git ignore rules
+├── package.json        # Dependencies and scripts
+└── README.md          # This file
 ```
 
-## 🔧 Development Commands
+## Resources
 
-### Backend
+- [Documentation](https://github.com/Legends-Ascend/legends-ascend-mvp/wiki) (coming soon)
+- [Issue Tracker](https://github.com/Legends-Ascend/legends-ascend-mvp/issues)
+- [Project Board](https://github.com/Legends-Ascend/legends-ascend-mvp/projects)
+- [Discord Community](https://discord.gg/legends-ascend) (coming soon)
 
-```bash
-# Development mode with hot reload
-npm run dev
+## Roadmap
 
-# Build TypeScript
-npm run build
+### Phase 1: MVP (Current)
+- [ ] Core team management features
+- [ ] Basic match simulation
+- [ ] User authentication
+- [ ] Initial AI integration
 
-# Start production server
-npm start
-```
+### Phase 2: Beta
+- [ ] Enhanced match engine
+- [ ] Advanced tactics system
+- [ ] Multiplayer features
+- [ ] Mobile responsiveness
 
-### Frontend
+### Phase 3: Launch
+- [ ] Full game features
+- [ ] Social features
+- [ ] Tournament system
+- [ ] Advanced AI opponents
 
-```bash
-# Development mode with hot reload
-npm run dev
+## License
 
-# Build for production
-npm run build
+This project is proprietary software. All rights reserved.
 
-# Preview production build
-npm run preview
-```
+## Contact
 
-## 🧪 Database Schema
+For questions, suggestions, or collaboration opportunities:
 
-### Players Table
-- id (PRIMARY KEY)
-- name
-- position
-- overall_rating (1-100)
-- pace (1-100)
-- shooting (1-100)
-- passing (1-100)
-- dribbling (1-100)
-- defending (1-100)
-- physical (1-100)
-- created_at
+- **GitHub Issues**: [Create an issue](https://github.com/Legends-Ascend/legends-ascend-mvp/issues/new)
+- **Email**: info@legends-ascend.com (coming soon)
+- **Discord**: Join our community (coming soon)
 
-### Teams Table
-- id (PRIMARY KEY)
-- name
-- points (default 0)
-- wins (default 0)
-- draws (default 0)
-- losses (default 0)
-- goals_for (default 0)
-- goals_against (default 0)
-- created_at
+## Acknowledgments
 
-### Team Lineups Table
-- id (PRIMARY KEY)
-- team_id (FOREIGN KEY → teams)
-- player_id (FOREIGN KEY → players)
-- position_in_lineup
+- Thanks to all contributors who help make this project possible
+- Inspired by classic football management games and modern AI technology
+- Built with passion for football and gaming
 
-### Matches Table
-- id (PRIMARY KEY)
-- home_team_id (FOREIGN KEY → teams)
-- away_team_id (FOREIGN KEY → teams)
-- home_score
-- away_score
-- status (pending | in_progress | completed)
-- match_date
-- completed_at
+---
 
-## 🎨 UI Features
-
-- Responsive design that works on desktop and mobile
-- Clean, modern interface with styled components
-- Real-time updates for match simulation
-- Color-coded ratings and statistics
-- Interactive navigation between different sections
-
-## 🔒 Security Notes
-
-- The `.env` files contain sensitive information and should never be committed
-- In production, use proper authentication and authorization
-- Validate all user inputs on the backend
-- Use environment variables for all configuration
-
-## 📝 License
-
-MIT
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## 📧 Contact
-
-For questions or support, please open an issue on GitHub.
+**Ready to build the future of football management?** Check out our [Contributing Guidelines](#contribution-guidelines) and join the team!
