@@ -31,6 +31,7 @@ jobs:
         if: steps.gather.outputs.files != '[]'
         uses: actions/github-script@v7
         with:
+          files: ${{ steps.gather.outputs.files }}
           script: |
             const fs = require('fs')
             const files = JSON.parse(core.getInput('files', { required: true }))
