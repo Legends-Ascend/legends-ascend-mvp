@@ -21,7 +21,7 @@ jobs:
         id: find
         run: |
           set -e
-          ADDED=$(jq -r '.pull_request.number' <<< "$GITHUB_EVENT_PATH")
+          ADDED=$(jq -r '.pull_request.number' "$GITHUB_EVENT_PATH")
           echo "PR: ${{ github.event.number }}"
           git fetch origin ${{ github.base_ref }} --depth=1
           git diff --name-only origin/${{ github.base_ref }}...HEAD | grep '^docs/user-stories/.*\.md$' || true
