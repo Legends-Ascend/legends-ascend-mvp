@@ -15,7 +15,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Promote user stories to issues (safe script)
+      - name: Promote user stories to issues (grouped by story)
         uses: actions/github-script@v7
         with:
           script: |
@@ -36,36 +36,69 @@ jobs:
 
               const storyFiles = files
                 .map(function(f){ return f.filename })
-                .filter(function(p){ return p.indexOf('docs/user-stories/') === 0 && p.slice(-3) === '.md' })
+                .filter(function(p){ return p.indexOf('docs/user-stories/') === 0 && p.slice(-3) === '.md' && p !== 'docs/user-stories/README.md' })
 
               if (!storyFiles.length) {
                 core.info('No docs/user-stories/*.md files found; nothing to promote.')
                 return
               }
 
-              const fs = require('fs')
+              // Group files by story ID (US-001, US-002, etc.)
+              const storyGroups = {}
               for (const path of storyFiles) {
-                if (!fs.existsSync(path)) {
-                  core.info('Path not found at checkout: ' + path)
+                const match = path.match(/US-(\d+)/)
+                const storyId = match ? 'US-' + match[1] : 'general'
+                if (!storyGroups[storyId]) storyGroups[storyId] = []
+                storyGroups[storyId].push(path)
+              }
+
+              const fs = require('fs')
+              for (const storyId of Object.keys(storyGroups)) {
+                const paths = storyGroups[storyId]
+                
+                // Find main story file (longest name with story details)
+                const mainFile = paths.reduce(function(longest, current) {
+                  return current.length > longest.length ? current : longest
+                })
+                const supportingFiles = paths.filter(function(p) { return p !== mainFile })
+
+                if (!fs.existsSync(mainFile)) {
+                  core.info('Main file not found at checkout: ' + mainFile)
                   continue
                 }
-                const content = fs.readFileSync(path, 'utf8')
-                const match = content.match(/^#\s+(.+)$/m)
-                const issueTitle = match ? ('US: ' + match[1]) : ('US: ' + path.replace(/^.*\//, '').replace(/\.md$/, ''))
+
+                // Read main content
+                const mainContent = fs.readFileSync(mainFile, 'utf8')
+                const match = mainContent.match(/^#\s+(.+)$/m)
+                const issueTitle = match ? ('US: ' + match[1]) : ('US: ' + storyId)
+
+                // Build combined body with supporting docs
+                let combinedBody = mainContent
+                
+                if (supportingFiles.length > 0) {
+                  combinedBody += '\n\n---\n\n## Supporting Documentation\n\n'
+                  for (const supportPath of supportingFiles) {
+                    if (fs.existsSync(supportPath)) {
+                      const supportContent = fs.readFileSync(supportPath, 'utf8')
+                      const fileName = supportPath.replace(/^.*\//, '')
+                      combinedBody += '### ' + fileName + '\n\n' + supportContent + '\n\n'
+                    }
+                  }
+                }
 
                 const created = await github.rest.issues.create({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   title: issueTitle,
-                  body: content,
-                  labels: ['user-story', 'generated']
+                  body: combinedBody,
+                  labels: ['user-story', 'generated', storyId.toLowerCase()]
                 })
 
                 await github.rest.issues.createComment({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   issue_number: pr.number,
-                  body: 'Promoted ' + path + ' to issue #' + created.data.number + '.'
+                  body: 'Promoted ' + storyId + ' (' + paths.length + ' files) to issue #' + created.data.number + '.'
                 })
               }
             } catch (err) {
