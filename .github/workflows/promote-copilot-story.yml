@@ -15,38 +15,59 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Promote user stories to issues
+      - name: Promote user stories to issues (safe script)
         uses: actions/github-script@v7
         with:
           script: |
-            const pr = context.payload.pull_request
-            const files = await github.paginate(
-              github.rest.pulls.listFiles,
-              { owner: context.repo.owner,
-                repo: context.repo.repo,
-                pull_number: pr.number,
-                per_page: 100 }
-            )
-            const storyFiles = files
-              .map(f => f.filename)
-              .filter(p => p.startsWith('docs/user-stories/') && p.endsWith('.md'))
+            try {
+              const pr = context.payload.pull_request
+              if (!pr) {
+                core.info('No PR in context; skipping')
+                return
+              }
 
-            const fs = require('fs')
-            for (const path of storyFiles) {
-              if (!fs.existsSync(path)) continue
-              const content = fs.readFileSync(path, 'utf8')
-              const m = content.match(/^#\s+(.+)$/m)
-              const title = m ? `US: ${m[1]}` : `US: ${path.replace(/^.*\//,'').replace(/\.md$/,'')}`
-              const { data: issue } = await github.rest.issues.create({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                title,
-                body: content,
-                labels: ['user-story','generated']
-              })
-              await github.rest.issues.createComment({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                issue_number: pr.number,
-                body: `Promoted ${path} to issue #${issue.number}.`
-              })
+              const files = await github.paginate(
+                github.rest.pulls.listFiles,
+                { owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: pr.number,
+                  per_page: 100 }
+              )
+
+              const storyFiles = files
+                .map(function(f){ return f.filename })
+                .filter(function(p){ return p.indexOf('docs/user-stories/') === 0 && p.slice(-3) === '.md' })
+
+              if (!storyFiles.length) {
+                core.info('No docs/user-stories/*.md files found; nothing to promote.')
+                return
+              }
+
+              const fs = require('fs')
+              for (const path of storyFiles) {
+                if (!fs.existsSync(path)) {
+                  core.info('Path not found at checkout: ' + path)
+                  continue
+                }
+                const content = fs.readFileSync(path, 'utf8')
+                const match = content.match(/^#\s+(.+)$/m)
+                const issueTitle = match ? ('US: ' + match[1]) : ('US: ' + path.replace(/^.*\//, '').replace(/\.md$/, ''))
+
+                const created = await github.rest.issues.create({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  title: issueTitle,
+                  body: content,
+                  labels: ['user-story', 'generated']
+                })
+
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: pr.number,
+                  body: 'Promoted ' + path + ' to issue #' + created.data.number + '.'
+                })
+              }
+            } catch (err) {
+              core.setFailed('Promotion failed: ' + (err && err.message ? err.message : String(err)))
+            }
