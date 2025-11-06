@@ -24,8 +24,9 @@ jobs:
           script: |
             const body = context.payload.issue.body || ''
             function extract(id) {
-              const re = new RegExp(`\n\s*${id}.*?\n[\\/\-*#\s:]*`, 'i')
-              return body
+              const re = new RegExp(`\n\s*${id}.*?\n[\/\-*#\s:]*`, 'i')
+              const match = body.match(re)
+              return match ? match[0].trim() : ''
             }
             core.setOutput('raw', body)
 
@@ -40,7 +41,8 @@ jobs:
             Repository foundation documents are available in /docs.
 
             Issue Title: ${{ github.event.issue.title }}
-            Issue Body:\n${{ steps.extract.outputs.raw }}
+            Issue Body:
+            ${{ steps.extract.outputs.raw }}
 
       - name: Create user story issue with generated content
         id: backlog
