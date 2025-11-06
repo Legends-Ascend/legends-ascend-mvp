@@ -36,8 +36,8 @@ jobs:
               const groups = {}
               for (const path of storyFiles) {
                 const m = path.match(/US-(\d+)/)
-                const id = m ? `US-${m[1]}` : 'general'
-                groups[id] = groups[id] || []
+                const id = m ? 'US-' + m[1] : 'general'
+                if (!groups[id]) groups[id] = []
                 groups[id].push(path)
               }
 
@@ -49,23 +49,23 @@ jobs:
                 if (!fs.existsSync(main)) continue
                 const content = fs.readFileSync(main,'utf8')
                 const titleMatch = content.match(/^#\s+(.+)$/m)
-                const title = titleMatch ? `US: ${titleMatch[1]}` : `US: ${id}`
+                const title = titleMatch ? ('US: ' + titleMatch[1]) : ('US: ' + id)
 
                 // Build lean body with references only
-                let body = `This is a lean reference issue for ${id}.\n\n`+
-                  `The BA agent produced a comprehensive specification stored in repository files. `+
-                  `Use the documents below as the single source of truth.\n\n`+
-                  `## Documents in repo\n`+
-                  paths.map(p=>`- \\`${p}\\``).join('\n') +
-                  `\n\n## Notes for Coding Agent\n`+
-                  `- Read all files listed above for full requirements, ACs, diagrams, and guides.\n`+
-                  `- Adhere to TECHNICAL_ARCHITECTURE.md, BRANDING_GUIDELINE.md, ACCESSIBILITY_REQUIREMENTS.md.\n`
+                let body = 'This is a lean reference issue for ' + id + '.\n\n' +
+                  'The BA agent produced a comprehensive specification stored in repository files. ' +
+                  'Use the documents below as the single source of truth.\n\n' +
+                  '## Documents in repo\n' +
+                  paths.map(function(p){ return '- `' + p + '`' }).join('\n') +
+                  '\n\n## Notes for Coding Agent\n' +
+                  '- Read all files listed above for full requirements, ACs, diagrams, and guides.\n' +
+                  '- Adhere to TECHNICAL_ARCHITECTURE.md, BRANDING_GUIDELINE.md, ACCESSIBILITY_REQUIREMENTS.md.\n'
 
                 await github.rest.issues.create({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
-                  title,
-                  body,
+                  title: title,
+                  body: body,
                   labels: ['user-story','generated', id.toLowerCase()]
                 })
 
@@ -73,9 +73,9 @@ jobs:
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   issue_number: pr.number,
-                  body: `Created lean story issue for ${id} from ${paths.length} document(s).`
+                  body: 'Created lean story issue for ' + id + ' from ' + paths.length + ' document(s).'
                 })
               }
             } catch (e) {
-              core.setFailed('Lean promotion failed: '+(e?.message||String(e)))
+              core.setFailed('Lean promotion failed: ' + ((e && e.message) ? e.message : String(e)))
             }
