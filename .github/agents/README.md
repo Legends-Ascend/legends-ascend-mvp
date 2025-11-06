@@ -1,4 +1,8 @@
-# Legends Ascend Custom Copilot Agents
+- The BA agent will automatically generate a comprehensive DoR-compliant user story as a new GitHub issue.
+- The generated issue will contain ALL sections (Context, Requirements, Acceptance Criteria, Technical Notes, etc.) in ONE document.
+- Use the generated issue directly for development - no additional files or PRs needed.Legends Ascend Custom Copilot
+-
+- # Legends Ascend Custom Copilot AgentsAgents
 
 ## How to Use the Copilot BA, Coding, and Testing Agents
 
