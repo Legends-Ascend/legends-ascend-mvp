@@ -28,6 +28,7 @@ so that [benefit].
 | ID | Title | Priority | Points | Status |
 |----|-------|----------|--------|--------|
 | [US-001](./US-001-landing-page-hero-emailoctopus-gdpr.md) | Landing Page – Hero Background, EmailOctopus Signup, GDPR Compliance | MUST | 8 | Ready for Development |
+| [US-002](./US-002-privacy-policy-gdpr-compliance.md) | Privacy Policy Page with GDPR Compliance and Regular Updates | MUST | 5 | Ready for Development |
 
 ### Core Game Features
 
@@ -62,7 +63,7 @@ Before a story can be marked "Ready for Development", it must satisfy all criter
 1. ✅ Story Structure (format, title, points, priority, epic)
 2. ✅ Acceptance Criteria Completeness (clear, testable, edge cases, test scenarios)
 3. ✅ Football Management Game Requirements (game logic, player/team impact, match engine integration)
-4. ✅ Internationalization & Localization (UK English, football terminology, metric system, date/time formatting)
+4. ✅ Internationalisation & Localisation (UK English, football terminology, metric system, date/time formatting)
 5. ✅ Technical Requirements & Architecture (compliance, tech stack, API design, database impact, performance, security)
 6. ✅ Dependencies & Integration (story dependencies, technical dependencies, third-party services)
 7. ✅ Testing & Quality Assurance (test strategy, browser compatibility, performance benchmarks, accessibility testing)
@@ -90,5 +91,5 @@ For questions about user stories or the DoR process:
 
 ---
 
-**Last Updated:** 2025-11-05  
+**Last Updated:** 2025-11-06  
 **Maintained By:** Technical Business Analyst Agent
