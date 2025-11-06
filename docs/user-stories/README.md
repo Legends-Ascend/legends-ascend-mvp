@@ -28,6 +28,7 @@ so that [benefit].
 | ID | Title | Priority | Points | Status |
 |----|-------|----------|--------|--------|
 | [US-001](./US-001-landing-page-hero-emailoctopus-gdpr.md) | Landing Page – Hero Background, EmailOctopus Signup, GDPR Compliance | MUST | 8 | Ready for Development |
+| [US-002](./US-002-privacy-policy-gdpr-compliance.md) | Privacy Policy Page with GDPR Compliance and Regular Updates | MUST | 5 | Ready for Development |
 
 ### Core Game Features
 
@@ -90,5 +91,5 @@ For questions about user stories or the DoR process:
 
 ---
 
-**Last Updated:** 2025-11-05  
+**Last Updated:** 2025-11-06  
 **Maintained By:** Technical Business Analyst Agent
