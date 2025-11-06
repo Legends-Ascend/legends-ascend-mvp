@@ -1,0 +1,86 @@
+name: Promote Copilot Story to Issue
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  promote:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Create lean reference issues (single master per story)
+        uses: actions/github-script@v7
+        with:
+          script: |
+            try {
+              const pr = context.payload.pull_request
+              if (!pr) { core.info('No PR context'); return }
+
+              const files = await github.paginate(
+                github.rest.pulls.listFiles,
+                { owner: context.repo.owner, repo: context.repo.repo, pull_number: pr.number, per_page: 100 }
+              )
+
+              const storyFiles = files.map(f => f.filename)
+                .filter(p => p.startsWith('docs/user-stories/') && p.endsWith('.md') && p !== 'docs/user-stories/README.md')
+
+              if (!storyFiles.length) { core.info('No story files'); return }
+
+              // Group by US-XXX id
+              const groups = {}
+              for (const path of storyFiles) {
+                const m = path.match(/US-(\d+)/)
+                const id = m ? 'US-' + m[1] : 'general'
+                if (!groups[id]) groups[id] = []
+                groups[id].push(path)
+              }
+
+              const fs = require('fs')
+
+              for (const id of Object.keys(groups)) {
+                const paths = groups[id]
+
+                // choose main file (longest filename heuristic)
+                const main = paths.reduce((a,b)=> (b.length>a.length?b:a))
+                if (!fs.existsSync(main)) continue
+
+                const content = fs.readFileSync(main,'utf8')
+                const titleMatch = content.match(/^#\s+(.+)$/m)
+                const title = titleMatch ? ('US: ' + titleMatch[1]) : ('US: ' + id)
+
+                // Build lean body with references only
+                let body = 'This is a lean reference issue for ' + id + '.\n\n' +
+                  'The BA agent produced a comprehensive specification stored in repository files. ' +
+                  'Use the documents below as the single source of truth.\n\n' +
+                  '## Documents in repo\n' +
+                  paths.map(function(p){ return '- `' + p + '`' }).join('\n') +
+                  '\n\n## Notes for Coding Agent\n' +
+                  '- Read all files listed above for full requirements, ACs, diagrams, and guides.\n' +
+                  '- Adhere to TECHNICAL_ARCHITECTURE.md, BRANDING_GUIDELINE.md, ACCESSIBILITY_REQUIREMENTS.md.\n'
+
+                await github.rest.issues.create({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  title: title,
+                  body: body,
+                  labels: ['user-story','generated', id.toLowerCase()]
+                })
+
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: pr.number,
+                  body: 'Created lean story issue for ' + id + ' from ' + paths.length + ' document(s).'
+                })
+              }
+            } catch (e) {
+              core.setFailed('Lean promotion failed: ' + ((e && e.message) ? e.message : String(e)))
+            }
