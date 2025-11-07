@@ -5,6 +5,7 @@ import { initializeDatabase } from './config/database';
 import playerRoutes from './routes/playerRoutes';
 import teamRoutes from './routes/teamRoutes';
 import matchRoutes from './routes/matchRoutes';
+import subscribeRoutes from './routes/subscribeRoutes';
 
 dotenv.config();
 
@@ -19,6 +20,7 @@ app.use(express.json());
 app.use('/api/players', playerRoutes);
 app.use('/api/teams', teamRoutes);
 app.use('/api/matches', matchRoutes);
+app.use('/api/v1', subscribeRoutes); // US-001: Email subscription route
 
 // Health check
 app.get('/api/health', (req, res) => {
