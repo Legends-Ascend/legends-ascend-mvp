@@ -145,40 +145,131 @@ The BA agent produced a comprehensive specification stored across multiple docum
         body: body,
         labels: ['user-story','generated', id.toLowerCase()]
       })
-
-            // Add issue to 'Legends Ascend' project and set status/type
+      
+      // Add issue to 'Legends Ascend' project (Projects V2) and set status/type
       try {
-        // Get the project by name
-        const projects = await github.rest.projects.listForRepo({
-          owner: context.repo.owner,
-          repo: context.repo.repo,
-          state: 'open'
+        // Get the project ID from the organization
+        const getProjectQuery = `
+          query($org: String!, $number: Int!) {
+            organization(login: $org) {
+              projectV2(number: $number) {
+                id
+              }
+            }
+          }
+        `;
+        
+        const projectData = await github.graphql(getProjectQuery, {
+          org: 'Legends-Ascend',
+          number: 1
         });
         
-        const legendsProject = projects.data.find(p => p.name === 'Legends Ascend');
+        const projectId = projectData.organization.projectV2.id;
         
-        if (legendsProject) {
-          // Get project columns
-          const columns = await github.rest.projects.listColumns({
-            project_id: legendsProject.id
-          });
-          
-          // Find the Backlog column
-          const backlogColumn = columns.data.find(c => c.name === 'Backlog');
-          
-          if (backlogColumn) {
-            // Add card to Backlog column
-            await github.rest.projects.createCard({
-              column_id: backlogColumn.id,
-              content_id: issue.data.id,
-              content_type: 'Issue'
-            });
+        // Add the issue to the project
+        const addItemMutation = `
+          mutation($projectId: ID!, $contentId: ID!) {
+            addProjectV2ItemById(input: {projectId: $projectId, contentId: $contentId}) {
+              item {
+                id
+              }
+            }
+          }
+        `;
+        
+        const projectResponse = await github.graphql(addItemMutation, {
+          projectId: projectId,
+          contentId: issue.data.node_id
+        });
+        
+        const itemId = projectResponse.addProjectV2ItemById.item.id;
+        core.info(`Added issue #${issue.data.number} to Legends Ascend project`);
+        
+        // Get field IDs for Status and Type
+        const getFieldsQuery = `
+          query($projectId: ID!) {
+            node(id: $projectId) {
+              ... on ProjectV2 {
+                fields(first: 20) {
+                  nodes {
+                    ... on ProjectV2SingleSelectField {
+                      id
+                      name
+                      options {
+                        id
+                        name
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        `;
+        
+        const fieldsResponse = await github.graphql(getFieldsQuery, {
+          projectId: projectId
+        });
+        
+        const fields = fieldsResponse.node.fields.nodes;
+        const statusField = fields.find(f => f.name === 'Status');
+        const typeField = fields.find(f => f.name === 'Type');
+        
+        // Set Status to "Backlog"
+        if (statusField) {
+          const backlogOption = statusField.options.find(o => o.name === 'Backlog');
+          if (backlogOption) {
+            const updateMutation = `
+              mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
+                updateProjectV2ItemFieldValue(input: {
+                  projectId: $projectId
+                  itemId: $itemId
+                  fieldId: $fieldId
+                  value: {singleSelectOptionId: $optionId}
+                }) {
+                  projectV2Item { id }
+                }
+              }
+            `;
             
-            core.info(`Added issue #${issue.data.number} to Legends Ascend project (Backlog column)`);
+            await github.graphql(updateMutation, {
+              projectId: projectId,
+              itemId: itemId,
+              fieldId: statusField.id,
+              optionId: backlogOption.id
+            });
+            core.info(`Set status to 'Backlog' for issue #${issue.data.number}`);
+          }
+        }
+        
+        // Set Type to "Feature"
+        if (typeField) {
+          const featureOption = typeField.options.find(o => o.name === 'Feature');
+          if (featureOption) {
+            const updateMutation = `
+              mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
+                updateProjectV2ItemFieldValue(input: {
+                  projectId: $projectId
+                  itemId: $itemId
+                  fieldId: $fieldId
+                  value: {singleSelectOptionId: $optionId}
+                }) {
+                  projectV2Item { id }
+                }
+              }
+            `;
+            
+            await github.graphql(updateMutation, {
+              projectId: projectId,
+              itemId: itemId,
+              fieldId: typeField.id,
+              optionId: featureOption.id
+            });
+            core.info(`Set type to 'Feature' for issue #${issue.data.number}`);
           }
         }
       } catch (error) {
-        core.warning(`Failed to add issue to project: ${error.message}`);
+        core.warning(`Failed to add issue to project or set fields: ${error.message}`);
       }
 
       await github.rest.issues.createComment({
