@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { LandingPage } from './pages/LandingPage';
 import { PrivacyPolicy } from './components/PrivacyPolicy';
 import styled from 'styled-components';
@@ -73,14 +73,14 @@ function App() {
   const [currentView, setCurrentView] = useState<View>('landing');
 
   // Check URL path for routing (simple client-side routing)
-  useState(() => {
+  useEffect(() => {
     const path = window.location.pathname;
     if (path === '/privacy-policy') {
       setCurrentView('privacy');
     } else if (path === '/game') {
       setCurrentView('players');
     }
-  });
+  }, []);
 
   const renderView = () => {
     switch (currentView) {
