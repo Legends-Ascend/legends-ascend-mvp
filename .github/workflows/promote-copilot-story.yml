@@ -54,7 +54,7 @@ jobs:
 
                 const content = fs.readFileSync(main,'utf8')
                 const titleMatch = content.match(/^#\s+(.+)$/m)
-                const title = titleMatch ? ('US: ' + titleMatch[1]) : ('US: ' + id)
+const title = titleMatch ? (id + ': ' + titleMatch[1]) : id
 
 // GitHub issue body character limit is ~65,536 characters
       const MAX_ISSUE_LENGTH = 60000; // Leave buffer for safety
@@ -138,13 +138,48 @@ The BA agent produced a comprehensive specification stored across multiple docum
 - Adhere to [TECHNICAL_ARCHITECTURE.md](${repoUrl}/blob/${branch}/TECHNICAL_ARCHITECTURE.md), [BRANDING_GUIDELINES.md](${repoUrl}/blob/${branch}/BRANDING_GUIDELINES.md), and [SECURITY_GUIDELINES.md](${repoUrl}/blob/${branch}/SECURITY_GUIDELINES.md)`;
       }
 
-      await github.rest.issues.create({
+      const issue = await github.rest.issues.create({
         owner: context.repo.owner,
         repo: context.repo.repo,
         title: title,
         body: body,
         labels: ['user-story','generated', id.toLowerCase()]
       })
+
+            // Add issue to 'Legends Ascend' project and set status/type
+      try {
+        // Get the project by name
+        const projects = await github.rest.projects.listForRepo({
+          owner: context.repo.owner,
+          repo: context.repo.repo,
+          state: 'open'
+        });
+        
+        const legendsProject = projects.data.find(p => p.name === 'Legends Ascend');
+        
+        if (legendsProject) {
+          // Get project columns
+          const columns = await github.rest.projects.listColumns({
+            project_id: legendsProject.id
+          });
+          
+          // Find the Backlog column
+          const backlogColumn = columns.data.find(c => c.name === 'Backlog');
+          
+          if (backlogColumn) {
+            // Add card to Backlog column
+            await github.rest.projects.createCard({
+              column_id: backlogColumn.id,
+              content_id: issue.data.id,
+              content_type: 'Issue'
+            });
+            
+            core.info(`Added issue #${issue.data.number} to Legends Ascend project (Backlog column)`);
+          }
+        }
+      } catch (error) {
+        core.warning(`Failed to add issue to project: ${error.message}`);
+      }
 
       await github.rest.issues.createComment({
         owner: context.repo.owner,
