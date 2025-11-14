@@ -1,0 +1,98 @@
+name: Release to Production
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  deploy-to-production:
+    name: Deploy Release to Production
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      repository-projects: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Configure Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
+      - name: Get release information
+        id: release_info
+        run: |
+          echo "tag=${{ github.event.release.tag_name }}" >> $GITHUB_OUTPUT
+          echo "version=${TAG#v}" >> $GITHUB_OUTPUT
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+
+      - name: Create or update production branch
+        run: |
+          # Check if production branch exists
+          if git rev-parse --verify origin/production &> /dev/null; then
+            echo "Production branch exists, updating..."
+            git checkout production
+            git merge --ff-only origin/production || true
+          else
+            echo "Creating production branch from main..."
+            git checkout -b production
+          fi
+          
+          # Fast-forward to the release tag commit
+          git merge --ff-only ${{ steps.release_info.outputs.tag }}
+          
+          # Push production branch
+          git push origin production
+
+      - name: Create deployment status
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const release = context.payload.release;
+            const tag = release.tag_name;
+            const commit = release.target_commitish || 'main';
+            
+            github.rest.repos.createDeployment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: tag,
+              environment: 'production',
+              description: `Release ${tag} deployed to production`,
+              required_contexts: [],
+              auto_merge: false,
+              production_environment: true
+            }).then(deployment => {
+              console.log(`Deployment created: ${deployment.data.id}`);
+              
+              // Create deployment status
+              return github.rest.repos.createDeploymentStatus({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                deployment_id: deployment.data.id,
+                state: 'success',
+                description: `Release ${tag} is now live in production`,
+                environment_url: 'https://www.legendsascend.com'
+              });
+            }).catch(err => {
+              console.error(`Error creating deployment: ${err.message}`);
+            });
+
+      - name: Comment on release
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const release = context.payload.release;
+            const tag = release.tag_name;
+            
+            github.rest.repos.createReleaseComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              release_id: release.id,
+              body: `✅ **Release ${tag} deployed to production**\n\n- Production branch updated to ${tag}\n- Vercel deployment triggered automatically\n- Live at: https://www.legendsascend.com\n\nFor deployment status, see the [Deployments](https://github.com/${context.repo.owner}/${context.repo.repo}/deployments) page.`
+            });
