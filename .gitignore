@@ -145,7 +145,8 @@ frontend/dist/
 # Test output
 playwright-report/
 test-results/
-reports/
+reports/*.json
+!reports/DOD_VALIDATION_SUMMARY.md
 
 # Playwright
 .playwright/
