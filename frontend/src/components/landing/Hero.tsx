@@ -57,7 +57,7 @@ export const Hero: React.FC = () => {
             <img
               src="/assets/branding/legends-ascend-logo-transparent.png"
               alt="Legends Ascend"
-              className="h-20 sm:h-24 md:h-32 mx-auto"
+              className="h-32 sm:h-40 md:h-48 lg:h-56 mx-auto"
             />
           </div>
 
