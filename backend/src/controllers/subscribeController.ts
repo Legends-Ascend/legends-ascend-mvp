@@ -27,8 +27,14 @@ export const subscribeEmail = async (req: Request, res: Response): Promise<void>
     // Call EmailOctopus service
     const result = await subscribeToEmailList(email, timestamp);
 
-    // Return appropriate status code
-    const statusCode = result.success ? 200 : 500;
+    // Map service status to HTTP response codes per FR-3
+    const statusCodeMap: Record<string, number> = {
+      pending_confirmation: 200,
+      already_subscribed: 409,
+      error: 500,
+    };
+
+    const statusCode = statusCodeMap[result.status] ?? (result.success ? 200 : 500);
     res.status(statusCode).json(result);
   } catch (error) {
     console.error('Subscription error:', error);

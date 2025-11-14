@@ -77,7 +77,7 @@ describe('subscribeController', () => {
         await subscribeEmail(req as Request, res as Response);
 
         // Assert
-        expect(statusMock).toHaveBeenCalledWith(200);
+        expect(statusMock).toHaveBeenCalledWith(409);
         expect(jsonMock).toHaveBeenCalledWith(mockResult);
       });
     });
