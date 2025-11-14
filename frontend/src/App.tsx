@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { LandingPage } from './pages/LandingPage';
+import { PrivacyPolicy } from './components/PrivacyPolicy';
 import styled from 'styled-components';
 import { PlayerRoster } from './components/PlayerRoster/PlayerRoster';
 import { TeamLineup } from './components/TeamLineup/TeamLineup';
@@ -32,6 +34,7 @@ const Logo = styled.h1`
   color: #667eea;
   font-size: 28px;
   font-weight: bold;
+  cursor: pointer;
 `;
 
 const Nav = styled.nav`
@@ -64,13 +67,27 @@ const Main = styled.main`
   min-height: calc(100vh - 100px);
 `;
 
-type View = 'players' | 'lineup' | 'simulator' | 'leaderboard';
+type View = 'landing' | 'privacy' | 'players' | 'lineup' | 'simulator' | 'leaderboard';
 
 function App() {
-  const [currentView, setCurrentView] = useState<View>('players');
+  const [currentView, setCurrentView] = useState<View>('landing');
+
+  // Check URL path for routing (simple client-side routing)
+  useEffect(() => {
+    const path = window.location.pathname;
+    if (path === '/privacy-policy') {
+      setCurrentView('privacy');
+    } else if (path === '/game') {
+      setCurrentView('players');
+    }
+  }, []);
 
   const renderView = () => {
     switch (currentView) {
+      case 'landing':
+        return <LandingPage />;
+      case 'privacy':
+        return <PrivacyPolicy />;
       case 'players':
         return <PlayerRoster />;
       case 'lineup':
@@ -80,15 +97,20 @@ function App() {
       case 'leaderboard':
         return <Leaderboard />;
       default:
-        return <PlayerRoster />;
+        return <LandingPage />;
     }
   };
+
+  // If showing landing or privacy page, render without game header
+  if (currentView === 'landing' || currentView === 'privacy') {
+    return renderView();
+  }
 
   return (
     <AppContainer>
       <Header>
         <HeaderContent>
-          <Logo>⚽ Legends Ascend</Logo>
+          <Logo onClick={() => setCurrentView('landing')}>⚽ Legends Ascend</Logo>
           <Nav>
             <NavButton
               active={currentView === 'players'}
