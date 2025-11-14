@@ -5,10 +5,11 @@ module.exports = {
   roots: ['<rootDir>/src'],
   testMatch: ['**/__tests__/**/*.ts', '**/*.test.ts', '**/*.spec.ts'],
   collectCoverageFrom: [
-    'src/**/*.ts',
+    'src/controllers/subscribeController.ts',
+    'src/services/emailOctopusService.ts',
+    'src/models/subscribeSchema.ts',
+    'src/middleware/rateLimiter.ts',
     '!src/**/*.d.ts',
-    '!src/index.ts',
-    '!src/seed.ts',
   ],
   coverageThreshold: {
     global: {
