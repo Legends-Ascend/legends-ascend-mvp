@@ -141,3 +141,11 @@ vite.config.ts.timestamp-*
 # Build output
 backend/dist/
 frontend/dist/
+
+# Test output
+playwright-report/
+test-results/
+reports/
+
+# Playwright
+.playwright/
