@@ -83,16 +83,4 @@ jobs:
               console.error(`Error creating deployment: ${err.message}`);
             });
 
-      - name: Comment on release
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const release = context.payload.release;
-            const tag = release.tag_name;
-            
-            github.rest.repos.createReleaseComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              release_id: release.id,
-              body: `✅ **Release ${tag} deployed to production**\n\n- Production branch updated to ${tag}\n- Vercel deployment triggered automatically\n- Live at: https://www.legendsascend.com\n\nFor deployment status, see the [Deployments](https://github.com/${context.repo.owner}/${context.repo.repo}/deployments) page.`
-            });
+      
