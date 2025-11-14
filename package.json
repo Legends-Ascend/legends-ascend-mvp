@@ -14,7 +14,7 @@
     "test:e2e:ui": "playwright test --ui",
     "test:coverage": "npm run test:frontend -- --coverage && npm run test:backend -- --coverage",
     "test:all": "npm run test && npm run test:e2e",
-    "validate:dod": "ts-node scripts/dod-validation/validate-dod.ts",
+    "validate:dod": "node scripts/dod-validation/validate-dod.js",
     "validate:coverage": "npm run test:coverage",
     "validate:security": "npm audit --audit-level=high",
     "validate:a11y": "npm run test:frontend -- --grep accessibility",
@@ -27,12 +27,20 @@
     "build:backend": "cd backend && npm run build",
     "playwright:install": "playwright install"
   },
-  "keywords": ["football", "management", "game", "legends-ascend"],
+  "keywords": [
+    "football",
+    "management",
+    "game",
+    "legends-ascend"
+  ],
   "author": "Legends Ascend Team",
   "license": "ISC",
   "devDependencies": {
     "@axe-core/playwright": "^4.11.0",
     "@playwright/test": "^1.56.1",
-    "playwright": "^1.56.1"
+    "@types/node": "^24.10.1",
+    "playwright": "^1.56.1",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.3"
   }
 }
