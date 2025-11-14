@@ -2,7 +2,7 @@
 
 **Legends Ascend Football Management Game**  
 **Version:** 1.0  
-**Last Updated:** 7 November 2025  
+**Last Updated:** 14 November 2025  
 **Effective From:** Current Sprint
 
 ---
