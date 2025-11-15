@@ -62,12 +62,12 @@ export const Hero: React.FC = () => {
           </div>
 
           {/* Headline */}
-          <h1 className="font-heading text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight">
+          <h1 className="font-heading text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight drop-shadow-lg">
             Build Your Football Legacy
           </h1>
 
           {/* Subheadline */}
-          <p className="text-lg sm:text-xl md:text-2xl text-soft-gray max-w-3xl mx-auto">
+          <p className="text-lg sm:text-xl md:text-2xl text-white max-w-3xl mx-auto drop-shadow-lg">
             The AI-powered football management game where every decision shapes your destiny
           </p>
 
