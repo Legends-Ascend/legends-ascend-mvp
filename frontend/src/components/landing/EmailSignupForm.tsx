@@ -82,7 +82,7 @@ export const EmailSignupForm: React.FC = () => {
   if (submitStatus === 'success') {
     return (
       <div
-        className="bg-soft-gray rounded-lg p-6 text-center"
+        className="bg-white/95 backdrop-blur-sm rounded-lg p-6 text-center shadow-xl"
         role="status"
         aria-live="polite"
       >
@@ -107,7 +107,7 @@ export const EmailSignupForm: React.FC = () => {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="bg-soft-gray/90 backdrop-blur-sm rounded-lg p-6 space-y-4 w-full max-w-md">
+    <form onSubmit={handleSubmit} className="bg-white/95 backdrop-blur-sm rounded-lg p-6 space-y-4 w-full max-w-md shadow-xl">
       {/* Email Input */}
       <div>
         <label htmlFor="email" className="block text-sm font-medium text-dark-navy mb-1">
@@ -141,7 +141,7 @@ export const EmailSignupForm: React.FC = () => {
       />
 
       {/* Regional Disclosure */}
-      <p className="text-xs text-medium-gray">
+      <p className="text-xs text-dark-navy/80">
         For EU residents: Your data is protected under GDPR. We store only your email address and consent timestamp.
       </p>
 
