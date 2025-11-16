@@ -119,7 +119,7 @@ export const EmailSignupForm: React.FC = () => {
           name="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full px-4 py-2 border-2 border-dark-navy/40 rounded-md bg-white text-dark-navy placeholder:text-medium-gray focus:ring-2 focus:ring-primary-blue focus:border-primary-blue focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-blue"
+          className="w-full px-4 py-2 border-2 border-dark-navy rounded-md bg-white text-dark-navy placeholder:text-medium-gray focus:ring-2 focus:ring-primary-blue focus:border-primary-blue focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-blue"
           placeholder="your@email.com"
           required
           aria-required="true"

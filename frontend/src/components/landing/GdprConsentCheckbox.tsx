@@ -25,7 +25,7 @@ export const GdprConsentCheckbox: React.FC<GdprConsentCheckboxProps> = ({
             type="checkbox"
             checked={checked}
             onChange={(e) => onChange(e.target.checked)}
-            className="h-5 w-5 text-primary-blue border-2 border-dark-navy/40 rounded focus:ring-2 focus:ring-primary-blue focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-blue"
+            className="h-5 w-5 text-primary-blue border-2 border-dark-navy rounded focus:ring-2 focus:ring-primary-blue focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-blue"
             aria-describedby="gdpr-consent-description"
             aria-invalid={!!error}
           />
