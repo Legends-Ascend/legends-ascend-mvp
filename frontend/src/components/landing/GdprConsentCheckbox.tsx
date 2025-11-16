@@ -25,7 +25,7 @@ export const GdprConsentCheckbox: React.FC<GdprConsentCheckboxProps> = ({
             type="checkbox"
             checked={checked}
             onChange={(e) => onChange(e.target.checked)}
-            className="h-5 w-5 text-primary-blue border-medium-gray rounded focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-blue"
+            className="h-5 w-5 text-primary-blue border-2 border-dark-navy rounded focus:ring-2 focus:ring-primary-blue focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-blue"
             aria-describedby="gdpr-consent-description"
             aria-invalid={!!error}
           />
@@ -40,7 +40,7 @@ export const GdprConsentCheckbox: React.FC<GdprConsentCheckboxProps> = ({
                 href="/privacy-policy"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-primary-blue hover:text-accent-gold underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-blue"
+                className="text-primary-blue hover:text-primary-blue/80 underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-blue font-semibold"
               >
                 Privacy Policy
               </a>

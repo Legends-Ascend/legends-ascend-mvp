@@ -107,7 +107,7 @@ export const EmailSignupForm: React.FC = () => {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="bg-white/95 backdrop-blur-sm rounded-lg p-6 space-y-4 w-full max-w-md shadow-xl">
+    <form onSubmit={handleSubmit} className="bg-white/95 backdrop-blur-sm rounded-lg p-6 space-y-4 w-full max-w-md shadow-xl border-2 border-dark-navy/10">
       {/* Email Input */}
       <div>
         <label htmlFor="email" className="block text-sm font-medium text-dark-navy mb-1">
@@ -119,7 +119,7 @@ export const EmailSignupForm: React.FC = () => {
           name="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
-          className="w-full px-4 py-2 border border-medium-gray rounded-md focus:ring-2 focus:ring-primary-blue focus:border-primary-blue focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-blue"
+          className="w-full px-4 py-2 border-2 border-dark-navy rounded-md bg-white text-dark-navy placeholder:text-medium-gray focus:ring-2 focus:ring-primary-blue focus:border-primary-blue focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-blue"
           placeholder="your@email.com"
           required
           aria-required="true"
@@ -149,7 +149,21 @@ export const EmailSignupForm: React.FC = () => {
       <button
         type="submit"
         disabled={isSubmitting}
-        className="w-full bg-primary-blue hover:bg-accent-gold text-white font-semibold py-3 px-6 rounded-md transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-blue disabled:opacity-50 disabled:cursor-not-allowed"
+        style={{
+          backgroundColor: isSubmitting ? '#64748B' : '#1E3A8A',
+          color: '#FFFFFF',
+        }}
+        className="w-full text-white font-bold py-3 px-6 rounded-md transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-blue disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl border-2 border-primary-blue hover:border-dark-navy hover:!bg-dark-navy"
+        onMouseEnter={(e) => {
+          if (!isSubmitting) {
+            e.currentTarget.style.backgroundColor = '#0F172A';
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (!isSubmitting) {
+            e.currentTarget.style.backgroundColor = '#1E3A8A';
+          }
+        }}
         aria-busy={isSubmitting}
       >
         {isSubmitting ? 'Joining...' : 'Join the Waitlist'}
