@@ -149,7 +149,21 @@ export const EmailSignupForm: React.FC = () => {
       <button
         type="submit"
         disabled={isSubmitting}
-        className="w-full bg-primary-blue hover:bg-dark-navy text-white font-bold py-3 px-6 rounded-md transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-blue disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl border-2 border-primary-blue hover:border-dark-navy"
+        style={{
+          backgroundColor: isSubmitting ? '#64748B' : '#1E3A8A',
+          color: '#FFFFFF',
+        }}
+        className="w-full text-white font-bold py-3 px-6 rounded-md transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-blue disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl border-2 border-primary-blue hover:border-dark-navy hover:!bg-dark-navy"
+        onMouseEnter={(e) => {
+          if (!isSubmitting) {
+            e.currentTarget.style.backgroundColor = '#0F172A';
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (!isSubmitting) {
+            e.currentTarget.style.backgroundColor = '#1E3A8A';
+          }
+        }}
         aria-busy={isSubmitting}
       >
         {isSubmitting ? 'Joining...' : 'Join the Waitlist'}

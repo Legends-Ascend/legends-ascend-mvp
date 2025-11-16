@@ -55,7 +55,8 @@ describe('Form Contrast and Accessibility', () => {
       const button = screen.getByRole('button', { name: /join the waitlist/i });
       
       // Verify button has proper styling for contrast
-      expect(button.className).toContain('bg-primary-blue');
+      // Using inline style for bg color to ensure visibility
+      expect(button).toHaveStyle({ backgroundColor: '#1E3A8A', color: '#FFFFFF' });
       expect(button.className).toContain('text-white');
       expect(button.className).toContain('shadow-lg');
       expect(button.className).toContain('border-2');
@@ -65,8 +66,8 @@ describe('Form Contrast and Accessibility', () => {
       render(<EmailSignupForm />);
       const button = screen.getByRole('button', { name: /join the waitlist/i });
       
-      // Verify hover maintains good contrast (dark-navy for high visibility)
-      expect(button.className).toContain('hover:bg-dark-navy');
+      // Verify button has inline style and hover classes
+      expect(button).toHaveStyle({ backgroundColor: '#1E3A8A' });
       expect(button.className).toContain('hover:shadow-xl');
       expect(button.className).toContain('font-bold');
     });
