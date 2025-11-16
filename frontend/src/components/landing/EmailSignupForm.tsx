@@ -149,7 +149,7 @@ export const EmailSignupForm: React.FC = () => {
       <button
         type="submit"
         disabled={isSubmitting}
-        className="w-full bg-primary-blue hover:bg-primary-blue/90 text-white font-semibold py-3 px-6 rounded-md transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-blue disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
+        className="w-full bg-primary-blue hover:bg-dark-navy text-white font-bold py-3 px-6 rounded-md transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-blue disabled:opacity-50 disabled:cursor-not-allowed shadow-lg hover:shadow-xl border-2 border-primary-blue hover:border-dark-navy"
         aria-busy={isSubmitting}
       >
         {isSubmitting ? 'Joining...' : 'Join the Waitlist'}
