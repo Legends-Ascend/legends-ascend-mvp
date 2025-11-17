@@ -146,8 +146,8 @@ describe('PrivacyPolicy Component', () => {
       const homeLink = screen.getByRole('link', { name: /Legends Ascend - Return to home/i });
       expect(homeLink).toHaveAttribute('href', '/');
       
-      const emailLink = screen.getAllByRole('link', { name: /privacy@legends-ascend.com/i })[0];
-      expect(emailLink).toHaveAttribute('href', 'mailto:privacy@legends-ascend.com');
+      const emailLink = screen.getAllByRole('link', { name: /privacy@legendsascend.com/i })[0];
+      expect(emailLink).toHaveAttribute('href', 'mailto:privacy@legendsascend.com');
     });
 
     it('should have external links with proper rel attributes', () => {
@@ -191,10 +191,10 @@ describe('PrivacyPolicy Component', () => {
     it('should display privacy contact email', () => {
       render(<PrivacyPolicy />);
       
-      const emailLinks = screen.getAllByRole('link', { name: /privacy@legends-ascend.com/i });
+      const emailLinks = screen.getAllByRole('link', { name: /privacy@legendsascend.com/i });
       expect(emailLinks.length).toBeGreaterThan(0);
       emailLinks.forEach(link => {
-        expect(link).toHaveAttribute('href', 'mailto:privacy@legends-ascend.com');
+        expect(link).toHaveAttribute('href', 'mailto:privacy@legendsascend.com');
       });
     });
 

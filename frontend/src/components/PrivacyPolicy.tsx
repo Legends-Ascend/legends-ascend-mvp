@@ -211,7 +211,7 @@ export const PrivacyPolicy: React.FC = () => {
               </p>
               <div className="bg-soft-gray p-4 rounded-lg mb-4">
                 <p className="font-medium text-dark-navy">Legends Ascend</p>
-                <p className="text-dark-navy">Email: <a href="mailto:privacy@legends-ascend.com" className="text-primary-blue hover:text-accent-gold underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-blue">privacy@legends-ascend.com</a></p>
+                <p className="text-dark-navy">Email: <a href="mailto:privacy@legendsascend.com" className="text-primary-blue hover:text-accent-gold underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-blue">privacy@legendsascend.com</a></p>
               </div>
               <p className="leading-relaxed text-dark-navy">
                 If you have any questions about how we handle your personal data or wish to exercise your data protection rights, please contact us using the details provided above.
@@ -272,7 +272,7 @@ export const PrivacyPolicy: React.FC = () => {
               <h3 className="text-xl font-semibold text-dark-navy mb-3">Third-Party Integrations:</h3>
               <ul className="list-disc pl-6 space-y-2 text-dark-navy">
                 <li>EmailOctopus (email marketing platform)</li>
-                <li>Analytics providers (if implemented)</li>
+                <li>Vercel Analytics (website analytics and performance monitoring)</li>
               </ul>
             </section>
 
@@ -359,16 +359,19 @@ export const PrivacyPolicy: React.FC = () => {
                 </div>
 
                 <div className="bg-soft-gray p-4 rounded-lg">
-                  <h3 className="text-lg font-semibold text-dark-navy mb-2">Hosting Providers:</h3>
+                  <h3 className="text-lg font-semibold text-dark-navy mb-2">Hosting and Infrastructure Providers:</h3>
                   <p className="text-dark-navy">
-                    Our platform is hosted on secure cloud infrastructure. These providers process data on our behalf under strict data processing agreements.
+                    Our platform is hosted on Vercel, a secure cloud hosting platform. Vercel processes data on our behalf under strict data processing agreements and maintains high security standards.
                   </p>
                 </div>
 
                 <div className="bg-soft-gray p-4 rounded-lg">
-                  <h3 className="text-lg font-semibold text-dark-navy mb-2">Analytics Providers (If Implemented):</h3>
+                  <h3 className="text-lg font-semibold text-dark-navy mb-2">Analytics and Performance Monitoring:</h3>
+                  <p className="text-dark-navy mb-2">
+                    We use Vercel Analytics and Vercel Speed Insights to monitor website performance and understand user behavior. These tools help us improve our services and ensure optimal performance.
+                  </p>
                   <p className="text-dark-navy">
-                    We may use analytics tools to understand user behavior and improve our services. Any analytics data is anonymised where possible.
+                    Data collected by Vercel Analytics is anonymised and aggregated where possible, and is processed in accordance with Vercel's privacy policy and GDPR requirements.
                   </p>
                 </div>
               </div>
@@ -508,10 +511,10 @@ export const PrivacyPolicy: React.FC = () => {
                 <p className="text-dark-navy">
                   To exercise any of these rights, please contact us at{' '}
                   <a 
-                    href="mailto:privacy@legends-ascend.com" 
+                    href="mailto:privacy@legendsascend.com" 
                     className="text-primary-blue hover:text-accent-gold underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-blue"
                   >
-                    privacy@legends-ascend.com
+                    privacy@legendsascend.com
                   </a>
                   . We will respond to your request within 30 days.
                 </p>
@@ -597,10 +600,10 @@ export const PrivacyPolicy: React.FC = () => {
               <p className="leading-relaxed text-dark-navy">
                 If we become aware that we have collected personal data from a child under 13 without parental consent, we will take steps to delete that information as quickly as possible. If you believe we have collected data from a child under 13, please contact us at{' '}
                 <a 
-                  href="mailto:privacy@legends-ascend.com" 
+                  href="mailto:privacy@legendsascend.com" 
                   className="text-primary-blue hover:text-accent-gold underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-blue"
                 >
-                  privacy@legends-ascend.com
+                  privacy@legendsascend.com
                 </a>
                 .
               </p>
@@ -644,19 +647,19 @@ export const PrivacyPolicy: React.FC = () => {
                   <p>
                     <strong>Email:</strong>{' '}
                     <a 
-                      href="mailto:privacy@legends-ascend.com" 
+                      href="mailto:privacy@legendsascend.com" 
                       className="text-primary-blue hover:text-accent-gold underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-blue"
                     >
-                      privacy@legends-ascend.com
+                      privacy@legendsascend.com
                     </a>
                   </p>
                   <p>
                     <strong>General Enquiries:</strong>{' '}
                     <a 
-                      href="mailto:hello@legends-ascend.com" 
+                      href="mailto:hello@legendsascend.com" 
                       className="text-primary-blue hover:text-accent-gold underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-blue"
                     >
-                      hello@legends-ascend.com
+                      hello@legendsascend.com
                     </a>
                   </p>
                 </div>
