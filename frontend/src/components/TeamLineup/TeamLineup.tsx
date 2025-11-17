@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import styled from 'styled-components';
 import type { Team, Player, TeamLineupPlayer } from '../../types';
 import { teamApi, playerApi } from '../../services/api';
@@ -180,13 +180,13 @@ export const TeamLineup: React.FC = () => {
     if (selectedTeamId) {
       fetchLineup();
     }
-  }, [selectedTeamId]);
+  }, [selectedTeamId, fetchLineup]);
 
   const fetchTeams = async () => {
     try {
       const data = await teamApi.getAll();
       setTeams(data);
-    } catch (err) {
+    } catch {
       setError('Failed to load teams');
     }
   };
@@ -195,24 +195,24 @@ export const TeamLineup: React.FC = () => {
     try {
       const data = await playerApi.getAll();
       setAvailablePlayers(data);
-    } catch (err) {
+    } catch {
       setError('Failed to load players');
     }
   };
 
-  const fetchLineup = async () => {
+  const fetchLineup = useCallback(async () => {
     if (!selectedTeamId) return;
     try {
       setLoading(true);
       const data = await teamApi.getLineup(selectedTeamId);
       setLineup(data);
       setError(null);
-    } catch (err) {
+    } catch {
       setError('Failed to load lineup');
     } finally {
       setLoading(false);
     }
-  };
+  }, [selectedTeamId]);
 
   const handleCreateTeam = async () => {
     if (!newTeamName.trim()) return;
@@ -223,7 +223,7 @@ export const TeamLineup: React.FC = () => {
       if (newTeam.id) {
         setSelectedTeamId(newTeam.id);
       }
-    } catch (err) {
+    } catch {
       setError('Failed to create team');
     }
   };
@@ -234,7 +234,7 @@ export const TeamLineup: React.FC = () => {
       await teamApi.addPlayerToLineup(selectedTeamId, selectedPlayerId, selectedPosition);
       setSelectedPlayerId(null);
       fetchLineup();
-    } catch (err) {
+    } catch {
       setError('Failed to add player to lineup');
     }
   };
@@ -244,7 +244,7 @@ export const TeamLineup: React.FC = () => {
     try {
       await teamApi.removePlayerFromLineup(selectedTeamId, playerId);
       fetchLineup();
-    } catch (err) {
+    } catch {
       setError('Failed to remove player from lineup');
     }
   };
