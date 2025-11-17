@@ -2,9 +2,38 @@
 
 This guide will help you set up and run the Legends Ascend football manager MVP on your local machine.
 
+## Database Configuration (Production & Development)
+
+Legends Ascend uses **Neon Serverless PostgreSQL** for production and development databases.
+
+### Important: Before you set up your local environment
+
+**For Production/Vercel:** Database is automatically configured and you don't need to do anything - Vercel + Neon handle it automatically.
+
+**For Local Development:** You have two options:
+
+#### Option 1: Use Neon (Recommended for integration testing)
+
+1. Create a free account at https://console.neon.tech
+2. Create a development branch or project
+3. Get your connection string from Neon Console
+4. Add it to your `.env` file as `DATABASE_URL`
+
+See [DATABASE.md](./DATABASE.md) for complete Neon setup details.
+
+#### Option 2: Use Local PostgreSQL (Legacy - only if you have it installed)
+
+If you prefer to use a local PostgreSQL instance, follow the database setup steps below. However, **we recommend using Neon for consistency with production**.
+
+---
+
+
 ## Prerequisites
 
 Before you begin, ensure you have the following installed:
+
+**Note:** PostgreSQL is only required if you choose to use local database (Option 2). If using Neon (recommended), you only need Node.js, Git, and a text editor. You can skip PostgreSQL installation.
+
 
 - **Node.js** (v18 or higher) - [Download](https://nodejs.org/)
 - **PostgreSQL** (v14 or higher) - [Download](https://www.postgresql.org/download/)
