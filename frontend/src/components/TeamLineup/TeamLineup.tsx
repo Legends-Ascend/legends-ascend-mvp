@@ -171,17 +171,6 @@ export const TeamLineup: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    fetchTeams();
-    fetchPlayers();
-  }, []);
-
-  useEffect(() => {
-    if (selectedTeamId) {
-      fetchLineup();
-    }
-  }, [selectedTeamId, fetchLineup]);
-
   const fetchTeams = async () => {
     try {
       const data = await teamApi.getAll();
@@ -213,6 +202,17 @@ export const TeamLineup: React.FC = () => {
       setLoading(false);
     }
   }, [selectedTeamId]);
+
+  useEffect(() => {
+    fetchTeams();
+    fetchPlayers();
+  }, []);
+
+  useEffect(() => {
+    if (selectedTeamId) {
+      fetchLineup();
+    }
+  }, [selectedTeamId, fetchLineup]);
 
   const handleCreateTeam = async () => {
     if (!newTeamName.trim()) return;
