@@ -202,7 +202,7 @@ describe('PrivacyPolicy Component', () => {
       render(<PrivacyPolicy />);
       
       expect(screen.getByText(/Information Commissioner's Office \(ICO\)/i)).toBeInTheDocument();
-      expect(screen.getByRole('link', { name: /ico.org.uk/i })).toBeInTheDocument();
+      expect(screen.getByRole('link', { name: /ico\.org\.uk/i })).toBeInTheDocument();
     });
 
     it('should mention data retention policies', () => {
