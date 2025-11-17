@@ -45,13 +45,24 @@ export const PrivacyPolicy: React.FC = () => {
   const handleBackToHome = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     
-    // Check if this window was opened from another window (has an opener)
+    // Try to close the window if it was opened from another page
+    // This will work if the link that opened this page didn't use rel="noopener"
     if (window.opener && !window.opener.closed) {
-      // If there's a valid opener, close this tab and the opener will be focused automatically
-      window.close();
+      try {
+        window.close();
+        // If window.close() was blocked, fall back to navigation
+        // Check after a short delay if window is still open
+        setTimeout(() => {
+          if (!window.closed) {
+            window.location.href = '/';
+          }
+        }, 100);
+      } catch (e) {
+        // If close() throws an error, navigate instead
+        window.location.href = '/';
+      }
     } else {
       // If no opener or opener is closed, navigate to home in current tab
-      // or open in new tab
       window.location.href = '/';
     }
   };

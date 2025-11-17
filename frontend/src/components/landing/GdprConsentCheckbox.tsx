@@ -39,7 +39,7 @@ export const GdprConsentCheckbox: React.FC<GdprConsentCheckboxProps> = ({
               <a
                 href="/privacy-policy"
                 target="_blank"
-                rel="noopener noreferrer"
+                rel="noreferrer"
                 className="text-primary-blue hover:text-primary-blue/80 underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-blue font-semibold"
               >
                 Privacy Policy
