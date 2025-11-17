@@ -50,8 +50,9 @@ export const Hero: React.FC = () => {
           </p>
 
           {/* Email Signup Form */}
-                    <div className={`flex justify-center transition-all duration-1000 delay-300 ${
+          <div className={`flex justify-center transition-all duration-1000 delay-300 ${
             isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
+          }`}>
             <EmailSignupForm />
           </div>
         </div>
