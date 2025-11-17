@@ -165,7 +165,7 @@ export const MatchSimulator: React.FC = () => {
     try {
       const data = await teamApi.getAll();
       setTeams(data);
-    } catch (err) {
+    } catch {
       setError('Failed to load teams');
     }
   };
@@ -174,7 +174,7 @@ export const MatchSimulator: React.FC = () => {
     try {
       const data = await matchApi.getAll();
       setMatches(data);
-    } catch (err) {
+    } catch {
       setError('Failed to load matches');
     }
   };
@@ -197,7 +197,7 @@ export const MatchSimulator: React.FC = () => {
       setAwayTeamId(null);
       setError(null);
       fetchMatches();
-    } catch (err) {
+    } catch {
       setError('Failed to create match');
     } finally {
       setLoading(false);
@@ -226,7 +226,7 @@ export const MatchSimulator: React.FC = () => {
         fetchMatches();
         setLoading(false);
       }, 10000);
-    } catch (err) {
+    } catch {
       setError('Failed to simulate match');
       setLoading(false);
     }

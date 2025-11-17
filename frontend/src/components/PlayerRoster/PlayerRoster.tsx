@@ -184,7 +184,7 @@ export const PlayerRoster: React.FC = () => {
       const data = await playerApi.getAll();
       setPlayers(data);
       setError(null);
-    } catch (err) {
+    } catch {
       setError('Failed to load players');
     } finally {
       setLoading(false);
@@ -208,7 +208,7 @@ export const PlayerRoster: React.FC = () => {
         physical: 75,
       });
       fetchPlayers();
-    } catch (err) {
+    } catch {
       setError('Failed to create player');
     }
   };
@@ -218,7 +218,7 @@ export const PlayerRoster: React.FC = () => {
       try {
         await playerApi.delete(id);
         fetchPlayers();
-      } catch (err) {
+      } catch {
         setError('Failed to delete player');
       }
     }
