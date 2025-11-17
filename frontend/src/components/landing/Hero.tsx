@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { EmailSignupForm } from './EmailSignupForm';
 
 /**
@@ -7,8 +7,11 @@ import { EmailSignupForm } from './EmailSignupForm';
  * Enhanced with professional fonts and typography improvements
  */
 export const Hero: React.FC = () => {
-    const [isVisible] = useState(true);
+    const [isVisible, setIsVisible] = useState(false);
 
+        useEffect(() => {
+                  setIsVisible(true);
+                }, []);
   
   return (
     <div>
