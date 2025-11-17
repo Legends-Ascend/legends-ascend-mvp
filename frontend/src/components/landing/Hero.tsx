@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { EmailSignupForm } from './EmailSignupForm';
 
 /**
@@ -7,12 +7,9 @@ import { EmailSignupForm } from './EmailSignupForm';
  * Enhanced with professional fonts and typography improvements
  */
 export const Hero: React.FC = () => {
-  const [isVisible, setIsVisible] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
 
-  useEffect(() => {
-    setIsVisible(true);
-  }, []);
-
+  
   return (
     <div>
       {/* Background Image */}
@@ -53,9 +50,8 @@ export const Hero: React.FC = () => {
           </p>
 
           {/* Email Signup Form */}
-          <div className={`transition-all duration-1000 delay-300 ${
+                    <div className={`flex justify-center transition-all duration-1000 delay-300 ${
             isVisible ? 'opacity-100 scale-100' : 'opacity-0 scale-95'
-          }`}>
             <EmailSignupForm />
           </div>
         </div>
