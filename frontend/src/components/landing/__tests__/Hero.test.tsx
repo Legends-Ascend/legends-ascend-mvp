@@ -26,11 +26,10 @@ describe('Hero Component', () => {
       const logoClasses = logo.className;
       
       // Verify responsive sizing classes are present
-      // Base: h-32 (128px), sm: h-40 (160px), md: h-48 (192px), lg: h-56 (224px)
+      // Base: h-32 (128px), sm: h-40 (160px), md: h-56 (224px)
       expect(logoClasses).toContain('h-32');
       expect(logoClasses).toContain('sm:h-40');
-      expect(logoClasses).toContain('md:h-48');
-      expect(logoClasses).toContain('lg:h-56');
+      expect(logoClasses).toContain('md:h-56');
     });
 
     it('should center the logo horizontally', () => {
@@ -47,14 +46,16 @@ describe('Hero Component', () => {
       
       const headline = screen.getByRole('heading', { level: 1 });
       expect(headline).toBeInTheDocument();
-      expect(headline).toHaveTextContent('Build Your Football Legacy');
+      expect(headline).toHaveTextContent('Forge Your Football Legacy');
     });
 
     it('should render the subheadline', () => {
       render(<Hero />);
       
-      const subheadline = screen.getByText(/AI-powered football management game/i);
+      const subheadline = screen.getByText(/Experience the/i);
       expect(subheadline).toBeInTheDocument();
+      expect(subheadline).toHaveTextContent(/AI-powered/i);
+      expect(subheadline).toHaveTextContent(/football management game/i);
     });
   });
 

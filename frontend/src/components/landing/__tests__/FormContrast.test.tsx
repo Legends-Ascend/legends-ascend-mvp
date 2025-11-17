@@ -26,7 +26,7 @@ describe('Form Contrast and Accessibility', () => {
       
       // Verify enhanced border styling for better contrast
       expect(emailInput.className).toContain('border-2');
-      expect(emailInput.className).toContain('border-dark-navy/40');
+      expect(emailInput.className).toContain('border-dark-navy');
       expect(emailInput.className).toContain('bg-white');
     });
 
@@ -93,7 +93,7 @@ describe('Form Contrast and Accessibility', () => {
       
       const checkbox = container.querySelector('input[type="checkbox"]');
       expect(checkbox?.className).toContain('border-2');
-      expect(checkbox?.className).toContain('border-dark-navy/40');
+      expect(checkbox?.className).toContain('border-dark-navy');
     });
 
     it('should have proper focus indicator on checkbox', () => {
