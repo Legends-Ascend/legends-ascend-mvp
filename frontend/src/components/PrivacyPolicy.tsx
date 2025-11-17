@@ -42,6 +42,20 @@ export const PrivacyPolicy: React.FC = () => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  const handleBackToHome = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    
+    // Check if this window was opened from another window (has an opener)
+    if (window.opener && !window.opener.closed) {
+      // If there's a valid opener, close this tab and the opener will be focused automatically
+      window.close();
+    } else {
+      // If no opener or opener is closed, navigate to home in current tab
+      // or open in new tab
+      window.location.href = '/';
+    }
+  };
+
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
     if (element) {
@@ -693,6 +707,7 @@ export const PrivacyPolicy: React.FC = () => {
           <div className="mt-12 mb-8">
             <a
               href="/"
+              onClick={handleBackToHome}
               className="inline-flex items-center text-primary-blue hover:text-accent-gold font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-blue rounded px-2 py-1"
             >
               <span aria-hidden="true">←</span>
