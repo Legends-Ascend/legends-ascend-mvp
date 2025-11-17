@@ -139,7 +139,7 @@ export const Leaderboard: React.FC = () => {
       const data = await teamApi.getLeaderboard();
       setLeaderboard(data);
       setError(null);
-    } catch (err) {
+    } catch {
       setError('Failed to load leaderboard');
     } finally {
       setLoading(false);

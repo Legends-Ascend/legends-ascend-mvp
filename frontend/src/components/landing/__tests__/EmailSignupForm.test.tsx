@@ -93,13 +93,13 @@ describe('EmailSignupForm', () => {
     it('should submit form successfully with valid data', async () => {
       const user = userEvent.setup();
       
-      (global.fetch as any).mockResolvedValueOnce({
+      vi.mocked(global.fetch).mockResolvedValueOnce({
         json: async () => ({
           success: true,
           message: 'Thank you! Check your email to confirm your subscription.',
           status: 'pending_confirmation',
         }),
-      });
+      } as Response);
       
       render(<EmailSignupForm />);
       
@@ -134,13 +134,13 @@ describe('EmailSignupForm', () => {
     it('should display success state after successful submission', async () => {
       const user = userEvent.setup();
       
-      (global.fetch as any).mockResolvedValueOnce({
+      vi.mocked(global.fetch).mockResolvedValueOnce({
         json: async () => ({
           success: true,
           message: 'Thank you! Check your email to confirm your subscription.',
           status: 'pending_confirmation',
         }),
-      });
+      } as Response);
       
       render(<EmailSignupForm />);
       
@@ -162,13 +162,13 @@ describe('EmailSignupForm', () => {
     it('should clear form fields after successful submission', async () => {
       const user = userEvent.setup();
       
-      (global.fetch as any).mockResolvedValueOnce({
+      vi.mocked(global.fetch).mockResolvedValueOnce({
         json: async () => ({
           success: true,
           message: 'Thank you!',
           status: 'pending_confirmation',
         }),
-      });
+      } as Response);
       
       render(<EmailSignupForm />);
       
@@ -191,13 +191,13 @@ describe('EmailSignupForm', () => {
     it('should display error message when API returns error', async () => {
       const user = userEvent.setup();
       
-      (global.fetch as any).mockResolvedValueOnce({
+      vi.mocked(global.fetch).mockResolvedValueOnce({
         json: async () => ({
           success: false,
           message: 'Unable to subscribe. Please try again later.',
           status: 'error',
         }),
-      });
+      } as Response);
       
       render(<EmailSignupForm />);
       
@@ -220,7 +220,7 @@ describe('EmailSignupForm', () => {
     it('should display error when network request fails', async () => {
       const user = userEvent.setup();
       
-      (global.fetch as any).mockRejectedValueOnce(new Error('Network error'));
+      vi.mocked(global.fetch).mockRejectedValueOnce(new Error('Network error'));
       
       render(<EmailSignupForm />);
       
@@ -242,13 +242,13 @@ describe('EmailSignupForm', () => {
     it('should handle already subscribed scenario', async () => {
       const user = userEvent.setup();
       
-      (global.fetch as any).mockResolvedValueOnce({
+      vi.mocked(global.fetch).mockResolvedValueOnce({
         json: async () => ({
           success: true,
           message: 'This email is already on our list. Check your inbox for updates.',
           status: 'already_subscribed',
         }),
-      });
+      } as Response);
       
       render(<EmailSignupForm />);
       
@@ -298,10 +298,10 @@ describe('EmailSignupForm', () => {
     it('should disable button during submission', async () => {
       const user = userEvent.setup();
       
-      (global.fetch as any).mockImplementationOnce(() => 
+      vi.mocked(global.fetch).mockImplementationOnce(() => 
         new Promise(resolve => setTimeout(() => resolve({
           json: async () => ({ success: true, message: 'Success' })
-        }), 100))
+        } as Response), 100))
       );
       
       render(<EmailSignupForm />);
@@ -345,13 +345,13 @@ describe('EmailSignupForm', () => {
     it('should handle email with special characters', async () => {
       const user = userEvent.setup();
       
-      (global.fetch as any).mockResolvedValueOnce({
+      vi.mocked(global.fetch).mockResolvedValueOnce({
         json: async () => ({
           success: true,
           message: 'Success',
           status: 'pending_confirmation',
         }),
-      });
+      } as Response);
       
       render(<EmailSignupForm />);
       
@@ -377,10 +377,10 @@ describe('EmailSignupForm', () => {
     it('should prevent double submission', async () => {
       const user = userEvent.setup();
       
-      (global.fetch as any).mockImplementationOnce(() => 
+      vi.mocked(global.fetch).mockImplementationOnce(() => 
         new Promise(resolve => setTimeout(() => resolve({
           json: async () => ({ success: true, message: 'Success' })
-        }), 100))
+        } as Response), 100))
       );
       
       render(<EmailSignupForm />);
@@ -403,12 +403,12 @@ describe('EmailSignupForm', () => {
     it('should send correct timestamp format', async () => {
       const user = userEvent.setup();
       
-      (global.fetch as any).mockResolvedValueOnce({
+      vi.mocked(global.fetch).mockResolvedValueOnce({
         json: async () => ({
           success: true,
           message: 'Success',
         }),
-      });
+      } as Response);
       
       render(<EmailSignupForm />);
       
@@ -422,8 +422,8 @@ describe('EmailSignupForm', () => {
       await user.click(submitButton);
       
       await waitFor(() => {
-        const call = (global.fetch as any).mock.calls[0];
-        const body = JSON.parse(call[1].body);
+        const call = vi.mocked(global.fetch).mock.calls[0];
+        const body = JSON.parse(call[1].body as string);
         expect(body.timestamp).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
       });
     });
@@ -433,10 +433,10 @@ describe('EmailSignupForm', () => {
     it('should show "Joining..." text while submitting', async () => {
       const user = userEvent.setup();
       
-      (global.fetch as any).mockImplementationOnce(() => 
+      vi.mocked(global.fetch).mockImplementationOnce(() => 
         new Promise(resolve => setTimeout(() => resolve({
           json: async () => ({ success: true, message: 'Success' })
-        }), 100))
+        } as Response), 100))
       );
       
       render(<EmailSignupForm />);
@@ -456,7 +456,7 @@ describe('EmailSignupForm', () => {
     it('should re-enable button after submission error', async () => {
       const user = userEvent.setup();
       
-      (global.fetch as any).mockRejectedValueOnce(new Error('Network error'));
+      vi.mocked(global.fetch).mockRejectedValueOnce(new Error('Network error'));
       
       render(<EmailSignupForm />);
       
