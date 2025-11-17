@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { EmailSignupForm } from './EmailSignupForm';
 
 /**
@@ -6,45 +6,15 @@ import { EmailSignupForm } from './EmailSignupForm';
  * Per US-001 requirements: Full-viewport hero with background media, logo, headline, and signup form
  */
 export const Hero: React.FC = () => {
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
-
-  useEffect(() => {
-    // Check for reduced motion preference (WCAG accessibility requirement)
-    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-    setPrefersReducedMotion(mediaQuery.matches);
-
-    const handleChange = (e: MediaQueryListEvent) => {
-      setPrefersReducedMotion(e.matches);
-    };
-
-    mediaQuery.addEventListener('change', handleChange);
-    return () => mediaQuery.removeEventListener('change', handleChange);
-  }, []);
-
   return (
     <div className="relative min-h-screen w-full overflow-hidden">
-      {/* Background Media */}
-      {!prefersReducedMotion ? (
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          poster="/assets/backgrounds/stadium.jpg"
-          className="absolute inset-0 w-full h-full object-cover"
-          aria-hidden="true"
-        >
-          <source src="/assets/backgrounds/stadium.mp4" type="video/mp4" />
-          Your browser does not support the video tag.
-        </video>
-      ) : (
-        <img
-          src="/assets/backgrounds/stadium.jpg"
-          alt=""
-          className="absolute inset-0 w-full h-full object-cover"
-          aria-hidden="true"
-        />
-      )}
+      {/* Background Image */}
+      <img
+        src="/assets/backgrounds/stadium.jpg"
+        alt=""
+        className="absolute inset-0 w-full h-full object-cover"
+        aria-hidden="true"
+      />
 
       {/* Gradient Overlay for text readability */}
       <div className="absolute inset-0 bg-gradient-to-b from-dark-navy/70 via-dark-navy/50 to-dark-navy/80" aria-hidden="true"></div>
