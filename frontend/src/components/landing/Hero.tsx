@@ -7,7 +7,7 @@ import { EmailSignupForm } from './EmailSignupForm';
  * Enhanced with professional fonts and typography improvements
  */
 export const Hero: React.FC = () => {
-  const [isVisible, setIsVisible] = useState(true);
+  const [isVisible,e] = useState(true);
 
   
   return (
