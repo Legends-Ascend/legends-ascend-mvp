@@ -12,7 +12,7 @@
 
 As a **football manager**,  
 I want **a robust backend system to manage my player roster, inventory, and squad formations**,  
-So that **I can build and customize my team, organize lineups, and prepare for matches**.
+So that **I can build and customise my team, organise lineups, and prepare for matches**.
 
 ---
 
