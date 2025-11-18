@@ -1,61 +1,464 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="jest tests" tests="27" failures="0" errors="0" time="3.329">
-  <testsuite name="emailOctopusService" errors="0" failures="0" skipped="0" timestamp="2025-11-14T09:23:25" time="2.68" tests="15">
-    <testcase classname="emailOctopusService › subscribeToEmailList › Happy Path" name="should successfully subscribe a new email" time="0.011">
+<testsuites name="jest tests" tests="107" failures="17" errors="0" time="4.621">
+  <testsuite name="InventoryController" errors="0" failures="2" skipped="0" timestamp="2025-11-18T11:00:56" time="3.157" tests="11">
+    <testcase classname="InventoryController › GET /api/v1/players/my-inventory" name="should return 200 with valid inventory data" time="0.014">
+      <failure>Error: expect(jest.fn()).toHaveBeenCalledWith(...expected)
+
+- Expected
++ Received
+
+  Object {
+-   &quot;data&quot;: Object {
+-     &quot;inventory&quot;: Array [
+-       Object {
+-         &quot;acquired_at&quot;: &quot;2025-11-15T10:30:00Z&quot;,
+-         &quot;inventory_id&quot;: &quot;inv-1&quot;,
+-         &quot;player&quot;: Object {
+-           &quot;base_overall&quot;: 95,
+-           &quot;defending&quot;: 40,
+-           &quot;dribbling&quot;: 88,
+-           &quot;id&quot;: &quot;player-1&quot;,
+-           &quot;name&quot;: &quot;Test Player&quot;,
+-           &quot;pace&quot;: 90,
+-           &quot;passing&quot;: 85,
+-           &quot;physical&quot;: 80,
+-           &quot;position&quot;: &quot;FW&quot;,
+-           &quot;rarity&quot;: 5,
+-           &quot;shooting&quot;: 92,
+-           &quot;tier&quot;: 0,
+-         },
+-         &quot;quantity&quot;: 1,
+-       },
+-     ],
+-     &quot;pagination&quot;: Object {
+-       &quot;limit&quot;: 20,
+-       &quot;page&quot;: 1,
+-       &quot;total_items&quot;: 1,
+-       &quot;total_pages&quot;: 1,
+-     },
+-   },
++   &quot;data&quot;: undefined,
+    &quot;success&quot;: true,
+  },
+
+Number of calls: 1
+    at Object.&lt;anonymous&gt; (/home/runner/work/legends-ascend-mvp/legends-ascend-mvp/backend/src/__tests__/inventoryController.test.ts:69:24)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)</failure>
     </testcase>
-    <testcase classname="emailOctopusService › subscribeToEmailList › Happy Path" name="should handle already subscribed email (409 status)" time="0.004">
+    <testcase classname="InventoryController › GET /api/v1/players/my-inventory" name="should return 500 on database error" time="0.002">
+      <failure>Error: expect(jest.fn()).toHaveBeenCalledWith(...expected)
+
+Expected: 500
+Received: 200
+
+Number of calls: 1
+    at Object.&lt;anonymous&gt; (/home/runner/work/legends-ascend-mvp/legends-ascend-mvp/backend/src/__tests__/inventoryController.test.ts:80:26)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)</failure>
     </testcase>
-    <testcase classname="emailOctopusService › subscribeToEmailList › Happy Path" name="should handle already subscribed email (error code)" time="0.001">
+    <testcase classname="InventoryController › GET /api/v1/players/my-inventory" name="should return 400 for invalid position parameter" time="0.002">
     </testcase>
-    <testcase classname="emailOctopusService › subscribeToEmailList › Error Handling" name="should throw error when EMAILOCTOPUS_API_KEY is missing" time="0.04">
+    <testcase classname="InventoryController › GET /api/v1/players/my-inventory" name="should return 400 for invalid rarity parameter" time="0.002">
     </testcase>
-    <testcase classname="emailOctopusService › subscribeToEmailList › Error Handling" name="should throw error when EMAILOCTOPUS_LIST_ID is missing" time="0.002">
+    <testcase classname="InventoryController › GET /api/v1/players/my-inventory" name="should return 400 for rarity out of range (below 1)" time="0.002">
     </testcase>
-    <testcase classname="emailOctopusService › subscribeToEmailList › Error Handling" name="should handle API error responses" time="0.028">
+    <testcase classname="InventoryController › GET /api/v1/players/my-inventory" name="should return 400 for min_overall out of range" time="0.001">
+    </testcase>
+    <testcase classname="InventoryController › GET /api/v1/players/my-inventory" name="should return 400 for max_overall out of range" time="0.002">
+    </testcase>
+    <testcase classname="InventoryController › GET /api/v1/players/my-inventory" name="should return 400 for invalid sort parameter" time="0.001">
+    </testcase>
+    <testcase classname="InventoryController › GET /api/v1/players/my-inventory" name="should return 400 for invalid order parameter" time="0.001">
+    </testcase>
+    <testcase classname="InventoryController › GET /api/v1/players/my-inventory" name="should return 400 for page less than 1" time="0.002">
+    </testcase>
+    <testcase classname="InventoryController › GET /api/v1/players/my-inventory" name="should return 400 for limit exceeding 100" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="InventoryService" errors="0" failures="0" skipped="0" timestamp="2025-11-18T11:00:59" time="0.162" tests="8">
+    <testcase classname="InventoryService › getUserInventory" name="should retrieve user inventory with default parameters" time="0.007">
+    </testcase>
+    <testcase classname="InventoryService › getUserInventory" name="should filter by position" time="0.002">
+    </testcase>
+    <testcase classname="InventoryService › getUserInventory" name="should filter by rarity" time="0.002">
+    </testcase>
+    <testcase classname="InventoryService › getUserInventory" name="should filter by min and max overall" time="0.001">
+    </testcase>
+    <testcase classname="InventoryService › getUserInventory" name="should handle pagination correctly" time="0.002">
+    </testcase>
+    <testcase classname="InventoryService › getUserInventory" name="should sort by different fields" time="0.001">
+    </testcase>
+    <testcase classname="InventoryService › userOwnsPlayer" name="should return true if user owns the player" time="0.004">
+    </testcase>
+    <testcase classname="InventoryService › userOwnsPlayer" name="should return false if user does not own the player" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="SquadService" errors="0" failures="0" skipped="0" timestamp="2025-11-18T11:00:56" time="3.252" tests="13">
+    <testcase classname="SquadService › createSquad" name="should create a new squad successfully" time="0.009">
+    </testcase>
+    <testcase classname="SquadService › createSquad" name="should throw error if squad name already exists" time="0.037">
+    </testcase>
+    <testcase classname="SquadService › createSquad" name="should deactivate other squads when is_active is true" time="0.002">
+    </testcase>
+    <testcase classname="SquadService › getSquadById" name="should retrieve squad details" time="0.002">
+    </testcase>
+    <testcase classname="SquadService › getSquadById" name="should throw error if squad not found" time="0.001">
+    </testcase>
+    <testcase classname="SquadService › getSquadById" name="should throw error if user does not own squad" time="0.001">
+    </testcase>
+    <testcase classname="SquadService › getSquadById" name="should exclude player stats when include_stats is false" time="0.003">
+    </testcase>
+    <testcase classname="SquadService › updateLineup" name="should update lineup successfully" time="0.003">
+    </testcase>
+    <testcase classname="SquadService › updateLineup" name="should throw error if squad not found" time="0.003">
+    </testcase>
+    <testcase classname="SquadService › updateLineup" name="should throw error if user does not own squad" time="0.002">
+    </testcase>
+    <testcase classname="SquadService › updateLineup" name="should throw error if player not in inventory" time="0.001">
+    </testcase>
+    <testcase classname="SquadService › updateLineup" name="should throw error for position mismatch" time="0.001">
+    </testcase>
+    <testcase classname="SquadService › updateLineup" name="should throw error for duplicate assignment" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="Squad Model Utilities" errors="0" failures="0" skipped="0" timestamp="2025-11-18T11:00:59" time="0.226" tests="17">
+    <testcase classname="Squad Model Utilities › generatePositionSlots" name="should generate correct positions for 4-3-3 formation" time="0.004">
+    </testcase>
+    <testcase classname="Squad Model Utilities › generatePositionSlots" name="should generate correct positions for 4-2-4 formation" time="0.001">
+    </testcase>
+    <testcase classname="Squad Model Utilities › generatePositionSlots" name="should generate correct positions for 5-3-2 formation" time="0.002">
+    </testcase>
+    <testcase classname="Squad Model Utilities › generatePositionSlots" name="should generate correct positions for 3-5-2 formation" time="0.001">
+    </testcase>
+    <testcase classname="Squad Model Utilities › generatePositionSlots" name="should generate correct positions for 4-4-2 formation" time="0.001">
+    </testcase>
+    <testcase classname="Squad Model Utilities › generatePositionSlots" name="should throw error for invalid formation" time="0.027">
+    </testcase>
+    <testcase classname="Squad Model Utilities › isPositionCompatible" name="should allow GK players in GK slots" time="0">
+    </testcase>
+    <testcase classname="Squad Model Utilities › isPositionCompatible" name="should not allow FW players in GK slots" time="0.005">
+    </testcase>
+    <testcase classname="Squad Model Utilities › isPositionCompatible" name="should allow DF players in DF slots" time="0.001">
+    </testcase>
+    <testcase classname="Squad Model Utilities › isPositionCompatible" name="should not allow MF players in DF slots" time="0">
+    </testcase>
+    <testcase classname="Squad Model Utilities › isPositionCompatible" name="should allow MF players in MF slots" time="0.001">
+    </testcase>
+    <testcase classname="Squad Model Utilities › isPositionCompatible" name="should allow FW players in FW slots" time="0">
+    </testcase>
+    <testcase classname="Squad Model Utilities › isPositionCompatible" name="should allow UT (Utility) players in any position" time="0.007">
+    </testcase>
+    <testcase classname="Squad Model Utilities › isPositionCompatible" name="should allow any position on bench" time="0.001">
+    </testcase>
+    <testcase classname="Squad Model Utilities › FORMATION_POSITIONS" name="should have all required formations" time="0.002">
+    </testcase>
+    <testcase classname="Squad Model Utilities › FORMATION_POSITIONS" name="should have 11 starters and 7 bench for each formation" time="0.001">
+    </testcase>
+    <testcase classname="Squad Model Utilities › FORMATION_POSITIONS" name="should always have 1 GK in each formation" time="0.002">
+    </testcase>
+  </testsuite>
+  <testsuite name="subscribeController" errors="0" failures="0" skipped="0" timestamp="2025-11-18T11:00:59" time="0.231" tests="12">
+    <testcase classname="subscribeController › POST /api/v1/subscribe › Happy Path" name="should successfully subscribe a valid email with GDPR consent" time="0.007">
+    </testcase>
+    <testcase classname="subscribeController › POST /api/v1/subscribe › Happy Path" name="should handle already subscribed email gracefully" time="0.005">
+    </testcase>
+    <testcase classname="subscribeController › POST /api/v1/subscribe › Validation Errors" name="should reject request with invalid email format" time="0.006">
+    </testcase>
+    <testcase classname="subscribeController › POST /api/v1/subscribe › Validation Errors" name="should reject request with missing email" time="0.002">
+    </testcase>
+    <testcase classname="subscribeController › POST /api/v1/subscribe › Validation Errors" name="should reject request with missing GDPR consent" time="0.007">
+    </testcase>
+    <testcase classname="subscribeController › POST /api/v1/subscribe › Validation Errors" name="should reject request with missing timestamp" time="0.004">
+    </testcase>
+    <testcase classname="subscribeController › POST /api/v1/subscribe › Validation Errors" name="should reject request with invalid timestamp format" time="0.001">
+    </testcase>
+    <testcase classname="subscribeController › POST /api/v1/subscribe › Error Handling" name="should handle EmailOctopus service failures" time="0.005">
+    </testcase>
+    <testcase classname="subscribeController › POST /api/v1/subscribe › Error Handling" name="should handle unexpected errors gracefully" time="0.026">
+    </testcase>
+    <testcase classname="subscribeController › POST /api/v1/subscribe › Edge Cases" name="should handle empty request body" time="0.002">
+    </testcase>
+    <testcase classname="subscribeController › POST /api/v1/subscribe › Edge Cases" name="should handle email with special characters" time="0.001">
+    </testcase>
+    <testcase classname="subscribeController › POST /api/v1/subscribe › Edge Cases" name="should handle very long email addresses" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="Authentication Middleware" errors="0" failures="0" skipped="0" timestamp="2025-11-18T11:01:00" time="0.128" tests="5">
+    <testcase classname="Authentication Middleware" name="should attach user_id to request when valid UUID provided" time="0.004">
+    </testcase>
+    <testcase classname="Authentication Middleware" name="should return 401 when no user_id header provided" time="0.002">
+    </testcase>
+    <testcase classname="Authentication Middleware" name="should return 401 when invalid UUID format provided" time="0.001">
+    </testcase>
+    <testcase classname="Authentication Middleware" name="should return 401 when empty user_id provided" time="0.001">
+    </testcase>
+    <testcase classname="Authentication Middleware" name="should handle uppercase UUID" time="0.004">
+    </testcase>
+  </testsuite>
+  <testsuite name="emailOctopusService" errors="0" failures="0" skipped="0" timestamp="2025-11-18T11:01:00" time="0.21" tests="15">
+    <testcase classname="emailOctopusService › subscribeToEmailList › Happy Path" name="should successfully subscribe a new email" time="0.008">
+    </testcase>
+    <testcase classname="emailOctopusService › subscribeToEmailList › Happy Path" name="should handle already subscribed email (409 status)" time="0.001">
+    </testcase>
+    <testcase classname="emailOctopusService › subscribeToEmailList › Happy Path" name="should handle already subscribed email (error code)" time="0.002">
+    </testcase>
+    <testcase classname="emailOctopusService › subscribeToEmailList › Error Handling" name="should throw error when EMAILOCTOPUS_API_KEY is missing" time="0.029">
+    </testcase>
+    <testcase classname="emailOctopusService › subscribeToEmailList › Error Handling" name="should throw error when EMAILOCTOPUS_LIST_ID is missing" time="0.005">
+    </testcase>
+    <testcase classname="emailOctopusService › subscribeToEmailList › Error Handling" name="should handle API error responses" time="0.013">
     </testcase>
     <testcase classname="emailOctopusService › subscribeToEmailList › Error Handling" name="should handle network errors" time="0.005">
     </testcase>
-    <testcase classname="emailOctopusService › subscribeToEmailList › Error Handling" name="should handle 500 server errors" time="0.004">
+    <testcase classname="emailOctopusService › subscribeToEmailList › Error Handling" name="should handle 500 server errors" time="0.002">
     </testcase>
     <testcase classname="emailOctopusService › subscribeToEmailList › Error Handling" name="should handle 401 authentication errors" time="0.003">
     </testcase>
     <testcase classname="emailOctopusService › subscribeToEmailList › Edge Cases" name="should handle malformed JSON response" time="0.004">
     </testcase>
-    <testcase classname="emailOctopusService › subscribeToEmailList › Edge Cases" name="should handle timeout errors" time="0.003">
+    <testcase classname="emailOctopusService › subscribeToEmailList › Edge Cases" name="should handle timeout errors" time="0.002">
     </testcase>
-    <testcase classname="emailOctopusService › subscribeToEmailList › Edge Cases" name="should handle emails with unicode characters" time="0.002">
+    <testcase classname="emailOctopusService › subscribeToEmailList › Edge Cases" name="should handle emails with unicode characters" time="0.001">
     </testcase>
-    <testcase classname="emailOctopusService › subscribeToEmailList › Edge Cases" name="should handle empty error object in response" time="0.003">
+    <testcase classname="emailOctopusService › subscribeToEmailList › Edge Cases" name="should handle empty error object in response" time="0.002">
     </testcase>
-    <testcase classname="emailOctopusService › subscribeToEmailList › API Integration" name="should pass consent timestamp to EmailOctopus" time="0.002">
+    <testcase classname="emailOctopusService › subscribeToEmailList › API Integration" name="should pass consent timestamp to EmailOctopus" time="0.001">
     </testcase>
     <testcase classname="emailOctopusService › subscribeToEmailList › API Integration" name="should use correct API endpoint URL" time="0.001">
     </testcase>
   </testsuite>
-  <testsuite name="subscribeController" errors="0" failures="0" skipped="0" timestamp="2025-11-14T09:23:25" time="2.729" tests="12">
-    <testcase classname="subscribeController › POST /api/v1/subscribe › Happy Path" name="should successfully subscribe a valid email with GDPR consent" time="0.009">
+  <testsuite name="SquadController" errors="0" failures="15" skipped="0" timestamp="2025-11-18T11:00:56" time="3.912" tests="26">
+    <testcase classname="SquadController › POST /api/v1/squads" name="should create squad successfully with valid data" time="0.011">
+      <failure>Error: expect(jest.fn()).toHaveBeenCalledWith(...expected)
+
+- Expected
++ Received
+
+  Object {
+    &quot;data&quot;: Object {
+-     &quot;squad&quot;: Object {
+-       &quot;created_at&quot;: &quot;2025-11-18T12:00:00Z&quot;,
+-       &quot;formation&quot;: &quot;4-3-3&quot;,
+-       &quot;id&quot;: &quot;squad-id&quot;,
+-       &quot;is_active&quot;: true,
+-       &quot;name&quot;: &quot;Main Squad&quot;,
+-       &quot;positions&quot;: Array [],
+-       &quot;updated_at&quot;: &quot;2025-11-18T12:00:00Z&quot;,
+-       &quot;user_id&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
+-     },
++     &quot;squad&quot;: undefined,
+    },
+    &quot;message&quot;: &quot;Squad created successfully&quot;,
+    &quot;success&quot;: true,
+  },
+
+Number of calls: 1
+    at Object.&lt;anonymous&gt; (/home/runner/work/legends-ascend-mvp/legends-ascend-mvp/backend/src/__tests__/squadController.test.ts:60:24)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)</failure>
     </testcase>
-    <testcase classname="subscribeController › POST /api/v1/subscribe › Happy Path" name="should handle already subscribed email gracefully" time="0.001">
+    <testcase classname="SquadController › POST /api/v1/squads" name="should return 409 when squad name exists" time="0.001">
+      <failure>Error: expect(jest.fn()).toHaveBeenCalledWith(...expected)
+
+Expected: 409
+Received: 201
+
+Number of calls: 1
+    at Object.&lt;anonymous&gt; (/home/runner/work/legends-ascend-mvp/legends-ascend-mvp/backend/src/__tests__/squadController.test.ts:77:26)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)</failure>
     </testcase>
-    <testcase classname="subscribeController › POST /api/v1/subscribe › Validation Errors" name="should reject request with invalid email format" time="0.002">
+    <testcase classname="SquadController › POST /api/v1/squads" name="should return 500 on database error" time="0.001">
+      <failure>Error: expect(jest.fn()).toHaveBeenCalledWith(...expected)
+
+Expected: 500
+Received: 201
+
+Number of calls: 1
+    at Object.&lt;anonymous&gt; (/home/runner/work/legends-ascend-mvp/legends-ascend-mvp/backend/src/__tests__/squadController.test.ts:97:26)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)</failure>
     </testcase>
-    <testcase classname="subscribeController › POST /api/v1/subscribe › Validation Errors" name="should reject request with missing email" time="0.001">
+    <testcase classname="SquadController › POST /api/v1/squads" name="should return 400 for invalid formation" time="0.001">
     </testcase>
-    <testcase classname="subscribeController › POST /api/v1/subscribe › Validation Errors" name="should reject request with missing GDPR consent" time="0.002">
+    <testcase classname="SquadController › POST /api/v1/squads" name="should return 400 for missing name" time="0.001">
     </testcase>
-    <testcase classname="subscribeController › POST /api/v1/subscribe › Validation Errors" name="should reject request with missing timestamp" time="0.001">
+    <testcase classname="SquadController › POST /api/v1/squads" name="should return 400 for empty name" time="0">
     </testcase>
-    <testcase classname="subscribeController › POST /api/v1/subscribe › Validation Errors" name="should reject request with invalid timestamp format" time="0.002">
+    <testcase classname="SquadController › POST /api/v1/squads" name="should return 400 for name exceeding 100 characters" time="0.001">
     </testcase>
-    <testcase classname="subscribeController › POST /api/v1/subscribe › Error Handling" name="should handle EmailOctopus service failures" time="0">
+    <testcase classname="SquadController › POST /api/v1/squads" name="should accept valid formations" time="0.002">
     </testcase>
-    <testcase classname="subscribeController › POST /api/v1/subscribe › Error Handling" name="should handle unexpected errors gracefully" time="0.032">
+    <testcase classname="SquadController › GET /api/v1/squads/:squadId" name="should return squad details successfully" time="0.003">
+      <failure>Error: expect(jest.fn()).toHaveBeenCalledWith(...expected)
+
+- Expected
++ Received
+
+  Object {
+    &quot;data&quot;: Object {
+-     &quot;squad&quot;: Object {
+-       &quot;bench_count&quot;: 7,
+-       &quot;created_at&quot;: &quot;2025-11-18T12:00:00Z&quot;,
+-       &quot;empty_positions&quot;: 18,
+-       &quot;filled_positions&quot;: 0,
+-       &quot;formation&quot;: &quot;4-3-3&quot;,
+-       &quot;id&quot;: &quot;123e4567-e89b-12d3-a456-426614174010&quot;,
+-       &quot;is_active&quot;: true,
+-       &quot;name&quot;: &quot;Test Squad&quot;,
+-       &quot;positions&quot;: Array [],
+-       &quot;starters_count&quot;: 11,
+-       &quot;updated_at&quot;: &quot;2025-11-18T12:00:00Z&quot;,
+-       &quot;user_id&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
+-     },
++     &quot;squad&quot;: undefined,
+    },
+    &quot;success&quot;: true,
+  },
+
+Number of calls: 1
+    at Object.&lt;anonymous&gt; (/home/runner/work/legends-ascend-mvp/legends-ascend-mvp/backend/src/__tests__/squadController.test.ts:212:24)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)</failure>
     </testcase>
-    <testcase classname="subscribeController › POST /api/v1/subscribe › Edge Cases" name="should handle empty request body" time="0.001">
+    <testcase classname="SquadController › GET /api/v1/squads/:squadId" name="should return 404 if squad not found" time="0.001">
+      <failure>Error: expect(jest.fn()).toHaveBeenCalledWith(...expected)
+
+Expected: 404
+Received: 200
+
+Number of calls: 1
+    at Object.&lt;anonymous&gt; (/home/runner/work/legends-ascend-mvp/legends-ascend-mvp/backend/src/__tests__/squadController.test.ts:225:26)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)</failure>
     </testcase>
-    <testcase classname="subscribeController › POST /api/v1/subscribe › Edge Cases" name="should handle email with special characters" time="0.001">
+    <testcase classname="SquadController › GET /api/v1/squads/:squadId" name="should return 403 if user does not own squad" time="0.001">
+      <failure>Error: expect(jest.fn()).toHaveBeenCalledWith(...expected)
+
+Expected: 403
+Received: 200
+
+Number of calls: 1
+    at Object.&lt;anonymous&gt; (/home/runner/work/legends-ascend-mvp/legends-ascend-mvp/backend/src/__tests__/squadController.test.ts:235:26)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)</failure>
     </testcase>
-    <testcase classname="subscribeController › POST /api/v1/subscribe › Edge Cases" name="should handle very long email addresses" time="0.001">
+    <testcase classname="SquadController › GET /api/v1/squads/:squadId" name="should return 500 on database error" time="0.001">
+      <failure>Error: expect(jest.fn()).toHaveBeenCalledWith(...expected)
+
+Expected: 500
+Received: 200
+
+Number of calls: 1
+    at Object.&lt;anonymous&gt; (/home/runner/work/legends-ascend-mvp/legends-ascend-mvp/backend/src/__tests__/squadController.test.ts:245:26)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)</failure>
+    </testcase>
+    <testcase classname="SquadController › GET /api/v1/squads/:squadId" name="should return 400 for invalid squad ID format" time="0">
+    </testcase>
+    <testcase classname="SquadController › GET /api/v1/squads/:squadId" name="should return 400 for non-UUID strings" time="0">
+    </testcase>
+    <testcase classname="SquadController › PUT /api/v1/squads/:squadId/lineup" name="should update lineup successfully" time="0.002">
+      <failure>Error: expect(jest.fn()).toHaveBeenCalledWith(...expected)
+
+- Expected
++ Received
+
+  Object {
+    &quot;data&quot;: Object {
+-     &quot;squad&quot;: Object {
+-       &quot;bench_count&quot;: 7,
+-       &quot;created_at&quot;: &quot;2025-11-18T12:00:00Z&quot;,
+-       &quot;empty_positions&quot;: 17,
+-       &quot;filled_positions&quot;: 1,
+-       &quot;formation&quot;: &quot;4-3-3&quot;,
+-       &quot;id&quot;: &quot;123e4567-e89b-12d3-a456-426614174010&quot;,
+-       &quot;is_active&quot;: true,
+-       &quot;name&quot;: &quot;Test Squad&quot;,
+-       &quot;positions&quot;: Array [],
+-       &quot;starters_count&quot;: 11,
+-       &quot;updated_at&quot;: &quot;2025-11-18T13:00:00Z&quot;,
+-       &quot;user_id&quot;: &quot;123e4567-e89b-12d3-a456-426614174000&quot;,
+-     },
++     &quot;squad&quot;: undefined,
+    },
+    &quot;message&quot;: &quot;Lineup updated successfully&quot;,
+    &quot;success&quot;: true,
+  },
+
+Number of calls: 1
+    at Object.&lt;anonymous&gt; (/home/runner/work/legends-ascend-mvp/legends-ascend-mvp/backend/src/__tests__/squadController.test.ts:304:24)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)</failure>
+    </testcase>
+    <testcase classname="SquadController › PUT /api/v1/squads/:squadId/lineup" name="should return 404 if squad not found" time="0">
+      <failure>Error: expect(jest.fn()).toHaveBeenCalledWith(...expected)
+
+Expected: 404
+Received: 400
+
+Number of calls: 1
+    at Object.&lt;anonymous&gt; (/home/runner/work/legends-ascend-mvp/legends-ascend-mvp/backend/src/__tests__/squadController.test.ts:321:26)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)</failure>
+    </testcase>
+    <testcase classname="SquadController › PUT /api/v1/squads/:squadId/lineup" name="should return 403 if user does not own squad" time="0">
+      <failure>Error: expect(jest.fn()).toHaveBeenCalledWith(...expected)
+
+Expected: 403
+Received: 400
+
+Number of calls: 1
+    at Object.&lt;anonymous&gt; (/home/runner/work/legends-ascend-mvp/legends-ascend-mvp/backend/src/__tests__/squadController.test.ts:334:26)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)</failure>
+    </testcase>
+    <testcase classname="SquadController › PUT /api/v1/squads/:squadId/lineup" name="should return 400 if player not in inventory" time="0">
+      <failure>Error: expect(jest.fn()).toHaveBeenCalledWith(...expected)
+
+Expected: 400
+Received: 200
+
+Number of calls: 1
+    at Object.&lt;anonymous&gt; (/home/runner/work/legends-ascend-mvp/legends-ascend-mvp/backend/src/__tests__/squadController.test.ts:347:26)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)</failure>
+    </testcase>
+    <testcase classname="SquadController › PUT /api/v1/squads/:squadId/lineup" name="should return 404 if player not found" time="0.001">
+      <failure>Error: expect(jest.fn()).toHaveBeenCalledWith(...expected)
+
+Expected: 404
+Received: 400
+
+Number of calls: 1
+    at Object.&lt;anonymous&gt; (/home/runner/work/legends-ascend-mvp/legends-ascend-mvp/backend/src/__tests__/squadController.test.ts:367:26)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)</failure>
+    </testcase>
+    <testcase classname="SquadController › PUT /api/v1/squads/:squadId/lineup" name="should return 400 for position mismatch" time="0.001">
+      <failure>Error: expect(jest.fn()).toHaveBeenCalledWith(...expected)
+
+Expected: 400
+Received: 200
+
+Number of calls: 1
+    at Object.&lt;anonymous&gt; (/home/runner/work/legends-ascend-mvp/legends-ascend-mvp/backend/src/__tests__/squadController.test.ts:380:26)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)</failure>
+    </testcase>
+    <testcase classname="SquadController › PUT /api/v1/squads/:squadId/lineup" name="should return 409 for duplicate assignment" time="0.001">
+      <failure>Error: expect(jest.fn()).toHaveBeenCalledWith(...expected)
+
+Expected: 409
+Received: 400
+
+Number of calls: 1
+    at Object.&lt;anonymous&gt; (/home/runner/work/legends-ascend-mvp/legends-ascend-mvp/backend/src/__tests__/squadController.test.ts:403:26)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)</failure>
+    </testcase>
+    <testcase classname="SquadController › PUT /api/v1/squads/:squadId/lineup" name="should return 500 on database error" time="0.001">
+      <failure>Error: expect(jest.fn()).toHaveBeenCalledWith(...expected)
+
+Expected: 500
+Received: 400
+
+Number of calls: 1
+    at Object.&lt;anonymous&gt; (/home/runner/work/legends-ascend-mvp/legends-ascend-mvp/backend/src/__tests__/squadController.test.ts:416:26)
+    at processTicksAndRejections (node:internal/process/task_queues:95:5)</failure>
+    </testcase>
+    <testcase classname="SquadController › PUT /api/v1/squads/:squadId/lineup" name="should return 400 for invalid squad ID" time="0">
+    </testcase>
+    <testcase classname="SquadController › PUT /api/v1/squads/:squadId/lineup" name="should return 400 for missing positions array" time="0.001">
+    </testcase>
+    <testcase classname="SquadController › PUT /api/v1/squads/:squadId/lineup" name="should return 400 for empty positions array" time="0.001">
+    </testcase>
+    <testcase classname="SquadController › PUT /api/v1/squads/:squadId/lineup" name="should return 400 for invalid player_id format" time="0.001">
     </testcase>
   </testsuite>
 </testsuites>
