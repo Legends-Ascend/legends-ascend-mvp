@@ -7,8 +7,8 @@ describe('LogoutButton', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     localStorage.clear();
-    delete (window as any).location;
-    window.location = { href: '' } as any;
+    delete (window as Window & { location: unknown }).location;
+    (window as Window & { location: { href: string } }).location = { href: '' };
   });
 
   const renderLogoutButton = () => {
