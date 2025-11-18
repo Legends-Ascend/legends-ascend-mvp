@@ -30,6 +30,63 @@ describe('InventoryController', () => {
   });
 
   describe('GET /api/v1/players/my-inventory', () => {
+    it('should return 200 with valid inventory data', async () => {
+      const mockInventory = {
+        inventory: [
+          {
+            inventory_id: 'inv-1',
+            player: {
+              id: 'player-1',
+              name: 'Test Player',
+              position: 'FW' as const,
+              rarity: 5,
+              base_overall: 95,
+              tier: 0,
+              pace: 90,
+              shooting: 92,
+              passing: 85,
+              dribbling: 88,
+              defending: 40,
+              physical: 80,
+            },
+            quantity: 1,
+            acquired_at: '2025-11-15T10:30:00Z',
+          },
+        ],
+        pagination: {
+          page: 1,
+          limit: 20,
+          total_items: 1,
+          total_pages: 1,
+        },
+      };
+
+      InventoryService.prototype.getUserInventory = jest.fn().mockResolvedValue(mockInventory);
+
+      await getMyInventory(req as AuthenticatedRequest, res as Response);
+
+      expect(statusMock).toHaveBeenCalledWith(200);
+      expect(jsonMock).toHaveBeenCalledWith({
+        success: true,
+        data: mockInventory,
+      });
+    });
+
+    it('should return 500 on database error', async () => {
+      InventoryService.prototype.getUserInventory = jest.fn().mockRejectedValue(new Error('DB error'));
+
+      await getMyInventory(req as AuthenticatedRequest, res as Response);
+
+      expect(statusMock).toHaveBeenCalledWith(500);
+      expect(jsonMock).toHaveBeenCalledWith({
+        success: false,
+        error: {
+          code: 'DATABASE_ERROR',
+          message: 'An error occurred while fetching inventory',
+        },
+      });
+    });
+
     it('should return 400 for invalid position parameter', async () => {
       req.query = { position: 'INVALID' };
 

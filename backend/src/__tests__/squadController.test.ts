@@ -34,6 +34,69 @@ describe('SquadController', () => {
   });
 
   describe('POST /api/v1/squads', () => {
+    it('should create squad successfully with valid data', async () => {
+      req.body = {
+        name: 'Main Squad',
+        formation: '4-3-3',
+        is_active: true,
+      };
+
+      const mockSquad = {
+        id: 'squad-id',
+        user_id: req.user_id,
+        name: 'Main Squad',
+        formation: '4-3-3',
+        is_active: true,
+        created_at: '2025-11-18T12:00:00Z',
+        updated_at: '2025-11-18T12:00:00Z',
+        positions: [],
+      };
+
+      SquadService.prototype.createSquad = jest.fn().mockResolvedValue(mockSquad);
+
+      await createSquad(req as AuthenticatedRequest, res as Response);
+
+      expect(statusMock).toHaveBeenCalledWith(201);
+      expect(jsonMock).toHaveBeenCalledWith({
+        success: true,
+        data: { squad: mockSquad },
+        message: 'Squad created successfully',
+      });
+    });
+
+    it('should return 409 when squad name exists', async () => {
+      req.body = {
+        name: 'Existing Squad',
+        formation: '4-3-3',
+      };
+
+      SquadService.prototype.createSquad = jest.fn().mockRejectedValue(new Error('SQUAD_NAME_EXISTS'));
+
+      await createSquad(req as AuthenticatedRequest, res as Response);
+
+      expect(statusMock).toHaveBeenCalledWith(409);
+      expect(jsonMock).toHaveBeenCalledWith({
+        success: false,
+        error: {
+          code: 'SQUAD_NAME_EXISTS',
+          message: 'A squad with this name already exists',
+        },
+      });
+    });
+
+    it('should return 500 on database error', async () => {
+      req.body = {
+        name: 'Test Squad',
+        formation: '4-3-3',
+      };
+
+      SquadService.prototype.createSquad = jest.fn().mockRejectedValue(new Error('DB error'));
+
+      await createSquad(req as AuthenticatedRequest, res as Response);
+
+      expect(statusMock).toHaveBeenCalledWith(500);
+    });
+
     it('should return 400 for invalid formation', async () => {
       req.body = {
         name: 'Main Squad',
@@ -123,6 +186,65 @@ describe('SquadController', () => {
   });
 
   describe('GET /api/v1/squads/:squadId', () => {
+    it('should return squad details successfully', async () => {
+      req.params = { squadId: '123e4567-e89b-12d3-a456-426614174010' };
+
+      const mockSquad = {
+        id: req.params.squadId,
+        user_id: req.user_id,
+        name: 'Test Squad',
+        formation: '4-3-3',
+        is_active: true,
+        created_at: '2025-11-18T12:00:00Z',
+        updated_at: '2025-11-18T12:00:00Z',
+        positions: [],
+        starters_count: 11,
+        bench_count: 7,
+        filled_positions: 0,
+        empty_positions: 18,
+      };
+
+      SquadService.prototype.getSquadById = jest.fn().mockResolvedValue(mockSquad);
+
+      await getSquadById(req as AuthenticatedRequest, res as Response);
+
+      expect(statusMock).toHaveBeenCalledWith(200);
+      expect(jsonMock).toHaveBeenCalledWith({
+        success: true,
+        data: { squad: mockSquad },
+      });
+    });
+
+    it('should return 404 if squad not found', async () => {
+      req.params = { squadId: '123e4567-e89b-12d3-a456-426614174010' };
+
+      SquadService.prototype.getSquadById = jest.fn().mockRejectedValue(new Error('SQUAD_NOT_FOUND'));
+
+      await getSquadById(req as AuthenticatedRequest, res as Response);
+
+      expect(statusMock).toHaveBeenCalledWith(404);
+    });
+
+    it('should return 403 if user does not own squad', async () => {
+      req.params = { squadId: '123e4567-e89b-12d3-a456-426614174010' };
+
+      SquadService.prototype.getSquadById = jest.fn().mockRejectedValue(new Error('FORBIDDEN'));
+
+      await getSquadById(req as AuthenticatedRequest, res as Response);
+
+      expect(statusMock).toHaveBeenCalledWith(403);
+    });
+
+    it('should return 500 on database error', async () => {
+      req.params = { squadId: '123e4567-e89b-12d3-a456-426614174010' };
+
+      SquadService.prototype.getSquadById = jest.fn().mockRejectedValue(new Error('DB error'));
+
+      await getSquadById(req as AuthenticatedRequest, res as Response);
+
+      expect(statusMock).toHaveBeenCalledWith(500);
+    });
+
     it('should return 400 for invalid squad ID format', async () => {
       req.params = { squadId: 'invalid-uuid' };
 
@@ -148,6 +270,112 @@ describe('SquadController', () => {
   });
 
   describe('PUT /api/v1/squads/:squadId/lineup', () => {
+    it('should update lineup successfully', async () => {
+      req.params = { squadId: '123e4567-e89b-12d3-a456-426614174010' };
+      req.body = {
+        positions: [
+          {
+            position_slot: 'GK_1',
+            player_id: '123e4567-e89b-12d3-a456-426614174020',
+          },
+        ],
+      };
+
+      const mockSquad = {
+        id: req.params.squadId,
+        user_id: req.user_id,
+        name: 'Test Squad',
+        formation: '4-3-3',
+        is_active: true,
+        created_at: '2025-11-18T12:00:00Z',
+        updated_at: '2025-11-18T13:00:00Z',
+        positions: [],
+        starters_count: 11,
+        bench_count: 7,
+        filled_positions: 1,
+        empty_positions: 17,
+      };
+
+      SquadService.prototype.updateLineup = jest.fn().mockResolvedValue(mockSquad);
+
+      await updateLineup(req as AuthenticatedRequest, res as Response);
+
+      expect(statusMock).toHaveBeenCalledWith(200);
+      expect(jsonMock).toHaveBeenCalledWith({
+        success: true,
+        data: { squad: mockSquad },
+        message: 'Lineup updated successfully',
+      });
+    });
+
+    it('should return 404 if squad not found', async () => {
+      req.params = { squadId: '123e4567-e89b-12d3-a456-426614174010' };
+      req.body = {
+        positions: [{ position_slot: 'GK_1', player_id: 'player-1' }],
+      };
+
+      SquadService.prototype.updateLineup = jest.fn().mockRejectedValue(new Error('SQUAD_NOT_FOUND'));
+
+      await updateLineup(req as AuthenticatedRequest, res as Response);
+
+      expect(statusMock).toHaveBeenCalledWith(404);
+    });
+
+    it('should return 403 if user does not own squad', async () => {
+      req.params = { squadId: '123e4567-e89b-12d3-a456-426614174010' };
+      req.body = {
+        positions: [{ position_slot: 'GK_1', player_id: 'player-1' }],
+      };
+
+      SquadService.prototype.updateLineup = jest.fn().mockRejectedValue(new Error('FORBIDDEN'));
+
+      await updateLineup(req as AuthenticatedRequest, res as Response);
+
+      expect(statusMock).toHaveBeenCalledWith(403);
+    });
+
+    it('should return 400 if player not found', async () => {
+      req.params = { squadId: '123e4567-e89b-12d3-a456-426614174010' };
+      req.body = {
+        positions: [{ position_slot: 'GK_1', player_id: 'player-1' }],
+      };
+
+      SquadService.prototype.updateLineup = jest.fn().mockRejectedValue(new Error('PLAYER_NOT_FOUND'));
+
+      await updateLineup(req as AuthenticatedRequest, res as Response);
+
+      expect(statusMock).toHaveBeenCalledWith(404);
+    });
+
+    it('should return 409 for duplicate assignment', async () => {
+      req.params = { squadId: '123e4567-e89b-12d3-a456-426614174010' };
+      req.body = {
+        positions: [
+          { position_slot: 'MF_1', player_id: 'player-1' },
+          { position_slot: 'MF_2', player_id: 'player-1' },
+        ],
+      };
+
+      SquadService.prototype.updateLineup = jest.fn().mockRejectedValue(new Error('DUPLICATE_ASSIGNMENT'));
+
+      await updateLineup(req as AuthenticatedRequest, res as Response);
+
+      expect(statusMock).toHaveBeenCalledWith(409);
+    });
+
+    it('should return 500 on database error', async () => {
+      req.params = { squadId: '123e4567-e89b-12d3-a456-426614174010' };
+      req.body = {
+        positions: [{ position_slot: 'GK_1', player_id: 'player-1' }],
+      };
+
+      SquadService.prototype.updateLineup = jest.fn().mockRejectedValue(new Error('DB error'));
+
+      await updateLineup(req as AuthenticatedRequest, res as Response);
+
+      expect(statusMock).toHaveBeenCalledWith(500);
+    });
+
     it('should return 400 for invalid squad ID', async () => {
       req.params = { squadId: 'invalid-uuid' };
       req.body = { positions: [] };
