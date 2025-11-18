@@ -142,7 +142,7 @@ export const initializeDatabase = async () => {
       CREATE TABLE IF NOT EXISTS team_lineups (
         id SERIAL PRIMARY KEY,
         team_id INTEGER REFERENCES teams(id) ON DELETE CASCADE,
-        player_id INTEGER REFERENCES players(id) ON DELETE CASCADE,
+        player_id UUID REFERENCES players(id) ON DELETE CASCADE,
         position_in_lineup VARCHAR(50) NOT NULL,
         UNIQUE(team_id, player_id)
       )
