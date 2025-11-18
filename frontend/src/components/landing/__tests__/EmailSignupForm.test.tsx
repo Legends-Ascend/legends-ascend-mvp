@@ -6,6 +6,23 @@ import { EmailSignupForm } from '../EmailSignupForm';
 // Mock fetch globally
 global.fetch = vi.fn();
 
+// Helper to ensure mocked Responses include the properties the component reads
+const createMockResponse = (
+  body: unknown,
+  options: {
+    ok?: boolean;
+    status?: number;
+    headers?: HeadersInit;
+    json?: () => Promise<unknown>;
+  } = {}
+) =>
+  ({
+    ok: options.ok ?? true,
+    status: options.status ?? 200,
+    headers: new Headers(options.headers ?? { 'content-type': 'application/json' }),
+    json: options.json ?? (async () => body),
+  } as Response);
+
 describe('EmailSignupForm', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -449,14 +466,14 @@ describe('EmailSignupForm', () => {
   describe('Edge Cases', () => {
     it('should handle email with special characters', async () => {
       const user = userEvent.setup();
-      
-      vi.mocked(global.fetch).mockResolvedValueOnce({
-        json: async () => ({
+
+      vi.mocked(global.fetch).mockResolvedValueOnce(
+        createMockResponse({
           success: true,
           message: 'Success',
           status: 'pending_confirmation',
-        }),
-      } as Response);
+        })
+      );
       
       render(<EmailSignupForm />);
       
@@ -482,10 +499,17 @@ describe('EmailSignupForm', () => {
     it('should prevent double submission', async () => {
       const user = userEvent.setup();
       
-      vi.mocked(global.fetch).mockImplementationOnce(() => 
-        new Promise(resolve => setTimeout(() => resolve({
-          json: async () => ({ success: true, message: 'Success' })
-        } as Response), 100))
+      vi.mocked(global.fetch).mockImplementationOnce(
+        () =>
+          new Promise(resolve =>
+            setTimeout(
+              () =>
+                resolve(
+                  createMockResponse({ success: true, message: 'Success' })
+                ),
+              100
+            )
+          )
       );
       
       render(<EmailSignupForm />);
@@ -508,12 +532,12 @@ describe('EmailSignupForm', () => {
     it('should send correct timestamp format', async () => {
       const user = userEvent.setup();
       
-      vi.mocked(global.fetch).mockResolvedValueOnce({
-        json: async () => ({
+      vi.mocked(global.fetch).mockResolvedValueOnce(
+        createMockResponse({
           success: true,
           message: 'Success',
-        }),
-      } as Response);
+        })
+      );
       
       render(<EmailSignupForm />);
       
@@ -538,10 +562,17 @@ describe('EmailSignupForm', () => {
     it('should show "Joining..." text while submitting', async () => {
       const user = userEvent.setup();
       
-      vi.mocked(global.fetch).mockImplementationOnce(() => 
-        new Promise(resolve => setTimeout(() => resolve({
-          json: async () => ({ success: true, message: 'Success' })
-        } as Response), 100))
+      vi.mocked(global.fetch).mockImplementationOnce(
+        () =>
+          new Promise(resolve =>
+            setTimeout(
+              () =>
+                resolve(
+                  createMockResponse({ success: true, message: 'Success' })
+                ),
+              100
+            )
+          )
       );
       
       render(<EmailSignupForm />);
