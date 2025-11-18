@@ -1,61 +1,61 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuites name="jest tests" tests="27" failures="0" errors="0" time="3.329">
-  <testsuite name="emailOctopusService" errors="0" failures="0" skipped="0" timestamp="2025-11-14T09:23:25" time="2.68" tests="15">
-    <testcase classname="emailOctopusService › subscribeToEmailList › Happy Path" name="should successfully subscribe a new email" time="0.011">
-    </testcase>
-    <testcase classname="emailOctopusService › subscribeToEmailList › Happy Path" name="should handle already subscribed email (409 status)" time="0.004">
-    </testcase>
-    <testcase classname="emailOctopusService › subscribeToEmailList › Happy Path" name="should handle already subscribed email (error code)" time="0.001">
-    </testcase>
-    <testcase classname="emailOctopusService › subscribeToEmailList › Error Handling" name="should throw error when EMAILOCTOPUS_API_KEY is missing" time="0.04">
-    </testcase>
-    <testcase classname="emailOctopusService › subscribeToEmailList › Error Handling" name="should throw error when EMAILOCTOPUS_LIST_ID is missing" time="0.002">
-    </testcase>
-    <testcase classname="emailOctopusService › subscribeToEmailList › Error Handling" name="should handle API error responses" time="0.028">
-    </testcase>
-    <testcase classname="emailOctopusService › subscribeToEmailList › Error Handling" name="should handle network errors" time="0.005">
-    </testcase>
-    <testcase classname="emailOctopusService › subscribeToEmailList › Error Handling" name="should handle 500 server errors" time="0.004">
-    </testcase>
-    <testcase classname="emailOctopusService › subscribeToEmailList › Error Handling" name="should handle 401 authentication errors" time="0.003">
-    </testcase>
-    <testcase classname="emailOctopusService › subscribeToEmailList › Edge Cases" name="should handle malformed JSON response" time="0.004">
-    </testcase>
-    <testcase classname="emailOctopusService › subscribeToEmailList › Edge Cases" name="should handle timeout errors" time="0.003">
-    </testcase>
-    <testcase classname="emailOctopusService › subscribeToEmailList › Edge Cases" name="should handle emails with unicode characters" time="0.002">
-    </testcase>
-    <testcase classname="emailOctopusService › subscribeToEmailList › Edge Cases" name="should handle empty error object in response" time="0.003">
-    </testcase>
-    <testcase classname="emailOctopusService › subscribeToEmailList › API Integration" name="should pass consent timestamp to EmailOctopus" time="0.002">
-    </testcase>
-    <testcase classname="emailOctopusService › subscribeToEmailList › API Integration" name="should use correct API endpoint URL" time="0.001">
-    </testcase>
-  </testsuite>
-  <testsuite name="subscribeController" errors="0" failures="0" skipped="0" timestamp="2025-11-14T09:23:25" time="2.729" tests="12">
+<testsuites name="jest tests" tests="27" failures="0" errors="0" time="3.298">
+  <testsuite name="subscribeController" errors="0" failures="0" skipped="0" timestamp="2025-11-18T10:42:07" time="2.707" tests="12">
     <testcase classname="subscribeController › POST /api/v1/subscribe › Happy Path" name="should successfully subscribe a valid email with GDPR consent" time="0.009">
     </testcase>
-    <testcase classname="subscribeController › POST /api/v1/subscribe › Happy Path" name="should handle already subscribed email gracefully" time="0.001">
+    <testcase classname="subscribeController › POST /api/v1/subscribe › Happy Path" name="should handle already subscribed email gracefully" time="0.002">
     </testcase>
     <testcase classname="subscribeController › POST /api/v1/subscribe › Validation Errors" name="should reject request with invalid email format" time="0.002">
     </testcase>
-    <testcase classname="subscribeController › POST /api/v1/subscribe › Validation Errors" name="should reject request with missing email" time="0.001">
+    <testcase classname="subscribeController › POST /api/v1/subscribe › Validation Errors" name="should reject request with missing email" time="0.002">
     </testcase>
     <testcase classname="subscribeController › POST /api/v1/subscribe › Validation Errors" name="should reject request with missing GDPR consent" time="0.002">
     </testcase>
     <testcase classname="subscribeController › POST /api/v1/subscribe › Validation Errors" name="should reject request with missing timestamp" time="0.001">
     </testcase>
-    <testcase classname="subscribeController › POST /api/v1/subscribe › Validation Errors" name="should reject request with invalid timestamp format" time="0.002">
+    <testcase classname="subscribeController › POST /api/v1/subscribe › Validation Errors" name="should reject request with invalid timestamp format" time="0.001">
     </testcase>
-    <testcase classname="subscribeController › POST /api/v1/subscribe › Error Handling" name="should handle EmailOctopus service failures" time="0">
+    <testcase classname="subscribeController › POST /api/v1/subscribe › Error Handling" name="should handle EmailOctopus service failures" time="0.002">
     </testcase>
-    <testcase classname="subscribeController › POST /api/v1/subscribe › Error Handling" name="should handle unexpected errors gracefully" time="0.032">
+    <testcase classname="subscribeController › POST /api/v1/subscribe › Error Handling" name="should handle unexpected errors gracefully" time="0.036">
     </testcase>
     <testcase classname="subscribeController › POST /api/v1/subscribe › Edge Cases" name="should handle empty request body" time="0.001">
     </testcase>
     <testcase classname="subscribeController › POST /api/v1/subscribe › Edge Cases" name="should handle email with special characters" time="0.001">
     </testcase>
     <testcase classname="subscribeController › POST /api/v1/subscribe › Edge Cases" name="should handle very long email addresses" time="0.001">
+    </testcase>
+  </testsuite>
+  <testsuite name="emailOctopusService" errors="0" failures="0" skipped="0" timestamp="2025-11-18T10:42:07" time="2.733" tests="15">
+    <testcase classname="emailOctopusService › subscribeToEmailList › Happy Path" name="should successfully subscribe a new email" time="0.01">
+    </testcase>
+    <testcase classname="emailOctopusService › subscribeToEmailList › Happy Path" name="should handle already subscribed email (409 status)" time="0.002">
+    </testcase>
+    <testcase classname="emailOctopusService › subscribeToEmailList › Happy Path" name="should handle already subscribed email (error code)" time="0.002">
+    </testcase>
+    <testcase classname="emailOctopusService › subscribeToEmailList › Error Handling" name="should throw error when EMAILOCTOPUS_API_KEY is missing" time="0.021">
+    </testcase>
+    <testcase classname="emailOctopusService › subscribeToEmailList › Error Handling" name="should throw error when EMAILOCTOPUS_LIST_ID is missing" time="0.002">
+    </testcase>
+    <testcase classname="emailOctopusService › subscribeToEmailList › Error Handling" name="should handle API error responses" time="0.039">
+    </testcase>
+    <testcase classname="emailOctopusService › subscribeToEmailList › Error Handling" name="should handle network errors" time="0.006">
+    </testcase>
+    <testcase classname="emailOctopusService › subscribeToEmailList › Error Handling" name="should handle 500 server errors" time="0.007">
+    </testcase>
+    <testcase classname="emailOctopusService › subscribeToEmailList › Error Handling" name="should handle 401 authentication errors" time="0.004">
+    </testcase>
+    <testcase classname="emailOctopusService › subscribeToEmailList › Edge Cases" name="should handle malformed JSON response" time="0.003">
+    </testcase>
+    <testcase classname="emailOctopusService › subscribeToEmailList › Edge Cases" name="should handle timeout errors" time="0.002">
+    </testcase>
+    <testcase classname="emailOctopusService › subscribeToEmailList › Edge Cases" name="should handle emails with unicode characters" time="0.001">
+    </testcase>
+    <testcase classname="emailOctopusService › subscribeToEmailList › Edge Cases" name="should handle empty error object in response" time="0.003">
+    </testcase>
+    <testcase classname="emailOctopusService › subscribeToEmailList › API Integration" name="should pass consent timestamp to EmailOctopus" time="0.005">
+    </testcase>
+    <testcase classname="emailOctopusService › subscribeToEmailList › API Integration" name="should use correct API endpoint URL" time="0.001">
     </testcase>
   </testsuite>
 </testsuites>
