@@ -21,22 +21,32 @@ export function AuthProvider({ children }: AuthProviderProps) {
   // Initialize auth state from localStorage on mount
   useEffect(() => {
     const initializeAuth = async () => {
-      try {
-        const token = localStorage.getItem('authToken');
-        const storedUser = localStorage.getItem('user');
+      const token = localStorage.getItem('authToken');
 
-        if (token && storedUser) {
-          // Try to use stored user data first for faster initialization
-          try {
-            const userData = JSON.parse(storedUser);
-            setUser(userData);
-          } catch {
-            // If stored user data is invalid, verify token with backend
-            const userData = await verifyToken(token);
-            setUser(userData);
-            localStorage.setItem('user', JSON.stringify(userData));
-          }
+      if (!token) {
+        // No token available, ensure we start from a clean state
+        localStorage.removeItem('user');
+        setLoading(false);
+        return;
+      }
+
+      const storedUser = localStorage.getItem('user');
+
+      if (storedUser) {
+        // Optimistically hydrate UI while backend validation runs
+        try {
+          const userData = JSON.parse(storedUser);
+          setUser(userData);
+        } catch {
+          localStorage.removeItem('user');
         }
+      }
+
+      try {
+        // Always verify token with backend before trusting persisted state
+        const verifiedUser = await verifyToken(token);
+        setUser(verifiedUser);
+        localStorage.setItem('user', JSON.stringify(verifiedUser));
       } catch {
         // Token is invalid or expired, clear localStorage
         localStorage.removeItem('authToken');
