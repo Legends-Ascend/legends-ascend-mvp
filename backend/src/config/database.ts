@@ -12,19 +12,114 @@ export const query = (text: string, params?: any[]) => pool.query(text, params);
 
 export const initializeDatabase = async () => {
   try {
-    // Create tables if they don't exist
+    // Enable UUID extension
+    await query(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp"`);
+
+    // Create users table (prerequisite for foreign keys)
+    await query(`
+      CREATE TABLE IF NOT EXISTS users (
+        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        email VARCHAR(255) UNIQUE NOT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    // Create players table (US-044)
     await query(`
       CREATE TABLE IF NOT EXISTS players (
-        id SERIAL PRIMARY KEY,
+        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
         name VARCHAR(100) NOT NULL,
-        position VARCHAR(50) NOT NULL,
-        overall_rating INTEGER NOT NULL CHECK (overall_rating >= 1 AND overall_rating <= 100),
+        position VARCHAR(10) NOT NULL CHECK (position IN ('GK', 'DF', 'MF', 'FW', 'UT')),
+        rarity INTEGER NOT NULL CHECK (rarity >= 1 AND rarity <= 5),
+        base_overall INTEGER NOT NULL CHECK (base_overall >= 40 AND base_overall <= 99),
+        tier INTEGER DEFAULT 0 CHECK (tier >= 0 AND tier <= 5),
         pace INTEGER NOT NULL CHECK (pace >= 1 AND pace <= 100),
         shooting INTEGER NOT NULL CHECK (shooting >= 1 AND shooting <= 100),
         passing INTEGER NOT NULL CHECK (passing >= 1 AND passing <= 100),
         dribbling INTEGER NOT NULL CHECK (dribbling >= 1 AND dribbling <= 100),
         defending INTEGER NOT NULL CHECK (defending >= 1 AND defending <= 100),
         physical INTEGER NOT NULL CHECK (physical >= 1 AND physical <= 100),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    // Create indexes for players table
+    await query(`CREATE INDEX IF NOT EXISTS idx_players_position ON players(position)`);
+    await query(`CREATE INDEX IF NOT EXISTS idx_players_rarity ON players(rarity)`);
+    await query(`CREATE INDEX IF NOT EXISTS idx_players_base_overall ON players(base_overall)`);
+
+    // Create user_inventory table (US-044)
+    await query(`
+      CREATE TABLE IF NOT EXISTS user_inventory (
+        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        player_id UUID NOT NULL REFERENCES players(id) ON DELETE CASCADE,
+        quantity INTEGER DEFAULT 1 CHECK (quantity >= 1 AND quantity <= 50),
+        acquired_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(user_id, player_id)
+      )
+    `);
+
+    // Create indexes for user_inventory table
+    await query(`CREATE INDEX IF NOT EXISTS idx_user_inventory_user_id ON user_inventory(user_id)`);
+    await query(`CREATE INDEX IF NOT EXISTS idx_user_inventory_user_player ON user_inventory(user_id, player_id)`);
+
+    // Create squads table (US-044)
+    await query(`
+      CREATE TABLE IF NOT EXISTS squads (
+        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        user_id UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+        name VARCHAR(100) NOT NULL,
+        formation VARCHAR(10) NOT NULL CHECK (formation IN ('4-3-3', '4-2-4', '5-3-2', '3-5-2', '4-4-2')),
+        is_active BOOLEAN DEFAULT false,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )
+    `);
+
+    // Create indexes for squads table
+    await query(`CREATE INDEX IF NOT EXISTS idx_squads_user_id ON squads(user_id)`);
+    await query(`CREATE INDEX IF NOT EXISTS idx_squads_user_active ON squads(user_id, is_active)`);
+
+    // Create squad_positions table (US-044)
+    await query(`
+      CREATE TABLE IF NOT EXISTS squad_positions (
+        id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+        squad_id UUID NOT NULL REFERENCES squads(id) ON DELETE CASCADE,
+        player_id UUID REFERENCES players(id) ON DELETE SET NULL,
+        position_slot VARCHAR(20) NOT NULL,
+        slot_type VARCHAR(10) NOT NULL CHECK (slot_type IN ('STARTER', 'BENCH')),
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        UNIQUE(squad_id, position_slot)
+      )
+    `);
+
+    // Create unique constraint for player assignment (excluding NULL player_id)
+    await query(`
+      CREATE UNIQUE INDEX IF NOT EXISTS idx_squad_positions_unique_player 
+      ON squad_positions(squad_id, player_id) 
+      WHERE player_id IS NOT NULL
+    `);
+
+    // Create indexes for squad_positions table
+    await query(`CREATE INDEX IF NOT EXISTS idx_squad_positions_squad_id ON squad_positions(squad_id)`);
+    await query(`CREATE INDEX IF NOT EXISTS idx_squad_positions_player_id ON squad_positions(player_id)`);
+
+    // Legacy tables for backward compatibility
+    await query(`
+      CREATE TABLE IF NOT EXISTS teams (
+        id SERIAL PRIMARY KEY,
+        name VARCHAR(100) NOT NULL,
+        points INTEGER DEFAULT 0,
+        wins INTEGER DEFAULT 0,
+        draws INTEGER DEFAULT 0,
+        losses INTEGER DEFAULT 0,
+        goals_for INTEGER DEFAULT 0,
+        goals_against INTEGER DEFAULT 0,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       )
     `);
