@@ -46,7 +46,9 @@ export const EmailSignupForm: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+      // Use relative path to leverage Vite proxy in development
+      // In production, VITE_API_URL should be set to the full API URL
+      const apiUrl = import.meta.env.VITE_API_URL || '/api';
       const response = await fetch(`${apiUrl}/v1/subscribe`, {
         method: 'POST',
         headers: {
@@ -72,7 +74,21 @@ export const EmailSignupForm: React.FC = () => {
       }
     } catch (error) {
       setSubmitStatus('error');
-      setStatusMessage('Unable to connect. Please try again later.');
+      
+      // Provide more specific error messages based on the error type
+      let errorMessage = 'Unable to connect. Please try again later.';
+      
+      if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+        errorMessage = 'Unable to reach the server. Please check your internet connection or try disabling ad blockers.';
+      } else if (error instanceof Error) {
+        console.error('Subscription error details:', {
+          message: error.message,
+          name: error.name,
+          stack: error.stack,
+        });
+      }
+      
+      setStatusMessage(errorMessage);
       console.error('Subscription error:', error);
     } finally {
       setIsSubmitting(false);
