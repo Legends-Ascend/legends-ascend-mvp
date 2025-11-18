@@ -39,13 +39,15 @@ export const RouteGuard: React.FC<RouteGuardProps> = ({
 
     const landingEnabled = isLandingPageEnabled();
     
+    // Exempt routes that are always accessible
+    const exemptRoutes = ['landing', 'privacy', 'login', 'register'];
+    
     // If landing page is enabled and user is not authenticated
-    // and trying to access a non-landing, non-privacy view, redirect to landing
+    // and trying to access a protected view, redirect to landing
     if (
       landingEnabled &&
       !isAuthenticated &&
-      currentView !== 'landing' &&
-      currentView !== 'privacy'
+      !exemptRoutes.includes(currentView)
     ) {
       onRedirectToLanding();
     }
