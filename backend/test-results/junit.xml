@@ -207,13 +207,13 @@ Number of calls: 1
     </testcase>
     <testcase classname="emailOctopusService › subscribeToEmailList › Error Handling" name="should handle API error responses" time="0.013">
     </testcase>
-    <testcase classname="emailOctopusService › subscribeToEmailList › Error Handling" name="should handle network errors" time="0.005">
+    <testcase classname="subscribeController › POST /api/v1/subscribe › Validation Errors" name="should reject request with invalid timestamp format" time="0.001">
     </testcase>
     <testcase classname="emailOctopusService › subscribeToEmailList › Error Handling" name="should handle 500 server errors" time="0.002">
     </testcase>
-    <testcase classname="emailOctopusService › subscribeToEmailList › Error Handling" name="should handle 401 authentication errors" time="0.003">
+    <testcase classname="subscribeController › POST /api/v1/subscribe › Error Handling" name="should handle unexpected errors gracefully" time="0.036">
     </testcase>
-    <testcase classname="emailOctopusService › subscribeToEmailList › Edge Cases" name="should handle malformed JSON response" time="0.004">
+    <testcase classname="subscribeController › POST /api/v1/subscribe › Edge Cases" name="should handle empty request body" time="0.001">
     </testcase>
     <testcase classname="emailOctopusService › subscribeToEmailList › Edge Cases" name="should handle timeout errors" time="0.002">
     </testcase>
@@ -223,7 +223,7 @@ Number of calls: 1
     </testcase>
     <testcase classname="emailOctopusService › subscribeToEmailList › API Integration" name="should pass consent timestamp to EmailOctopus" time="0.001">
     </testcase>
-    <testcase classname="emailOctopusService › subscribeToEmailList › API Integration" name="should use correct API endpoint URL" time="0.001">
+    <testcase classname="emailOctopusService › subscribeToEmailList › Happy Path" name="should handle already subscribed email (error code)" time="0.002">
     </testcase>
   </testsuite>
   <testsuite name="SquadController" errors="0" failures="15" skipped="0" timestamp="2025-11-18T11:00:56" time="3.912" tests="26">
