@@ -141,3 +141,7 @@ vite.config.ts.timestamp-*
 # Build output
 backend/dist/
 frontend/dist/
+
+# Test results
+test-results/
+junit.xml

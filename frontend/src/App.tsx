@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { LandingPage } from './pages/LandingPage';
 import { PrivacyPolicy } from './components/PrivacyPolicy';
 import styled from 'styled-components';
@@ -6,6 +6,7 @@ import { PlayerRoster } from './components/PlayerRoster/PlayerRoster';
 import { TeamLineup } from './components/TeamLineup/TeamLineup';
 import { MatchSimulator } from './components/MatchSimulator/MatchSimulator';
 import { Leaderboard } from './components/Leaderboard/Leaderboard';
+import { RouteGuard } from './components/RouteGuard';
 
 const AppContainer = styled.div`
   min-height: 100vh;
@@ -72,6 +73,12 @@ type View = 'landing' | 'privacy' | 'players' | 'lineup' | 'simulator' | 'leader
 function App() {
   const [currentView, setCurrentView] = useState<View>('landing');
 
+  // Callback to redirect to landing page
+  const redirectToLanding = useCallback(() => {
+    setCurrentView('landing');
+    window.history.pushState({}, '', '/');
+  }, []);
+
   // Check URL path for routing (simple client-side routing)
   useEffect(() => {
     const path = window.location.pathname;
@@ -103,44 +110,58 @@ function App() {
 
   // If showing landing or privacy page, render without game header
   if (currentView === 'landing' || currentView === 'privacy') {
-    return renderView();
+    return (
+      <RouteGuard
+        currentView={currentView}
+        onRedirectToLanding={redirectToLanding}
+        isAuthenticated={false}
+      >
+        {renderView()}
+      </RouteGuard>
+    );
   }
 
   return (
-    <AppContainer>
-      <Header>
-        <HeaderContent>
-          <Logo onClick={() => setCurrentView('landing')}>⚽ Legends Ascend</Logo>
-          <Nav>
-            <NavButton
-              active={currentView === 'players'}
-              onClick={() => setCurrentView('players')}
-            >
-              Players
-            </NavButton>
-            <NavButton
-              active={currentView === 'lineup'}
-              onClick={() => setCurrentView('lineup')}
-            >
-              Team Lineup
-            </NavButton>
-            <NavButton
-              active={currentView === 'simulator'}
-              onClick={() => setCurrentView('simulator')}
-            >
-              Match Simulator
-            </NavButton>
-            <NavButton
-              active={currentView === 'leaderboard'}
-              onClick={() => setCurrentView('leaderboard')}
-            >
-              Leaderboard
-            </NavButton>
-          </Nav>
-        </HeaderContent>
-      </Header>
-      <Main>{renderView()}</Main>
-    </AppContainer>
+    <RouteGuard
+      currentView={currentView}
+      onRedirectToLanding={redirectToLanding}
+      isAuthenticated={false}
+    >
+      <AppContainer>
+        <Header>
+          <HeaderContent>
+            <Logo onClick={() => setCurrentView('landing')}>⚽ Legends Ascend</Logo>
+            <Nav>
+              <NavButton
+                active={currentView === 'players'}
+                onClick={() => setCurrentView('players')}
+              >
+                Players
+              </NavButton>
+              <NavButton
+                active={currentView === 'lineup'}
+                onClick={() => setCurrentView('lineup')}
+              >
+                Team Lineup
+              </NavButton>
+              <NavButton
+                active={currentView === 'simulator'}
+                onClick={() => setCurrentView('simulator')}
+              >
+                Match Simulator
+              </NavButton>
+              <NavButton
+                active={currentView === 'leaderboard'}
+                onClick={() => setCurrentView('leaderboard')}
+              >
+                Leaderboard
+              </NavButton>
+            </Nav>
+          </HeaderContent>
+        </Header>
+        <Main>{renderView()}</Main>
+      </AppContainer>
+    </RouteGuard>
   );
 }
 

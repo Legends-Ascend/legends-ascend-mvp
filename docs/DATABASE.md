@@ -40,10 +40,17 @@ The database uses **automatic branching** to isolate environments:
 ### Connection Methods
 
 **Production (Vercel):**
-- Connection string: `LA_POSTGRES_URL` (marked sensitive)
+- Connection string: `LA_POSTGRES_URL` (pooled, marked sensitive)
 - Injected by Vercel automatically
 - Environment: All Environments (Production preference)
 - Pool: Connection pooling enabled
+
+**Alternative Neon Variables (all auto-injected):**
+- `LA_POSTGRES_URL` - Pooled connection string (recommended for serverless)
+- `LA_POSTGRES_URL_NON_POOLING` - Direct connection (use sparingly)
+- `LA_POSTGRES_PRISMA_URL` - Prisma-compatible connection string
+- `LA_DATABASE_URL` - Alternative pooled connection
+- `LA_DATABASE_URL_UNPOOLED` - Direct connection (avoid in serverless)
 
 **Preview Deployments:**
 - Connection string: Auto-injected via Neon webhook
@@ -53,7 +60,8 @@ The database uses **automatic branching** to isolate environments:
 
 **Local Development:**
 - Create `.env` file: `cp .env.example .env`
-- Add Neon connection string from Neon Console
+- Add Neon connection string from Neon Console to `LA_POSTGRES_URL`
+- Fallback to `DATABASE_URL` supported for local development
 - Free tier branch shared among developers
 
 ---
@@ -72,16 +80,31 @@ The following settings have been configured in Vercel Storage:
 
 ### Environment Variables
 
-The following variables are automatically injected:
+The following variables are automatically injected by Vercel/Neon integration:
 
 | Variable | Scope | Usage | Visibility |
 |----------|-------|-------|------------|
-| `LA_POSTGRES_URL` | All | Connection string (pooled) | Hidden (Sensitive) |
+| `LA_POSTGRES_URL` | All | **Primary connection string (pooled)** - Use this | Hidden (Sensitive) |
+| `LA_POSTGRES_PRISMA_URL` | All | Prisma-compatible connection string (pooled) | Hidden |
+| `LA_DATABASE_URL` | All | Alternative pooled connection | Hidden |
+| `LA_POSTGRES_URL_NON_POOLING` | All | Direct connection (non-pooled) | Hidden |
+| `LA_DATABASE_URL_UNPOOLED` | All | Direct connection (avoid in serverless) | Hidden |
 | `LA_POSTGRES_HOST` | All | Database host | Hidden |
-| `LA_POSTGRES_PORT` | All | Connection port (5432) | Hidden |
-| `LA_POSTGRES_DB` | All | Database name | Hidden |
+| `LA_PGHOST` | All | PostgreSQL host | Hidden |
+| `LA_PGHOST_UNPOOLED` | All | PostgreSQL host (unpooled) | Hidden |
 | `LA_POSTGRES_USER` | All | Database user | Hidden |
+| `LA_PGUSER` | All | PostgreSQL user | Hidden |
 | `LA_POSTGRES_PASSWORD` | All | Database password | Hidden |
+| `LA_PGPASSWORD` | All | PostgreSQL password | Hidden |
+| `LA_POSTGRES_DATABASE` | All | Database name | Hidden |
+| `LA_PGDATABASE` | All | PostgreSQL database name | Hidden |
+| `LA_NEON_PROJECT_ID` | All | Neon project identifier | Hidden |
+
+**Best Practices:**
+- ✅ **Use `LA_POSTGRES_URL`** for all serverless functions (pooled connection)
+- ✅ Use `LA_POSTGRES_PRISMA_URL` if using Prisma ORM
+- ❌ **Avoid `LA_POSTGRES_URL_NON_POOLING`** and `LA_DATABASE_URL_UNPOOLED` in serverless (connection limits)
+- 💡 For local development, use `DATABASE_URL` in `.env` as fallback
 
 **Preview-only variables** (injected at deploy time, NOT in Vercel UI):
 - For preview deployments, different connection strings are injected via webhook
@@ -189,7 +212,7 @@ CREATE TABLE match_results (
 4. **Setup .env file:**
    ```bash
    cp .env.example .env
-   # Add your connection string to DATABASE_URL
+   # Add your connection string to LA_POSTGRES_URL (or DATABASE_URL for local dev)
    ```
 5. **Run migrations:** (when available)
    ```bash
@@ -276,9 +299,10 @@ git merge feat/us-012-lineup
 **Symptoms:** `Too many connections` or `connection pool exhausted`
 
 **Solutions:**
-1. Use `LA_POSTGRES_URL` (pooled connection)
-2. Avoid `LA_POSTGRES_URL_UNPOOLED` in serverless functions
+1. Use `LA_POSTGRES_URL` (pooled connection) - **Recommended**
+2. Avoid `LA_POSTGRES_URL_NON_POOLING` and `LA_DATABASE_URL_UNPOOLED` in serverless functions
 3. Use connection pooling for all serverless functions
+4. Ensure application code properly releases connections
 
 ### Preview and Production using same data
 
