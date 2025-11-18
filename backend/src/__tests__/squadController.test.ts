@@ -334,7 +334,27 @@ describe('SquadController', () => {
       expect(statusMock).toHaveBeenCalledWith(403);
     });
 
-    it('should return 400 if player not found', async () => {
+    it('should return 400 if player not in inventory', async () => {
+      req.params = { squadId: '123e4567-e89b-12d3-a456-426614174010' };
+      req.body = {
+        positions: [{ position_slot: 'GK_1', player_id: '123e4567-e89b-12d3-a456-426614174020' }],
+      };
+
+      SquadService.prototype.updateLineup = jest.fn().mockRejectedValue(new Error('PLAYER_NOT_IN_INVENTORY'));
+
+      await updateLineup(req as AuthenticatedRequest, res as Response);
+
+      expect(statusMock).toHaveBeenCalledWith(400);
+      expect(jsonMock).toHaveBeenCalledWith({
+        success: false,
+        error: {
+          code: 'PLAYER_NOT_IN_INVENTORY',
+          message: 'Player not found in your inventory',
+        },
+      });
+    });
+
+    it('should return 404 if player not found', async () => {
       req.params = { squadId: '123e4567-e89b-12d3-a456-426614174010' };
       req.body = {
         positions: [{ position_slot: 'GK_1', player_id: 'player-1' }],
@@ -345,6 +365,26 @@ describe('SquadController', () => {
       await updateLineup(req as AuthenticatedRequest, res as Response);
 
       expect(statusMock).toHaveBeenCalledWith(404);
+    });
+
+    it('should return 400 for position mismatch', async () => {
+      req.params = { squadId: '123e4567-e89b-12d3-a456-426614174010' };
+      req.body = {
+        positions: [{ position_slot: 'GK_1', player_id: '123e4567-e89b-12d3-a456-426614174020' }],
+      };
+
+      SquadService.prototype.updateLineup = jest.fn().mockRejectedValue(new Error('POSITION_MISMATCH'));
+
+      await updateLineup(req as AuthenticatedRequest, res as Response);
+
+      expect(statusMock).toHaveBeenCalledWith(400);
+      expect(jsonMock).toHaveBeenCalledWith({
+        success: false,
+        error: {
+          code: 'POSITION_MISMATCH',
+          message: 'Player position is not compatible with the slot',
+        },
+      });
     });
 
     it('should return 409 for duplicate assignment', async () => {
