@@ -85,10 +85,16 @@ VITE_LANDING_PAGE_ENABLED=true
 
 ### Vercel Deployment
 
-1. Configure environment variables in Vercel dashboard:
-   - Go to Project Settings > Environment Variables
-   - Add `VITE_API_URL` with your backend URL
-   - Example: `https://legends-ascend-backend.vercel.app/api`
+1. **Configure environment variables in Vercel dashboard**:
+   - Go to your project in Vercel dashboard (https://vercel.com)
+   - Click on your project
+   - Go to Settings tab
+   - Click on "Environment Variables" in the left sidebar
+   - Add a new variable:
+     - **Key**: `VITE_API_URL`
+     - **Value**: Your backend URL (e.g., `https://legends-ascend-backend.vercel.app/api`)
+     - **Environments**: Select Production, Preview, and Development
+   - Click "Save"
 
 2. Deploy frontend:
    ```bash
@@ -97,6 +103,8 @@ VITE_LANDING_PAGE_ENABLED=true
    ```
 
 3. The frontend will be available at your Vercel domain
+
+**Note**: Do NOT use the `@secret_name` syntax in `vercel.json`. Environment variables should be set directly in the Vercel dashboard as regular environment variables, not as references to Vercel Secrets.
 
 ### Vercel Configuration
 
@@ -109,12 +117,11 @@ The `frontend/vercel.json` file is pre-configured for SPA routing:
   "routes": [
     { "handle": "filesystem" },
     { "src": "/.*", "dest": "/index.html" }
-  ],
-  "env": {
-    "VITE_API_URL": "@vite_api_url"
-  }
+  ]
 }
 ```
+
+**Important**: Environment variables like `VITE_API_URL` must be set in the Vercel dashboard under Project Settings > Environment Variables, not in `vercel.json`.
 
 ## Troubleshooting
 
