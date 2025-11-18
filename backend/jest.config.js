@@ -9,6 +9,13 @@ module.exports = {
     'src/services/emailOctopusService.ts',
     'src/models/subscribeSchema.ts',
     'src/middleware/rateLimiter.ts',
+    'src/controllers/inventoryController.ts',
+    'src/controllers/squadController.ts',
+    'src/services/inventoryService.ts',
+    'src/services/squadService.ts',
+    'src/middleware/authenticate.ts',
+    'src/models/Squad.ts',
+    'src/models/UserInventory.ts',
     '!src/**/*.d.ts',
   ],
   coverageThreshold: {
