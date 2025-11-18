@@ -61,7 +61,41 @@ export const EmailSignupForm: React.FC = () => {
         }),
       });
 
-      const data: SubscribeResponse = await response.json();
+      // Check if response has content before parsing JSON
+      const contentType = response.headers.get('content-type');
+      const hasJsonContent = contentType && contentType.includes('application/json');
+      
+      // Handle HTTP error responses
+      if (!response.ok) {
+        let errorMessage = 'Something went wrong. Please try again.';
+        
+        // Try to parse error response if it's JSON
+        if (hasJsonContent) {
+          try {
+            const errorData = await response.json();
+            errorMessage = errorData.message || errorMessage;
+          } catch {
+            // If JSON parsing fails, use default message
+          }
+        } else if (response.status === 405) {
+          // Method Not Allowed - likely API configuration issue
+          errorMessage = 'Service temporarily unavailable. Please try again later.';
+          console.error('API configuration error: 405 Method Not Allowed. Check VITE_API_URL environment variable.');
+        }
+        
+        setSubmitStatus('error');
+        setStatusMessage(errorMessage);
+        return;
+      }
+
+      // Parse successful response
+      let data: SubscribeResponse;
+      if (hasJsonContent) {
+        data = await response.json();
+      } else {
+        // No JSON content in response
+        throw new Error('Invalid response format from server');
+      }
 
       if (data.success) {
         setSubmitStatus('success');
@@ -80,6 +114,10 @@ export const EmailSignupForm: React.FC = () => {
       
       if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
         errorMessage = 'Unable to reach the server. Please check your internet connection or try disabling ad blockers.';
+      } else if (error instanceof SyntaxError && error.message.includes('JSON')) {
+        // JSON parsing error - likely API configuration issue
+        errorMessage = 'Service configuration error. Please contact support.';
+        console.error('API configuration error: Invalid JSON response. Check VITE_API_URL environment variable.');
       } else if (error instanceof Error) {
         console.error('Subscription error details:', {
           message: error.message,
