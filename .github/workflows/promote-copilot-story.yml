@@ -43,7 +43,7 @@ jobs:
                 return;
               }
 
-              core.info(`Found ${storyFiles.length} user story file(s): ${storyFiles.join(', ')}`);
+              core.info('Found ' + storyFiles.length + ' user story file(s): ' + storyFiles.join(', '));
 
               // Group by US-XXX id
               const groups = {}
@@ -58,13 +58,13 @@ jobs:
 
               for (const id of Object.keys(groups)) {
                 const paths = groups[id]
-                core.info(`Processing user story group: ${id} with files: ${paths.join(', ')}`);
+                core.info('Processing user story group: ' + id + ' with files: ' + paths.join(', '));
 
                 // choose main file (longest filename heuristic)
                 const main = paths.reduce((a,b)=> (b.length>a.length?b:a))
                 
                 if (!fs.existsSync(main)) {
-                  core.warning(`Main file ${main} does not exist - skipping`);
+                  core.warning('Main file ' + main + ' does not exist - skipping');
                   continue;
                 }
 
@@ -106,55 +106,42 @@ jobs:
                 // Decide whether to include full content or use hyperlinks
                 if (totalLength < MAX_ISSUE_LENGTH) {
                   // Include full content
-                  body = `This issue tracks ${id} from the BA Agent specification.
-
-The BA agent produced a comprehensive specification stored across multiple documents. Use the documents below as the single source of truth.
-
----
-
-`;
+                  body = 'This issue tracks ' + id + ' from the BA Agent specification.\n\n';
+                  body += 'The BA agent produced a comprehensive specification stored across multiple documents. ';
+                  body += 'Use the documents below as the single source of truth.\n\n---\n\n';
                   
                   for (const doc of allContents) {
-                    body += `## ${doc.type}: \`${doc.path}\`
-
-${doc.content}
-
----
-
-`;
+                    body += '## ' + doc.type + ': `' + doc.path + '`\n\n';
+                    body += doc.content + '\n\n---\n\n';
                   }
                   
-                  body += `## Notes for Coding Agent
-
-- Read all files listed above for full requirements, ACs, and technical specifications
-- Adhere to TECHNICAL_ARCHITECTURE.md, BRANDING_GUIDELINES.md, and SECURITY_GUIDELINES.md`;
+                  body += '## Notes for Coding Agent\n\n';
+                  body += '- Read all files listed above for full requirements, ACs, and technical specifications\n';
+                  body += '- Adhere to TECHNICAL_ARCHITECTURE.md, BRANDING_GUIDELINES.md, and SECURITY_GUIDELINES.md';
                 } else {
                   // Use clickable hyperlinks as fallback
-                  const repoUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}`;
+                  const repoUrl = 'https://github.com/' + context.repo.owner + '/' + context.repo.repo;
                   const branch = context.payload.pull_request.head.ref;
                   
-                  body = `This issue tracks ${id} from the BA Agent specification.
-
-The BA agent produced a comprehensive specification stored across multiple documents. **The content is too large to include directly in this issue.** Click the links below to view the full documents:
-
-## 📄 Documents
-
-`;
+                  body = 'This issue tracks ' + id + ' from the BA Agent specification.\n\n';
+                  body += 'The BA agent produced a comprehensive specification stored across multiple documents. ';
+                  body += '**The content is too large to include directly in this issue.** ';
+                  body += 'Click the links below to view the full documents:\n\n';
+                  body += '## 📄 Documents\n\n';
                   
                   for (const doc of allContents) {
-                    const fileUrl = `${repoUrl}/blob/${branch}/${doc.path}`;
-                    body += `- **[${doc.type}: \`${doc.path}\`](${fileUrl})**
-`;
+                    const fileUrl = repoUrl + '/blob/' + branch + '/' + doc.path;
+                    body += '- **[' + doc.type + ': `' + doc.path + '`](' + fileUrl + ')**\n';
                   }
                   
-                  body += `
-## 📋 Notes for Coding Agent
-
-- Read all files listed above for full requirements, ACs, and technical specifications
-- Adhere to [TECHNICAL_ARCHITECTURE.md](${repoUrl}/blob/${branch}/TECHNICAL_ARCHITECTURE.md), [BRANDING_GUIDELINES.md](${repoUrl}/blob/${branch}/BRANDING_GUIDELINES.md), and [SECURITY_GUIDELINES.md](${repoUrl}/blob/${branch}/SECURITY_GUIDELINES.md)`;
+                  body += '\n## 📋 Notes for Coding Agent\n\n';
+                  body += '- Read all files listed above for full requirements, ACs, and technical specifications\n';
+                  body += '- Adhere to [TECHNICAL_ARCHITECTURE.md](' + repoUrl + '/blob/' + branch + '/docs/TECHNICAL_ARCHITECTURE.md), ';
+                  body += '[BRANDING_GUIDELINE.md](' + repoUrl + '/blob/' + branch + '/docs/BRANDING_GUIDELINE.md), ';
+                  body += 'and [ACCESSIBILITY_REQUIREMENTS.md](' + repoUrl + '/blob/' + branch + '/docs/ACCESSIBILITY_REQUIREMENTS.md)';
                 }
 
-                core.info(`Creating issue for ${id} with title: ${title}`);
+                core.info('Creating issue for ' + id + ' with title: ' + title);
                 const issue = await github.rest.issues.create({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
@@ -163,7 +150,7 @@ The BA agent produced a comprehensive specification stored across multiple docum
                   labels: ['user-story','generated', id.toLowerCase()]
                 })
                 
-                core.info(`Created issue #${issue.data.number} for ${id}`);
+                core.info('Created issue #' + issue.data.number + ' for ' + id);
                 
                 // Add issue to 'Legends Ascend' project (Projects V2) and set status/type
                 try {
@@ -202,7 +189,7 @@ The BA agent produced a comprehensive specification stored across multiple docum
                   });
                   
                   const itemId = projectResponse.addProjectV2ItemById.item.id;
-                  core.info(`Added issue #${issue.data.number} to Legends Ascend project`);
+                  core.info('Added issue #' + issue.data.number + ' to Legends Ascend project');
                   
                   // Get field IDs for Status and Type
                   const getFieldsQuery = `
@@ -257,7 +244,7 @@ The BA agent produced a comprehensive specification stored across multiple docum
                         fieldId: statusField.id,
                         optionId: backlogOption.id
                       });
-                      core.info(`Set status to 'Backlog' for issue #${issue.data.number}`);
+                      core.info('Set status to Backlog for issue #' + issue.data.number);
                     }
                   }
                   
@@ -284,25 +271,25 @@ The BA agent produced a comprehensive specification stored across multiple docum
                         fieldId: typeField.id,
                         optionId: featureOption.id
                       });
-                      core.info(`Set type to 'Feature' for issue #${issue.data.number}`);
+                      core.info('Set type to Feature for issue #' + issue.data.number);
                     }
                   }
                 } catch (error) {
-                  core.warning(`Failed to add issue to project or set fields: ${error.message}`);
+                  core.warning('Failed to add issue to project or set fields: ' + error.message);
                 }
 
                 await github.rest.issues.createComment({
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   issue_number: pr.number,
-                  body: `✅ Created lean story issue #${issue.data.number} for ${id} from ${paths.join(', ')}`
+                  body: '✅ Created lean story issue #' + issue.data.number + ' for ' + id + ' from ' + paths.join(', ')
                 })
                 
-                core.info(`Posted comment on PR #${pr.number} about issue #${issue.data.number}`);
+                core.info('Posted comment on PR #' + pr.number + ' about issue #' + issue.data.number);
               }
               
               core.info('Workflow completed successfully');
             } catch (error) {
-              core.setFailed(`Workflow failed: ${error.message}`);
+              core.setFailed('Workflow failed: ' + error.message);
               throw error;
             }
