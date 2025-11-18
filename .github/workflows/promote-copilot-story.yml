@@ -3,6 +3,9 @@ name: Promote Copilot Story to Issue
 on:
   pull_request:
     types: [opened, synchronize, reopened]
+    paths:
+      - 'docs/user-stories/**.md'
+      - '!docs/user-stories/README.md'
 
 permissions:
   contents: read
@@ -22,7 +25,10 @@ jobs:
           script: |
             try {
               const pr = context.payload.pull_request
-              if (!pr) { core.info('No PR context'); return }
+              if (!pr) { 
+                core.info('No PR context');
+                return;
+              }
 
               const files = await github.paginate(
                 github.rest.pulls.listFiles,
@@ -32,7 +38,12 @@ jobs:
               const storyFiles = files.map(f => f.filename)
                 .filter(p => p.startsWith('docs/user-stories/') && p.endsWith('.md') && p !== 'docs/user-stories/README.md')
 
-              if (!storyFiles.length) { core.info('No story files'); return }
+              if (!storyFiles.length) { 
+                core.info('No user story files found in this PR - skipping issue creation');
+                return;
+              }
+
+              core.info(`Found ${storyFiles.length} user story file(s): ${storyFiles.join(', ')}`);
 
               // Group by US-XXX id
               const groups = {}
@@ -47,236 +58,251 @@ jobs:
 
               for (const id of Object.keys(groups)) {
                 const paths = groups[id]
+                core.info(`Processing user story group: ${id} with files: ${paths.join(', ')}`);
 
                 // choose main file (longest filename heuristic)
                 const main = paths.reduce((a,b)=> (b.length>a.length?b:a))
-                if (!fs.existsSync(main)) continue
+                
+                if (!fs.existsSync(main)) {
+                  core.warning(`Main file ${main} does not exist - skipping`);
+                  continue;
+                }
 
                 const content = fs.readFileSync(main,'utf8')
                 const titleMatch = content.match(/^#\s+(.+)$/m)
-const title = titleMatch ? (id + ': ' + titleMatch[1]) : id
+                const title = titleMatch ? (id + ': ' + titleMatch[1]) : id
 
-// GitHub issue body character limit is ~65,536 characters
-      const MAX_ISSUE_LENGTH = 60000; // Leave buffer for safety
-      
-      // Build comprehensive body with actual content
-      let body = '';
-      
-      // Read all file contents
-      const allContents = [];
-      let totalLength = 0;
-      
-      // Read main user story content
-      allContents.push({
-        path: main,
-        content: content,
-        type: 'User Story'
-      });
-      totalLength += content.length;
-      
-      // Read related documents
-      for (const path of paths) {
-        if (path !== main && fs.existsSync(path)) {
-          const docContent = fs.readFileSync(path, 'utf8');
-          allContents.push({
-            path: path,
-            content: docContent,
-            type: 'Related Document'
-          });
-          totalLength += docContent.length;
-        }
-      }
-      
-      // Decide whether to include full content or use hyperlinks
-      if (totalLength < MAX_ISSUE_LENGTH) {
-        // Include full content
-        body = `This issue tracks ${id} from the BA Agent specification.
+                // GitHub issue body character limit is ~65,536 characters
+                const MAX_ISSUE_LENGTH = 60000; // Leave buffer for safety
+                
+                // Build comprehensive body with actual content
+                let body = '';
+                
+                // Read all file contents
+                const allContents = [];
+                let totalLength = 0;
+                
+                // Read main user story content
+                allContents.push({
+                  path: main,
+                  content: content,
+                  type: 'User Story'
+                });
+                totalLength += content.length;
+                
+                // Read related documents
+                for (const path of paths) {
+                  if (path !== main && fs.existsSync(path)) {
+                    const docContent = fs.readFileSync(path, 'utf8');
+                    allContents.push({
+                      path: path,
+                      content: docContent,
+                      type: 'Related Document'
+                    });
+                    totalLength += docContent.length;
+                  }
+                }
+                
+                // Decide whether to include full content or use hyperlinks
+                if (totalLength < MAX_ISSUE_LENGTH) {
+                  // Include full content
+                  body = `This issue tracks ${id} from the BA Agent specification.
 
 The BA agent produced a comprehensive specification stored across multiple documents. Use the documents below as the single source of truth.
 
 ---
 
 `;
-        
-        for (const doc of allContents) {
-          body += `## ${doc.type}: \`${doc.path}\`
+                  
+                  for (const doc of allContents) {
+                    body += `## ${doc.type}: \`${doc.path}\`
 
 ${doc.content}
 
 ---
 
 `;
-        }
-        
-        body += `## Notes for Coding Agent
+                  }
+                  
+                  body += `## Notes for Coding Agent
 
-'- Read all files listed above for full requirements, ACs, and technical specifications
-'- Adhere to TECHNICAL_ARCHITECTURE.md, BRANDING_GUIDELINES.md, and SECURITY_GUIDELINES.md`;
-      } else {
-        // Use clickable hyperlinks as fallback
-        const repoUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}`;
-        const branch = context.payload.pull_request.head.ref;
-        
-        body = `This issue tracks ${id} from the BA Agent specification.
+- Read all files listed above for full requirements, ACs, and technical specifications
+- Adhere to TECHNICAL_ARCHITECTURE.md, BRANDING_GUIDELINES.md, and SECURITY_GUIDELINES.md`;
+                } else {
+                  // Use clickable hyperlinks as fallback
+                  const repoUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}`;
+                  const branch = context.payload.pull_request.head.ref;
+                  
+                  body = `This issue tracks ${id} from the BA Agent specification.
 
 The BA agent produced a comprehensive specification stored across multiple documents. **The content is too large to include directly in this issue.** Click the links below to view the full documents:
 
 ## 📄 Documents
 
 `;
-        
-        for (const doc of allContents) {
-          const fileUrl = `${repoUrl}/blob/${branch}/${doc.path}`;
-          body += `- **[${doc.type}: \`${doc.path}\`](${fileUrl})**
+                  
+                  for (const doc of allContents) {
+                    const fileUrl = `${repoUrl}/blob/${branch}/${doc.path}`;
+                    body += `- **[${doc.type}: \`${doc.path}\`](${fileUrl})**
 `;
-        }
-        
-        body += `
+                  }
+                  
+                  body += `
 ## 📋 Notes for Coding Agent
 
 - Read all files listed above for full requirements, ACs, and technical specifications
 - Adhere to [TECHNICAL_ARCHITECTURE.md](${repoUrl}/blob/${branch}/TECHNICAL_ARCHITECTURE.md), [BRANDING_GUIDELINES.md](${repoUrl}/blob/${branch}/BRANDING_GUIDELINES.md), and [SECURITY_GUIDELINES.md](${repoUrl}/blob/${branch}/SECURITY_GUIDELINES.md)`;
-      }
+                }
 
-      const issue = await github.rest.issues.create({
-        owner: context.repo.owner,
-        repo: context.repo.repo,
-        title: title,
-        body: body,
-        labels: ['user-story','generated', id.toLowerCase()]
-      })
-      
-      // Add issue to 'Legends Ascend' project (Projects V2) and set status/type
-      try {
-        // Get the project ID from the organization
-        const getProjectQuery = `
-          query($org: String!, $number: Int!) {
-            organization(login: $org) {
-              projectV2(number: $number) {
-                id
-              }
-            }
-          }
-        `;
-        
-        const projectData = await github.graphql(getProjectQuery, {
-          org: 'Legends-Ascend',
-          number: 1
-        });
-        
-        const projectId = projectData.organization.projectV2.id;
-        
-        // Add the issue to the project
-        const addItemMutation = `
-          mutation($projectId: ID!, $contentId: ID!) {
-            addProjectV2ItemById(input: {projectId: $projectId, contentId: $contentId}) {
-              item {
-                id
-              }
-            }
-          }
-        `;
-        
-        const projectResponse = await github.graphql(addItemMutation, {
-          projectId: projectId,
-          contentId: issue.data.node_id
-        });
-        
-        const itemId = projectResponse.addProjectV2ItemById.item.id;
-        core.info(`Added issue #${issue.data.number} to Legends Ascend project`);
-        
-        // Get field IDs for Status and Type
-        const getFieldsQuery = `
-          query($projectId: ID!) {
-            node(id: $projectId) {
-              ... on ProjectV2 {
-                fields(first: 20) {
-                  nodes {
-                    ... on ProjectV2SingleSelectField {
-                      id
-                      name
-                      options {
-                        id
-                        name
+                core.info(`Creating issue for ${id} with title: ${title}`);
+                const issue = await github.rest.issues.create({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  title: title,
+                  body: body,
+                  labels: ['user-story','generated', id.toLowerCase()]
+                })
+                
+                core.info(`Created issue #${issue.data.number} for ${id}`);
+                
+                // Add issue to 'Legends Ascend' project (Projects V2) and set status/type
+                try {
+                  // Get the project ID from the organization
+                  const getProjectQuery = `
+                    query($org: String!, $number: Int!) {
+                      organization(login: $org) {
+                        projectV2(number: $number) {
+                          id
+                        }
                       }
                     }
+                  `;
+                  
+                  const projectData = await github.graphql(getProjectQuery, {
+                    org: 'Legends-Ascend',
+                    number: 1
+                  });
+                  
+                  const projectId = projectData.organization.projectV2.id;
+                  
+                  // Add the issue to the project
+                  const addItemMutation = `
+                    mutation($projectId: ID!, $contentId: ID!) {
+                      addProjectV2ItemById(input: {projectId: $projectId, contentId: $contentId}) {
+                        item {
+                          id
+                        }
+                      }
+                    }
+                  `;
+                  
+                  const projectResponse = await github.graphql(addItemMutation, {
+                    projectId: projectId,
+                    contentId: issue.data.node_id
+                  });
+                  
+                  const itemId = projectResponse.addProjectV2ItemById.item.id;
+                  core.info(`Added issue #${issue.data.number} to Legends Ascend project`);
+                  
+                  // Get field IDs for Status and Type
+                  const getFieldsQuery = `
+                    query($projectId: ID!) {
+                      node(id: $projectId) {
+                        ... on ProjectV2 {
+                          fields(first: 20) {
+                            nodes {
+                              ... on ProjectV2SingleSelectField {
+                                id
+                                name
+                                options {
+                                  id
+                                  name
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  `;
+                  
+                  const fieldsResponse = await github.graphql(getFieldsQuery, {
+                    projectId: projectId
+                  });
+                  
+                  const fields = fieldsResponse.node.fields.nodes;
+                  const statusField = fields.find(f => f.name === 'Status');
+                  const typeField = fields.find(f => f.name === 'Type');
+                  
+                  // Set Status to "Backlog"
+                  if (statusField) {
+                    const backlogOption = statusField.options.find(o => o.name === 'Backlog');
+                    if (backlogOption) {
+                      const updateMutation = `
+                        mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
+                          updateProjectV2ItemFieldValue(input: {
+                            projectId: $projectId
+                            itemId: $itemId
+                            fieldId: $fieldId
+                            value: {singleSelectOptionId: $optionId}
+                          }) {
+                            projectV2Item { id }
+                          }
+                        }
+                      `;
+                      
+                      await github.graphql(updateMutation, {
+                        projectId: projectId,
+                        itemId: itemId,
+                        fieldId: statusField.id,
+                        optionId: backlogOption.id
+                      });
+                      core.info(`Set status to 'Backlog' for issue #${issue.data.number}`);
+                    }
                   }
+                  
+                  // Set Type to "Feature"
+                  if (typeField) {
+                    const featureOption = typeField.options.find(o => o.name === 'Feature');
+                    if (featureOption) {
+                      const updateMutation = `
+                        mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
+                          updateProjectV2ItemFieldValue(input: {
+                            projectId: $projectId
+                            itemId: $itemId
+                            fieldId: $fieldId
+                            value: {singleSelectOptionId: $optionId}
+                          }) {
+                            projectV2Item { id }
+                          }
+                        }
+                      `;
+                      
+                      await github.graphql(updateMutation, {
+                        projectId: projectId,
+                        itemId: itemId,
+                        fieldId: typeField.id,
+                        optionId: featureOption.id
+                      });
+                      core.info(`Set type to 'Feature' for issue #${issue.data.number}`);
+                    }
+                  }
+                } catch (error) {
+                  core.warning(`Failed to add issue to project or set fields: ${error.message}`);
                 }
-              }
-            }
-          }
-        `;
-        
-        const fieldsResponse = await github.graphql(getFieldsQuery, {
-          projectId: projectId
-        });
-        
-        const fields = fieldsResponse.node.fields.nodes;
-        const statusField = fields.find(f => f.name === 'Status');
-        const typeField = fields.find(f => f.name === 'Type');
-        
-        // Set Status to "Backlog"
-        if (statusField) {
-          const backlogOption = statusField.options.find(o => o.name === 'Backlog');
-          if (backlogOption) {
-            const updateMutation = `
-              mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
-                updateProjectV2ItemFieldValue(input: {
-                  projectId: $projectId
-                  itemId: $itemId
-                  fieldId: $fieldId
-                  value: {singleSelectOptionId: $optionId}
-                }) {
-                  projectV2Item { id }
-                }
-              }
-            `;
-            
-            await github.graphql(updateMutation, {
-              projectId: projectId,
-              itemId: itemId,
-              fieldId: statusField.id,
-              optionId: backlogOption.id
-            });
-            core.info(`Set status to 'Backlog' for issue #${issue.data.number}`);
-          }
-        }
-        
-        // Set Type to "Feature"
-        if (typeField) {
-          const featureOption = typeField.options.find(o => o.name === 'Feature');
-          if (featureOption) {
-            const updateMutation = `
-              mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
-                updateProjectV2ItemFieldValue(input: {
-                  projectId: $projectId
-                  itemId: $itemId
-                  fieldId: $fieldId
-                  value: {singleSelectOptionId: $optionId}
-                }) {
-                  projectV2Item { id }
-                }
-              }
-            `;
-            
-            await github.graphql(updateMutation, {
-              projectId: projectId,
-              itemId: itemId,
-              fieldId: typeField.id,
-              optionId: featureOption.id
-            });
-            core.info(`Set type to 'Feature' for issue #${issue.data.number}`);
-          }
-        }
-      } catch (error) {
-        core.warning(`Failed to add issue to project or set fields: ${error.message}`);
-      }
 
-      await github.rest.issues.createComment({
-        owner: context.repo.owner,
-        repo: context.repo.repo,
-        issue_number: pr.number,
-        body: 'Created lean story issue for ' + id + ' from ' + paths.join(', ')
-      })
-    }
-  }
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: pr.number,
+                  body: `✅ Created lean story issue #${issue.data.number} for ${id} from ${paths.join(', ')}`
+                })
+                
+                core.info(`Posted comment on PR #${pr.number} about issue #${issue.data.number}`);
+              }
+              
+              core.info('Workflow completed successfully');
+            } catch (error) {
+              core.setFailed(`Workflow failed: ${error.message}`);
+              throw error;
+            }
