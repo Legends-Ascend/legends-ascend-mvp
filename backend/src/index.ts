@@ -16,7 +16,19 @@ const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.set('trust proxy', 1); // Ensure correct client IP detection behind proxies
-app.use(cors());
+
+// CORS configuration - explicit setup for development and production
+const corsOptions = {
+  origin: process.env.NODE_ENV === 'production' 
+    ? process.env.ALLOWED_ORIGINS?.split(',') || []
+    : ['http://localhost:5173', 'http://localhost:3000', 'http://127.0.0.1:5173', 'http://127.0.0.1:3000'],
+  credentials: true,
+  optionsSuccessStatus: 200,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+};
+
+app.use(cors(corsOptions));
 app.use(express.json());
 
 // Routes
