@@ -7,6 +7,10 @@ import { TeamLineup } from './components/TeamLineup/TeamLineup';
 import { MatchSimulator } from './components/MatchSimulator/MatchSimulator';
 import { Leaderboard } from './components/Leaderboard/Leaderboard';
 import { RouteGuard } from './components/RouteGuard';
+import { LoginPage } from './components/auth/LoginPage';
+import { RegisterPage } from './components/auth/RegisterPage';
+import { LogoutButton } from './components/auth/LogoutButton';
+import { useAuth } from './hooks/useAuth';
 
 const AppContainer = styled.div`
   min-height: 100vh;
@@ -41,6 +45,22 @@ const Logo = styled.h1`
 const Nav = styled.nav`
   display: flex;
   gap: 10px;
+  align-items: center;
+`;
+
+const UserInfo = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-left: 20px;
+  padding-left: 20px;
+  border-left: 2px solid #E2E8F0;
+`;
+
+const UserEmail = styled.span`
+  font-size: 14px;
+  color: #64748B;
+  font-weight: 500;
 `;
 
 const NavButton = styled.button<{ active: boolean }>`
@@ -68,10 +88,11 @@ const Main = styled.main`
   min-height: calc(100vh - 100px);
 `;
 
-type View = 'landing' | 'privacy' | 'players' | 'lineup' | 'simulator' | 'leaderboard';
+type View = 'landing' | 'privacy' | 'login' | 'register' | 'players' | 'lineup' | 'simulator' | 'leaderboard';
 
 function App() {
   const [currentView, setCurrentView] = useState<View>('landing');
+  const { isAuthenticated, user, loading } = useAuth();
 
   // Callback to redirect to landing page
   const redirectToLanding = useCallback(() => {
@@ -84,6 +105,10 @@ function App() {
     const path = window.location.pathname;
     if (path === '/privacy-policy') {
       setCurrentView('privacy');
+    } else if (path === '/login') {
+      setCurrentView('login');
+    } else if (path === '/register') {
+      setCurrentView('register');
     } else if (path === '/game') {
       setCurrentView('players');
     }
@@ -95,6 +120,10 @@ function App() {
         return <LandingPage />;
       case 'privacy':
         return <PrivacyPolicy />;
+      case 'login':
+        return <LoginPage />;
+      case 'register':
+        return <RegisterPage />;
       case 'players':
         return <PlayerRoster />;
       case 'lineup':
@@ -108,13 +137,18 @@ function App() {
     }
   };
 
-  // If showing landing or privacy page, render without game header
-  if (currentView === 'landing' || currentView === 'privacy') {
+  // Show loading state while auth is initializing
+  if (loading) {
+    return null;
+  }
+
+  // If showing landing, privacy, login, or register page, render without game header
+  if (currentView === 'landing' || currentView === 'privacy' || currentView === 'login' || currentView === 'register') {
     return (
       <RouteGuard
         currentView={currentView}
         onRedirectToLanding={redirectToLanding}
-        isAuthenticated={false}
+        isAuthenticated={isAuthenticated}
       >
         {renderView()}
       </RouteGuard>
@@ -125,7 +159,7 @@ function App() {
     <RouteGuard
       currentView={currentView}
       onRedirectToLanding={redirectToLanding}
-      isAuthenticated={false}
+      isAuthenticated={isAuthenticated}
     >
       <AppContainer>
         <Header>
@@ -156,6 +190,12 @@ function App() {
               >
                 Leaderboard
               </NavButton>
+              {isAuthenticated && (
+                <UserInfo>
+                  <UserEmail>{user?.email}</UserEmail>
+                  <LogoutButton />
+                </UserInfo>
+              )}
             </Nav>
           </HeaderContent>
         </Header>
