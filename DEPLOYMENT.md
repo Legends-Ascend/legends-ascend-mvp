@@ -56,14 +56,7 @@ ALLOWED_ORIGINS=*
 
 ### Vercel Project Settings
 
-**IMPORTANT**: The `vercel.json` file in the repository root handles the build configuration. You should use the following Vercel project settings:
-
-1. **Root Directory**: `/` (leave empty or set to root)
-2. **Build Command**: Override with `pnpm install && pnpm --filter=./frontend run build`
-3. **Output Directory**: Override with `frontend/dist`
-4. **Install Command**: `pnpm install`
-
-> **Note**: The `vercel.json` file will automatically configure the `/api` serverless function. You only need to ensure the frontend builds correctly.
+**IMPORTANT**: The `vercel.json` file in the repository root now fully defines the build and output configuration. You do **not** need to override the Build Command or Output Directory in the Vercel dashboard; those settings will be ignored when a `builds` array is present. Use the defaults and simply deploy from the repository root.
 
 ### Deployment Steps
 
