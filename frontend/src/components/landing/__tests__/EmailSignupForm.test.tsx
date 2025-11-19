@@ -323,7 +323,7 @@ describe('EmailSignupForm', () => {
       await user.click(submitButton);
       
       await waitFor(() => {
-        const errorMessage = screen.getByText(/service temporarily unavailable/i);
+        const errorMessage = screen.getByText(/subscription service is not configured correctly/i);
         expect(errorMessage).toBeInTheDocument();
         expect(errorMessage.closest('div')).toHaveAttribute('role', 'alert');
       });

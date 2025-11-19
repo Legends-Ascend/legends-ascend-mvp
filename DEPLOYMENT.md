@@ -129,14 +129,51 @@ The `frontend/vercel.json` file is pre-configured for SPA routing:
 
 **Symptoms**:
 - Form submission fails
-- Browser console shows: `Failed to load resource: the server responded with a status of 405`
-- Error message: `Failed to execute 'json' on 'Response': Unexpected end of JSON input`
+- Browser console shows: `POST https://your-frontend.vercel.app/api/v1/subscribe net::ERR_ABORTED 405 (Method Not Allowed)`
+- Error message: "The subscription service is not configured correctly"
+- Console shows detailed configuration error with deployment steps
 
-**Solution**:
-1. Verify `VITE_API_URL` is set correctly in frontend environment variables
-2. Ensure the URL points to your deployed backend
-3. Check that backend CORS `ALLOWED_ORIGINS` includes your frontend domain
-4. Test backend endpoint directly: `curl -X POST https://your-backend.vercel.app/api/v1/subscribe`
+**Root Cause**:
+The frontend is trying to call the API on its own domain instead of the backend API domain. This happens when `VITE_API_URL` is not set during the frontend build.
+
+**Solution** (REQUIRED for production):
+
+1. **Deploy your backend first**:
+   ```bash
+   cd backend
+   vercel --prod
+   # Note the URL: https://your-backend-abc123.vercel.app
+   ```
+
+2. **Set environment variable in Vercel dashboard** (this is the critical step):
+   - Go to https://vercel.com/dashboard
+   - Select your **FRONTEND** project (not backend)
+   - Go to Settings → Environment Variables
+   - Click "Add New"
+   - Set:
+     - **Name**: `VITE_API_URL`
+     - **Value**: `https://your-backend-abc123.vercel.app/api` (your actual backend URL)
+     - **Environment**: Check all (Production, Preview, Development)
+   - Click "Save"
+
+3. **Redeploy your frontend**:
+   ```bash
+   cd frontend
+   vercel --prod
+   ```
+   Or trigger a redeploy in the Vercel dashboard
+
+4. **Verify the fix**:
+   - Open your frontend in a browser
+   - Open Developer Console
+   - Look for the startup log message showing API URL
+   - Submit the form and check Network tab - request should go to your backend domain
+
+**Common Mistakes**:
+- ❌ Setting `VITE_API_URL` to the frontend URL instead of backend URL
+- ❌ Not redeploying after setting the environment variable
+- ❌ Setting the variable in the backend project instead of frontend project
+- ❌ Forgetting the `/api` suffix in the URL
 
 ### Issue: CORS errors
 
