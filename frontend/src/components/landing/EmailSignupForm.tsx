@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { SubscribeFormSchema, type SubscribeFormData, type SubscribeResponse } from '../../types/subscribe';
 import { GdprConsentCheckbox } from './GdprConsentCheckbox';
+import { getApiUrl, isProductionMisconfigured } from '../../config/apiConfig';
 
 /**
  * Email Signup Form Component
@@ -46,9 +47,25 @@ export const EmailSignupForm: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      // Use relative path to leverage Vite proxy in development
-      // In production, VITE_API_URL should be set to the full API URL
-      const apiUrl = import.meta.env.VITE_API_URL || '/api';
+      // Get API URL from configuration
+      const apiUrl = getApiUrl();
+      
+      // Log configuration issue if detected
+      if (isProductionMisconfigured()) {
+        console.error(
+          '❌ DEPLOYMENT CONFIGURATION ERROR:\n' +
+          'VITE_API_URL environment variable is not set.\n' +
+          'The API URL must be configured in your Vercel project settings.\n\n' +
+          'Steps to fix:\n' +
+          '1. Go to your Vercel dashboard\n' +
+          '2. Select your frontend project\n' +
+          '3. Go to Settings > Environment Variables\n' +
+          '4. Add VITE_API_URL with your backend URL (e.g., https://your-backend.vercel.app/api)\n' +
+          '5. Redeploy your frontend\n\n' +
+          'See DEPLOYMENT.md for detailed instructions.'
+        );
+      }
+      
       const response = await fetch(`${apiUrl}/v1/subscribe`, {
         method: 'POST',
         headers: {
@@ -61,7 +78,55 @@ export const EmailSignupForm: React.FC = () => {
         }),
       });
 
-      const data: SubscribeResponse = await response.json();
+      // Check if response has content before parsing JSON
+      const contentType = response.headers.get('content-type');
+      const hasJsonContent = contentType && contentType.includes('application/json');
+      
+      // Handle HTTP error responses
+      if (!response.ok) {
+        let errorMessage = 'Something went wrong. Please try again.';
+        
+        // Try to parse error response if it's JSON
+        if (hasJsonContent) {
+          try {
+            const errorData = await response.json();
+            errorMessage = errorData.message || errorMessage;
+          } catch {
+            // If JSON parsing fails, use default message
+          }
+        } else if (response.status === 405) {
+          // Method Not Allowed - likely API configuration issue
+          errorMessage = 'The subscription service is not configured correctly. Please contact support.';
+          console.error(
+            '❌ 405 Method Not Allowed Error:\n' +
+            'This error typically means VITE_API_URL is not configured correctly.\n\n' +
+            'Current API URL: ' + getApiUrl() + '\n' +
+            'Request attempted to: ' + getApiUrl() + '/v1/subscribe\n\n' +
+            'If this is a production deployment, VITE_API_URL must be set to your backend API URL.\n' +
+            'Steps to fix:\n' +
+            '1. Deploy your backend API to Vercel, Railway, or another hosting provider\n' +
+            '2. Note the backend URL (e.g., https://your-backend.vercel.app)\n' +
+            '3. In Vercel dashboard for your FRONTEND project:\n' +
+            '   - Go to Settings > Environment Variables\n' +
+            '   - Add: VITE_API_URL = https://your-backend.vercel.app/api\n' +
+            '4. Redeploy your frontend\n\n' +
+            'See DEPLOYMENT.md for detailed instructions.'
+          );
+        }
+        
+        setSubmitStatus('error');
+        setStatusMessage(errorMessage);
+        return;
+      }
+
+      // Parse successful response
+      let data: SubscribeResponse;
+      if (hasJsonContent) {
+        data = await response.json();
+      } else {
+        // No JSON content in response
+        throw new Error('Invalid response format from server');
+      }
 
       if (data.success) {
         setSubmitStatus('success');
@@ -80,6 +145,10 @@ export const EmailSignupForm: React.FC = () => {
       
       if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
         errorMessage = 'Unable to reach the server. Please check your internet connection or try disabling ad blockers.';
+      } else if (error instanceof SyntaxError && error.message.includes('JSON')) {
+        // JSON parsing error - likely API configuration issue
+        errorMessage = 'Service configuration error. Please contact support.';
+        console.error('API configuration error: Invalid JSON response. Check VITE_API_URL environment variable.');
       } else if (error instanceof Error) {
         console.error('Subscription error details:', {
           message: error.message,

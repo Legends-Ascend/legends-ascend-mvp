@@ -6,6 +6,23 @@ import { EmailSignupForm } from '../EmailSignupForm';
 // Mock fetch globally
 global.fetch = vi.fn();
 
+// Helper to ensure mocked Responses include the properties the component reads
+const createMockResponse = (
+  body: unknown,
+  options: {
+    ok?: boolean;
+    status?: number;
+    headers?: HeadersInit;
+    json?: () => Promise<unknown>;
+  } = {}
+) =>
+  ({
+    ok: options.ok ?? true,
+    status: options.status ?? 200,
+    headers: new Headers(options.headers ?? { 'content-type': 'application/json' }),
+    json: options.json ?? (async () => body),
+  } as Response);
+
 describe('EmailSignupForm', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -94,6 +111,9 @@ describe('EmailSignupForm', () => {
       const user = userEvent.setup();
       
       vi.mocked(global.fetch).mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        headers: new Headers({ 'content-type': 'application/json' }),
         json: async () => ({
           success: true,
           message: 'Thank you! Check your email to confirm your subscription.',
@@ -135,6 +155,9 @@ describe('EmailSignupForm', () => {
       const user = userEvent.setup();
       
       vi.mocked(global.fetch).mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        headers: new Headers({ 'content-type': 'application/json' }),
         json: async () => ({
           success: true,
           message: 'Thank you! Check your email to confirm your subscription.',
@@ -163,6 +186,9 @@ describe('EmailSignupForm', () => {
       const user = userEvent.setup();
       
       vi.mocked(global.fetch).mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        headers: new Headers({ 'content-type': 'application/json' }),
         json: async () => ({
           success: true,
           message: 'Thank you!',
@@ -192,6 +218,9 @@ describe('EmailSignupForm', () => {
       const user = userEvent.setup();
       
       vi.mocked(global.fetch).mockResolvedValueOnce({
+        ok: false,
+        status: 500,
+        headers: new Headers({ 'content-type': 'application/json' }),
         json: async () => ({
           success: false,
           message: 'Unable to subscribe. Please try again later.',
@@ -243,6 +272,9 @@ describe('EmailSignupForm', () => {
       const user = userEvent.setup();
       
       vi.mocked(global.fetch).mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        headers: new Headers({ 'content-type': 'application/json' }),
         json: async () => ({
           success: true,
           message: 'This email is already on our list. Check your inbox for updates.',
@@ -264,6 +296,96 @@ describe('EmailSignupForm', () => {
       await waitFor(() => {
         const message = screen.getByText(/already on our list/i);
         expect(message).toBeInTheDocument();
+      });
+    });
+
+    it('should handle 405 Method Not Allowed error gracefully', async () => {
+      const user = userEvent.setup();
+      
+      vi.mocked(global.fetch).mockResolvedValueOnce({
+        ok: false,
+        status: 405,
+        headers: new Headers({ 'content-type': 'text/html' }),
+        json: async () => {
+          throw new Error('Not JSON');
+        },
+      } as Response);
+      
+      render(<EmailSignupForm />);
+      
+      const emailInput = screen.getByLabelText(/email address/i);
+      await user.type(emailInput, 'test@example.com');
+      
+      const checkbox = screen.getByRole('checkbox');
+      await user.click(checkbox);
+      
+      const submitButton = screen.getByRole('button');
+      await user.click(submitButton);
+      
+      await waitFor(() => {
+        const errorMessage = screen.getByText(/subscription service is not configured correctly/i);
+        expect(errorMessage).toBeInTheDocument();
+        expect(errorMessage.closest('div')).toHaveAttribute('role', 'alert');
+      });
+    });
+
+    it('should handle invalid JSON response', async () => {
+      const user = userEvent.setup();
+      
+      vi.mocked(global.fetch).mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        headers: new Headers({ 'content-type': 'text/html' }),
+        json: async () => {
+          throw new SyntaxError('Unexpected end of JSON input');
+        },
+      } as Response);
+      
+      render(<EmailSignupForm />);
+      
+      const emailInput = screen.getByLabelText(/email address/i);
+      await user.type(emailInput, 'test@example.com');
+      
+      const checkbox = screen.getByRole('checkbox');
+      await user.click(checkbox);
+      
+      const submitButton = screen.getByRole('button');
+      await user.click(submitButton);
+      
+      await waitFor(() => {
+        // When content-type is not application/json, it throws "Invalid response format"
+        const errorMessage = screen.getByText(/unable to connect/i);
+        expect(errorMessage).toBeInTheDocument();
+      });
+    });
+
+    it('should handle JSON parsing errors with application/json content type', async () => {
+      const user = userEvent.setup();
+      
+      // This test simulates the scenario where response says it's JSON but parsing fails
+      vi.mocked(global.fetch).mockResolvedValueOnce({
+        ok: true,
+        status: 200,
+        headers: new Headers({ 'content-type': 'application/json' }),
+        json: async () => {
+          throw new SyntaxError('Unexpected end of JSON input');
+        },
+      } as Response);
+      
+      render(<EmailSignupForm />);
+      
+      const emailInput = screen.getByLabelText(/email address/i);
+      await user.type(emailInput, 'test@example.com');
+      
+      const checkbox = screen.getByRole('checkbox');
+      await user.click(checkbox);
+      
+      const submitButton = screen.getByRole('button');
+      await user.click(submitButton);
+      
+      await waitFor(() => {
+        const errorMessage = screen.getByText(/service configuration error/i);
+        expect(errorMessage).toBeInTheDocument();
       });
     });
   });
@@ -344,14 +466,14 @@ describe('EmailSignupForm', () => {
   describe('Edge Cases', () => {
     it('should handle email with special characters', async () => {
       const user = userEvent.setup();
-      
-      vi.mocked(global.fetch).mockResolvedValueOnce({
-        json: async () => ({
+
+      vi.mocked(global.fetch).mockResolvedValueOnce(
+        createMockResponse({
           success: true,
           message: 'Success',
           status: 'pending_confirmation',
-        }),
-      } as Response);
+        })
+      );
       
       render(<EmailSignupForm />);
       
@@ -377,10 +499,17 @@ describe('EmailSignupForm', () => {
     it('should prevent double submission', async () => {
       const user = userEvent.setup();
       
-      vi.mocked(global.fetch).mockImplementationOnce(() => 
-        new Promise(resolve => setTimeout(() => resolve({
-          json: async () => ({ success: true, message: 'Success' })
-        } as Response), 100))
+      vi.mocked(global.fetch).mockImplementationOnce(
+        () =>
+          new Promise(resolve =>
+            setTimeout(
+              () =>
+                resolve(
+                  createMockResponse({ success: true, message: 'Success' })
+                ),
+              100
+            )
+          )
       );
       
       render(<EmailSignupForm />);
@@ -403,12 +532,12 @@ describe('EmailSignupForm', () => {
     it('should send correct timestamp format', async () => {
       const user = userEvent.setup();
       
-      vi.mocked(global.fetch).mockResolvedValueOnce({
-        json: async () => ({
+      vi.mocked(global.fetch).mockResolvedValueOnce(
+        createMockResponse({
           success: true,
           message: 'Success',
-        }),
-      } as Response);
+        })
+      );
       
       render(<EmailSignupForm />);
       
@@ -433,10 +562,17 @@ describe('EmailSignupForm', () => {
     it('should show "Joining..." text while submitting', async () => {
       const user = userEvent.setup();
       
-      vi.mocked(global.fetch).mockImplementationOnce(() => 
-        new Promise(resolve => setTimeout(() => resolve({
-          json: async () => ({ success: true, message: 'Success' })
-        } as Response), 100))
+      vi.mocked(global.fetch).mockImplementationOnce(
+        () =>
+          new Promise(resolve =>
+            setTimeout(
+              () =>
+                resolve(
+                  createMockResponse({ success: true, message: 'Success' })
+                ),
+              100
+            )
+          )
       );
       
       render(<EmailSignupForm />);

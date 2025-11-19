@@ -13,6 +13,14 @@ import { EmailSignupForm } from '../EmailSignupForm';
 // Mock fetch globally
 global.fetch = vi.fn();
 
+// Helper to create mock Response objects with proper structure
+const createMockResponse = (body: unknown, options: { ok?: boolean; status?: number } = {}) => ({
+  ok: options.ok ?? true,
+  status: options.status ?? 200,
+  headers: new Headers({ 'content-type': 'application/json' }),
+  json: async () => body,
+} as Response);
+
 describe('EmailSignupForm - CORS and API Integration (Issue #97)', () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -23,13 +31,11 @@ describe('EmailSignupForm - CORS and API Integration (Issue #97)', () => {
     it('should use relative path /api by default for proxy support', async () => {
       const user = userEvent.setup();
       
-      vi.mocked(global.fetch).mockResolvedValueOnce({
-        json: async () => ({
-          success: true,
-          message: 'Thank you! Check your email to confirm your subscription.',
-          status: 'pending_confirmation',
-        }),
-      } as Response);
+      vi.mocked(global.fetch).mockResolvedValueOnce(createMockResponse({
+        success: true,
+        message: 'Thank you! Check your email to confirm your subscription.',
+        status: 'pending_confirmation',
+      }));
       
       render(<EmailSignupForm />);
       
@@ -62,13 +68,11 @@ describe('EmailSignupForm - CORS and API Integration (Issue #97)', () => {
       const originalEnv = import.meta.env.VITE_API_URL;
       import.meta.env.VITE_API_URL = 'https://api.legendsascend.com/api';
       
-      vi.mocked(global.fetch).mockResolvedValueOnce({
-        json: async () => ({
-          success: true,
-          message: 'Success',
-          status: 'pending_confirmation',
-        }),
-      } as Response);
+      vi.mocked(global.fetch).mockResolvedValueOnce(createMockResponse({
+        success: true,
+        message: 'Success',
+        status: 'pending_confirmation',
+      }));
       
       render(<EmailSignupForm />);
       
@@ -186,12 +190,10 @@ describe('EmailSignupForm - CORS and API Integration (Issue #97)', () => {
     it('should send correct Content-Type header', async () => {
       const user = userEvent.setup();
       
-      vi.mocked(global.fetch).mockResolvedValueOnce({
-        json: async () => ({
-          success: true,
-          message: 'Success',
-        }),
-      } as Response);
+      vi.mocked(global.fetch).mockResolvedValueOnce(createMockResponse({
+        success: true,
+        message: 'Success',
+      }));
       
       render(<EmailSignupForm />);
       
@@ -219,12 +221,10 @@ describe('EmailSignupForm - CORS and API Integration (Issue #97)', () => {
     it('should use POST method for subscription', async () => {
       const user = userEvent.setup();
       
-      vi.mocked(global.fetch).mockResolvedValueOnce({
-        json: async () => ({
-          success: true,
-          message: 'Success',
-        }),
-      } as Response);
+      vi.mocked(global.fetch).mockResolvedValueOnce(createMockResponse({
+        success: true,
+        message: 'Success',
+      }));
       
       render(<EmailSignupForm />);
       
@@ -252,13 +252,11 @@ describe('EmailSignupForm - CORS and API Integration (Issue #97)', () => {
     it('should successfully submit without CORS errors', async () => {
       const user = userEvent.setup();
       
-      vi.mocked(global.fetch).mockResolvedValueOnce({
-        json: async () => ({
-          success: true,
-          message: 'Thank you! Check your email to confirm your subscription.',
-          status: 'pending_confirmation',
-        }),
-      } as Response);
+      vi.mocked(global.fetch).mockResolvedValueOnce(createMockResponse({
+        success: true,
+        message: 'Thank you! Check your email to confirm your subscription.',
+        status: 'pending_confirmation',
+      }));
       
       render(<EmailSignupForm />);
       
@@ -287,13 +285,11 @@ describe('EmailSignupForm - CORS and API Integration (Issue #97)', () => {
     it('should provide user-friendly error messages on failure', async () => {
       const user = userEvent.setup();
       
-      vi.mocked(global.fetch).mockResolvedValueOnce({
-        json: async () => ({
-          success: false,
-          message: 'Unable to subscribe. Please try again later.',
-          status: 'error',
-        }),
-      } as Response);
+      vi.mocked(global.fetch).mockResolvedValueOnce(createMockResponse({
+        success: false,
+        message: 'Unable to subscribe. Please try again later.',
+        status: 'error',
+      }, { ok: false, status: 500 }));
       
       render(<EmailSignupForm />);
       
@@ -316,12 +312,10 @@ describe('EmailSignupForm - CORS and API Integration (Issue #97)', () => {
     it('should send correct payload structure', async () => {
       const user = userEvent.setup();
       
-      vi.mocked(global.fetch).mockResolvedValueOnce({
-        json: async () => ({
-          success: true,
-          message: 'Success',
-        }),
-      } as Response);
+      vi.mocked(global.fetch).mockResolvedValueOnce(createMockResponse({
+        success: true,
+        message: 'Success',
+      }));
       
       render(<EmailSignupForm />);
       
