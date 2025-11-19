@@ -145,3 +145,53 @@ All routing protection behavior is covered by comprehensive unit tests in `front
 5. **Test both enabled and disabled states** when modifying routing logic
 6. **Add new protected routes** to the RouteGuard logic and tests when expanding the application
 
+
+
+## 6. API Restructure and Vercel Conventions
+
+### 6.1 Overview
+
+The API has been restructured to follow Vercel's conventions for serverless functions. This ensures compatibility with Vercel's deployment platform and enables automatic API route discovery.
+
+### 6.2 Root Cause and Solution
+
+**Problem:**
+- Backend API was returning 404 errors
+- Vercel couldn't find serverless functions
+- Custom builds configuration wasn't working
+
+**Root Cause:** Vercel requires API functions to be in the `/api` directory at the repository root.
+
+**Solution:** Restructured the project to follow Vercel conventions with functions auto-discovered in `/api` directory.
+
+### 6.3 Key Changes
+
+- Main API handler moved to `/api/index.ts`
+- Backend services organized as importable modules
+- Configuration files (`vercel.json`) simplified
+- Removed custom builds configuration for automatic handling
+
+## 7. Deployment and Infrastructure
+
+### 7.1 Deployment Strategy
+
+The project uses Vercel for deployment with the following approach:
+
+**Monorepo Deployment:**
+- Single Vercel project manages both frontend and API
+- Automatic detection of deployable services
+- Shared dependencies via pnpm workspaces
+
+### 7.2 Pre-Deployment Verification
+
+Before deploying, verify:
+
+1. **API Configuration:** Environment variables set correctly, database connections validated
+2. **Build Status:** TypeScript compilation succeeds, no linting errors, tests pass
+3. **Dependencies:** pnpm lock file up to date, no missing peer dependencies
+4. **Security:** No console.log statements in production, secrets in environment variables only
+
+### 7.3 Environment Management
+
+**Development:** Use `.env` file, reference `.env.example` for required variables
+**Production:** Environment variables set in Vercel dashboard, `VITE_LANDING_PAGE_ENABLED=true`
