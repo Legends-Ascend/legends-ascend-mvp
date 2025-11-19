@@ -145,3 +145,7 @@ frontend/dist/
 # Test results
 test-results/
 junit.xml
+
+# Subdirectory lock files (pnpm uses workspace root)
+api/pnpm-lock.yaml
+backend/pnpm-lock.yaml
