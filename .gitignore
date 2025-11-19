@@ -149,3 +149,7 @@ junit.xml
 # Subdirectory lock files (pnpm uses workspace root)
 api/pnpm-lock.yaml
 backend/pnpm-lock.yaml
+
+# API compiled files (TypeScript sources are in api/, compiled output should not be committed)
+api/*.js
+api/*.js.map
