@@ -11,38 +11,37 @@ import { readFileSync, existsSync } from 'fs';
 import { join } from 'path';
 
 describe('PR #119: Vercel Deployment Configuration', () => {
+  const projectRoot = join(process.cwd(), '..');
+  
   describe('vercel.json Configuration', () => {
-    const vercelConfigPath = join(process.cwd(), '..', 'vercel.json');
+    const vercelConfigPath = join(projectRoot, 'vercel.json');
     let vercelConfig: any;
+
+    beforeAll(() => {
+      const content = readFileSync(vercelConfigPath, 'utf-8');
+      vercelConfig = JSON.parse(content);
+    });
 
     test('should have vercel.json in root directory', () => {
       expect(existsSync(vercelConfigPath)).toBe(true);
     });
 
     test('should be valid JSON', () => {
-      const content = readFileSync(vercelConfigPath, 'utf-8');
-      expect(() => {
-        vercelConfig = JSON.parse(content);
-      }).not.toThrow();
+      expect(vercelConfig).toBeDefined();
+      expect(typeof vercelConfig).toBe('object');
     });
 
     test('should have version 2 configuration', () => {
-      const content = readFileSync(vercelConfigPath, 'utf-8');
-      vercelConfig = JSON.parse(content);
       expect(vercelConfig.version).toBe(2);
     });
 
     test('should have builds configuration', () => {
-      const content = readFileSync(vercelConfigPath, 'utf-8');
-      vercelConfig = JSON.parse(content);
       expect(vercelConfig.builds).toBeDefined();
       expect(Array.isArray(vercelConfig.builds)).toBe(true);
       expect(vercelConfig.builds.length).toBeGreaterThan(0);
     });
 
     test('should configure frontend build with @vercel/static-build', () => {
-      const content = readFileSync(vercelConfigPath, 'utf-8');
-      vercelConfig = JSON.parse(content);
       const frontendBuild = vercelConfig.builds.find(
         (build: any) => build.src === 'frontend/package.json'
       );
@@ -52,8 +51,6 @@ describe('PR #119: Vercel Deployment Configuration', () => {
     });
 
     test('should configure backend API with @vercel/node', () => {
-      const content = readFileSync(vercelConfigPath, 'utf-8');
-      vercelConfig = JSON.parse(content);
       const apiBuild = vercelConfig.builds.find(
         (build: any) => build.src === 'api/index.ts'
       );
@@ -62,16 +59,12 @@ describe('PR #119: Vercel Deployment Configuration', () => {
     });
 
     test('should have routes configuration', () => {
-      const content = readFileSync(vercelConfigPath, 'utf-8');
-      vercelConfig = JSON.parse(content);
       expect(vercelConfig.routes).toBeDefined();
       expect(Array.isArray(vercelConfig.routes)).toBe(true);
       expect(vercelConfig.routes.length).toBeGreaterThan(0);
     });
 
     test('should route /api/* to serverless function', () => {
-      const content = readFileSync(vercelConfigPath, 'utf-8');
-      vercelConfig = JSON.parse(content);
       const apiRoute = vercelConfig.routes.find(
         (route: any) => route.src === '/api/(.*)'
       );
@@ -80,8 +73,6 @@ describe('PR #119: Vercel Deployment Configuration', () => {
     });
 
     test('should handle filesystem for static files', () => {
-      const content = readFileSync(vercelConfigPath, 'utf-8');
-      vercelConfig = JSON.parse(content);
       const filesystemRoute = vercelConfig.routes.find(
         (route: any) => route.handle === 'filesystem'
       );
@@ -89,8 +80,6 @@ describe('PR #119: Vercel Deployment Configuration', () => {
     });
 
     test('should fallback to index.html for SPA routing', () => {
-      const content = readFileSync(vercelConfigPath, 'utf-8');
-      vercelConfig = JSON.parse(content);
       const spaRoute = vercelConfig.routes.find(
         (route: any) => route.src === '/(.*)'
       );
@@ -99,8 +88,6 @@ describe('PR #119: Vercel Deployment Configuration', () => {
     });
 
     test('should have correct route order (API first, filesystem, then SPA)', () => {
-      const content = readFileSync(vercelConfigPath, 'utf-8');
-      vercelConfig = JSON.parse(content);
       const routes = vercelConfig.routes;
       
       const apiRouteIndex = routes.findIndex(
@@ -119,7 +106,7 @@ describe('PR #119: Vercel Deployment Configuration', () => {
   });
 
   describe('API Serverless Function', () => {
-    const apiIndexPath = join(process.cwd(), '..', 'api', 'index.ts');
+    const apiIndexPath = join(projectRoot, 'api', 'index.ts');
 
     test('should have api/index.ts file', () => {
       expect(existsSync(apiIndexPath)).toBe(true);
@@ -194,7 +181,7 @@ describe('PR #119: Vercel Deployment Configuration', () => {
   });
 
   describe('Frontend Build Configuration', () => {
-    const frontendPackagePath = join(process.cwd(), '..', 'frontend', 'package.json');
+    const frontendPackagePath = join(projectRoot, 'frontend', 'package.json');
 
     test('should have frontend/package.json', () => {
       expect(existsSync(frontendPackagePath)).toBe(true);
@@ -221,7 +208,7 @@ describe('PR #119: Vercel Deployment Configuration', () => {
   });
 
   describe('Environment Configuration', () => {
-    const envExamplePath = join(process.cwd(), '..', '.env.example');
+    const envExamplePath = join(projectRoot, '.env.example');
 
     test('should have .env.example in root', () => {
       expect(existsSync(envExamplePath)).toBe(true);
@@ -255,7 +242,7 @@ describe('PR #119: Vercel Deployment Configuration', () => {
   });
 
   describe('Documentation', () => {
-    const vercelInstructionsPath = join(process.cwd(), '..', 'VERCEL_DEPLOYMENT_INSTRUCTIONS.md');
+    const vercelInstructionsPath = join(projectRoot, 'VERCEL_DEPLOYMENT_INSTRUCTIONS.md');
 
     test('should have VERCEL_DEPLOYMENT_INSTRUCTIONS.md', () => {
       expect(existsSync(vercelInstructionsPath)).toBe(true);
@@ -292,22 +279,22 @@ describe('PR #119: Vercel Deployment Configuration', () => {
 
   describe('File Structure Validation', () => {
     test('should have api directory in root', () => {
-      const apiDir = join(process.cwd(), '..', 'api');
+      const apiDir = join(projectRoot, 'api');
       expect(existsSync(apiDir)).toBe(true);
     });
 
     test('should have api/package.json', () => {
-      const apiPackagePath = join(process.cwd(), '..', 'api', 'package.json');
+      const apiPackagePath = join(projectRoot, 'api', 'package.json');
       expect(existsSync(apiPackagePath)).toBe(true);
     });
 
     test('should have api/tsconfig.json', () => {
-      const apiTsconfigPath = join(process.cwd(), '..', 'api', 'tsconfig.json');
+      const apiTsconfigPath = join(projectRoot, 'api', 'tsconfig.json');
       expect(existsSync(apiTsconfigPath)).toBe(true);
     });
 
     test('api package.json should have required dependencies', () => {
-      const apiPackagePath = join(process.cwd(), '..', 'api', 'package.json');
+      const apiPackagePath = join(projectRoot, 'api', 'package.json');
       const content = readFileSync(apiPackagePath, 'utf-8');
       const packageJson = JSON.parse(content);
       
@@ -321,14 +308,14 @@ describe('PR #119: Vercel Deployment Configuration', () => {
     test('should not have removed DEPLOYMENT.md (if it existed)', () => {
       // This is a documentation test - the old DEPLOYMENT.md was replaced
       // with VERCEL_DEPLOYMENT_INSTRUCTIONS.md which is more specific
-      const newDocPath = join(process.cwd(), '..', 'VERCEL_DEPLOYMENT_INSTRUCTIONS.md');
+      const newDocPath = join(projectRoot, 'VERCEL_DEPLOYMENT_INSTRUCTIONS.md');
       expect(existsSync(newDocPath)).toBe(true);
     });
   });
 
   describe('CORS Configuration', () => {
     test('should configure CORS for development environments', () => {
-      const apiIndexPath = join(process.cwd(), '..', 'api', 'index.ts');
+      const apiIndexPath = join(projectRoot, 'api', 'index.ts');
       const content = readFileSync(apiIndexPath, 'utf-8');
       
       expect(content).toContain('localhost:5173');
@@ -336,7 +323,7 @@ describe('PR #119: Vercel Deployment Configuration', () => {
     });
 
     test('should configure CORS for production from ALLOWED_ORIGINS env var', () => {
-      const apiIndexPath = join(process.cwd(), '..', 'api', 'index.ts');
+      const apiIndexPath = join(projectRoot, 'api', 'index.ts');
       const content = readFileSync(apiIndexPath, 'utf-8');
       
       expect(content).toContain('ALLOWED_ORIGINS');
@@ -344,14 +331,14 @@ describe('PR #119: Vercel Deployment Configuration', () => {
     });
 
     test('should enable credentials for CORS', () => {
-      const apiIndexPath = join(process.cwd(), '..', 'api', 'index.ts');
+      const apiIndexPath = join(projectRoot, 'api', 'index.ts');
       const content = readFileSync(apiIndexPath, 'utf-8');
       
       expect(content).toContain('credentials: true');
     });
 
     test('should configure allowed HTTP methods', () => {
-      const apiIndexPath = join(process.cwd(), '..', 'api', 'index.ts');
+      const apiIndexPath = join(projectRoot, 'api', 'index.ts');
       const content = readFileSync(apiIndexPath, 'utf-8');
       
       expect(content).toContain('GET');
@@ -364,7 +351,7 @@ describe('PR #119: Vercel Deployment Configuration', () => {
 
   describe('Route Mounting', () => {
     test('should mount all required routes', () => {
-      const apiIndexPath = join(process.cwd(), '..', 'api', 'index.ts');
+      const apiIndexPath = join(projectRoot, 'api', 'index.ts');
       const content = readFileSync(apiIndexPath, 'utf-8');
       
       expect(content).toContain("app.use('/api/players'");
@@ -376,7 +363,7 @@ describe('PR #119: Vercel Deployment Configuration', () => {
     });
 
     test('should mount subscribe routes correctly for newsletter', () => {
-      const apiIndexPath = join(process.cwd(), '..', 'api', 'index.ts');
+      const apiIndexPath = join(projectRoot, 'api', 'index.ts');
       const content = readFileSync(apiIndexPath, 'utf-8');
       
       // The subscribe route should be at /api/v1 which makes the 
@@ -387,12 +374,12 @@ describe('PR #119: Vercel Deployment Configuration', () => {
 
   describe('Integration Readiness', () => {
     test('should have pnpm workspace configuration', () => {
-      const workspacePath = join(process.cwd(), '..', 'pnpm-workspace.yaml');
+      const workspacePath = join(projectRoot, 'pnpm-workspace.yaml');
       expect(existsSync(workspacePath)).toBe(true);
     });
 
     test('workspace should include all packages', () => {
-      const workspacePath = join(process.cwd(), '..', 'pnpm-workspace.yaml');
+      const workspacePath = join(projectRoot, 'pnpm-workspace.yaml');
       const content = readFileSync(workspacePath, 'utf-8');
       
       expect(content).toContain('frontend');
