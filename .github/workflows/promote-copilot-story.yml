@@ -2,10 +2,7 @@ name: Promote Copilot Story to Issue
 
 on:
   pull_request:
-types: [closed]
-  paths:
-      - 'docs/user-stories/**.md'
-      - '!docs/user-stories/README.md'
+    types: [opened, synchronize, reopened]
 
 permissions:
   contents: read
@@ -13,8 +10,24 @@ permissions:
   pull-requests: write
 
 jobs:
+  check-user-story-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      user_story: ${{ steps.filter.outputs.user_story }}
+    steps:
+      - uses: actions/checkout@v4
+      
+      - uses: dorny/paths-filter@v3
+        id: filter
+        with:
+          filters: |
+            user_story:
+              - 'docs/user-stories/**.md'
+              - '!docs/user-stories/README.md'
+
   promote:
-      if: github.event.pull_request.merged == true
+    needs: check-user-story-changes
+    if: needs.check-user-story-changes.outputs.user_story == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -49,7 +62,7 @@ jobs:
               // Group by US-XXX id
               const groups = {}
               for (const path of storyFiles) {
-                const m = path.match(/US-(\d+)/)
+                const m = path.match(/US-(\\d+)/)
                 const id = m ? 'US-' + m[1] : 'general'
                 if (!groups[id]) groups[id] = []
                 groups[id].push(path)
@@ -70,7 +83,7 @@ jobs:
                 }
 
                 const content = fs.readFileSync(main,'utf8')
-                const titleMatch = content.match(/^#\s+(.+)$/m)
+                const titleMatch = content.match(/^#\\s+(.+)$/m)
                 const title = titleMatch ? (id + ': ' + titleMatch[1]) : id
 
                 // GitHub issue body character limit is ~65,536 characters
@@ -107,36 +120,36 @@ jobs:
                 // Decide whether to include full content or use hyperlinks
                 if (totalLength < MAX_ISSUE_LENGTH) {
                   // Include full content
-                  body = 'This issue tracks ' + id + ' from the BA Agent specification.\n\n';
+                  body = 'This issue tracks ' + id + ' from the BA Agent specification.\\n\\n';
                   body += 'The BA agent produced a comprehensive specification stored across multiple documents. ';
-                  body += 'Use the documents below as the single source of truth.\n\n---\n\n';
+                  body += 'Use the documents below as the single source of truth.\\n\\n---\\n\\n';
                   
                   for (const doc of allContents) {
-                    body += '## ' + doc.type + ': `' + doc.path + '`\n\n';
-                    body += doc.content + '\n\n---\n\n';
+                    body += '## ' + doc.type + ': `' + doc.path + '`\\n\\n';
+                    body += doc.content + '\\n\\n---\\n\\n';
                   }
                   
-                  body += '## Notes for Coding Agent\n\n';
-                  body += '- Read all files listed above for full requirements, ACs, and technical specifications\n';
-                  body += '- Adhere to TECHNICAL_ARCHITECTURE.md, BRANDING_GUIDELINES.md, and SECURITY_GUIDELINES.md';
+                  body += '## Notes for Coding Agent\\n\\n';
+                  body += '- Read all files listed above for full requirements, ACs, and technical specifications\\n';
+                  body += '- Adhere to TECHNICAL_ARCHITECTURE.md, BRANDING_GUIDELINE.md, and ACCESSIBILITY_REQUIREMENTS.md';
                 } else {
                   // Use clickable hyperlinks as fallback
                   const repoUrl = 'https://github.com/' + context.repo.owner + '/' + context.repo.repo;
                   const branch = context.payload.pull_request.head.ref;
                   
-                  body = 'This issue tracks ' + id + ' from the BA Agent specification.\n\n';
+                  body = 'This issue tracks ' + id + ' from the BA Agent specification.\\n\\n';
                   body += 'The BA agent produced a comprehensive specification stored across multiple documents. ';
                   body += '**The content is too large to include directly in this issue.** ';
-                  body += 'Click the links below to view the full documents:\n\n';
-                  body += '## 📄 Documents\n\n';
+                  body += 'Click the links below to view the full documents:\\n\\n';
+                  body += '## 📄 Documents\\n\\n';
                   
                   for (const doc of allContents) {
                     const fileUrl = repoUrl + '/blob/' + branch + '/' + doc.path;
-                    body += '- **[' + doc.type + ': `' + doc.path + '`](' + fileUrl + ')**\n';
+                    body += '- **[' + doc.type + ': `' + doc.path + '`](' + fileUrl + ')**\\n';
                   }
                   
-                  body += '\n## 📋 Notes for Coding Agent\n\n';
-                  body += '- Read all files listed above for full requirements, ACs, and technical specifications\n';
+                  body += '\\n## 📋 Notes for Coding Agent\\n\\n';
+                  body += '- Read all files listed above for full requirements, ACs, and technical specifications\\n';
                   body += '- Adhere to [TECHNICAL_ARCHITECTURE.md](' + repoUrl + '/blob/' + branch + '/docs/TECHNICAL_ARCHITECTURE.md), ';
                   body += '[BRANDING_GUIDELINE.md](' + repoUrl + '/blob/' + branch + '/docs/BRANDING_GUIDELINE.md), ';
                   body += 'and [ACCESSIBILITY_REQUIREMENTS.md](' + repoUrl + '/blob/' + branch + '/docs/ACCESSIBILITY_REQUIREMENTS.md)';
