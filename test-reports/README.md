@@ -98,6 +98,66 @@ For the latest test reports, see:
 - PR-72: Privacy Policy Page with GDPR Compliance
 
 ---
+## MANDATORY INSTRUCTIONS FOR TEST AGENTS
+
+### All Test Agents MUST Follow These Rules:
+
+**1. ALWAYS save test files to `/test-reports` folder**
+   - Never save test outputs, reports, logs, or summaries to the root directory
+   - Use this path: `./test-reports/[filename].md` or `./test-reports/[filename].txt`
+   - Example: `./test-reports/PR-125-TESTING-REPORT.md` NOT `./PR-125-TESTING-REPORT.md`
+
+**2. File Location Enforcement**
+   - GitHub Copilot, OpenAI Codex, Databricks agents, and all AI testing tools
+   - Write ALL test outputs to `/test-reports/` exclusively
+   - The root directory is reserved for core project files only
+
+**3. Naming Convention for Test Output Files**
+   - Format: `PR-[NUMBER]-[TEST-TYPE]-[DATE].md`
+   - Example: `PR-125-INTEGRATION-TEST-2025-11-19.md`
+   - Always include the PR number, test type, and date
+   - Use uppercase with hyphens for readability
+
+**4. Automatic Organization**
+   - When test reports accumulate (>30 days old):
+     - Create folder: `./test-reports/archived/`
+     - Move old reports there with naming: `[ORIGINAL-NAME]-archived-[DATE].md`
+     - Keep current reports at root of test-reports
+
+**5. What Constitutes Test Output (MUST go to `/test-reports`)**
+   - ✅ Validation reports
+   - ✅ Test execution summaries
+   - ✅ DoD (Definition of Done) checklists
+   - ✅ Test results and findings
+   - ✅ Performance reports
+   - ✅ Coverage reports
+   - ✅ Bug findings and logs
+   - ✅ Any generated output from test runs
+
+**6. What Does NOT Go to `/test-reports`**
+   - ❌ Technical documentation (goes to `/docs`)
+   - ❌ Deployment guides (goes to `/docs/TECHNICAL_ARCHITECTURE.md`)
+   - ❌ Code changes and source files (go to respective folders)
+   - ❌ Configuration files (stay at root or appropriate folder)
+
+**7. Commit Message Format**
+   - Always use: `docs: Add [FILENAME] to test-reports - [Brief Description]`
+   - Example: `docs: Add PR-125-INTEGRATION-TEST-2025-11-19.md to test-reports - Complete integration testing validation`
+
+**8. Compliance Check**
+   - Before committing any test output, verify:
+     - ✓ File is in `test-reports/` folder
+     - ✓ Filename follows naming convention
+     - ✓ File contains test data, not technical docs
+     - ✓ Commit message references test-reports path
+
+### Why This Matters:
+
+- **Clean Repository Structure**: Keeps the root clean for project essentials only
+- **Easy Access**: All test results are in one organized location
+- **Historical Tracking**: Easy to review testing progress over time
+- **Archive Management**: Old reports don't clutter active test results
+- **CI/CD Integration**: Test agents can automatically place outputs in the right location
 
 **Last Updated:** November 17, 2025  
 **Managed by:** Legends Ascend Development Team
