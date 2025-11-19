@@ -75,9 +75,6 @@ if (process.env.VERCEL) {
       });
     }
   });
-  
-  // Export the Express app for Vercel
-  export default app;
 } else {
   // Traditional server deployment
   const startServer = async () => {
@@ -96,3 +93,6 @@ if (process.env.VERCEL) {
 
   startServer();
 }
+
+// Export the Express app for Vercel (must be at top level)
+export default app;
