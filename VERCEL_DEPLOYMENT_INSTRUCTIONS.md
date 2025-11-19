@@ -34,26 +34,26 @@ Go to: **Vercel Dashboard → Your Project → Settings → Environment Variable
 
 #### 2. Build Settings
 
-Go to: **Vercel Dashboard → Your Project → Settings → General**
+> **Note**: When using the `builds` configuration in `vercel.json`, Vercel ignores the Build and Development Settings in your Project Settings. The configuration in `vercel.json` takes precedence.
 
-**Update these settings:**
+The `vercel.json` file in this repository is now fully configured to handle both frontend and backend builds. No manual build settings configuration is needed in the Vercel dashboard.
 
-| Setting | Value | Notes |
-|---------|-------|-------|
-| **Root Directory** | `/` (leave empty) | Must be root, not `/frontend` |
-| **Build Command** | `pnpm install && pnpm --filter=./frontend run build` | Override if different |
-| **Output Directory** | `frontend/dist` | Override if different |
-| **Install Command** | `pnpm install` | Override if different |
-
-> **Important**: The `vercel.json` file will automatically handle the `/api` serverless function deployment. You only need to ensure the frontend builds correctly.
+**What happens automatically:**
+- Frontend builds using `@vercel/static-build` from `frontend/package.json`
+- The `vercel-build` script runs: `pnpm run build`
+- Backend API deploys as serverless function from `api/index.ts`
+- Routing is configured: `/api/*` → backend, everything else → frontend
 
 #### 3. Redeploy
 
-After updating the environment variables and build settings:
-1. Go to **Deployments** tab
-2. Click on the latest deployment
-3. Click **"Redeploy"** button
-4. Or push a new commit to trigger automatic deployment
+After updating the environment variables:
+1. The `vercel.json` configuration will be automatically applied
+2. Go to **Deployments** tab
+3. Click on the latest deployment
+4. Click **"Redeploy"** button
+5. Or push a new commit to trigger automatic deployment
+
+> **Note**: You may see a warning during deployment: "Due to `builds` existing in your configuration file, the Build and Development Settings defined in your Project Settings will not apply." This is expected and correct behavior.
 
 ### Verification
 
@@ -79,6 +79,20 @@ After redeployment, verify the fix:
    - Check browser Network tab - POST to `/api/v1/subscribe` should return 200
 
 ### Troubleshooting
+
+#### Build fails with npm/pnpm errors?
+
+**Symptoms:**
+- Build log shows: "npm ERR!" or dependency not found errors
+- Error occurs after "Installing dependencies" step
+
+**Solution:**
+This is fixed in the latest commit. The `vercel-build` script in `frontend/package.json` now uses `pnpm run build` instead of `npm run build`. This ensures the build uses the pnpm workspace dependencies that Vercel installs.
+
+If you still see this error:
+1. Ensure you've pulled the latest changes from this PR
+2. Check that `frontend/package.json` has `"vercel-build": "pnpm run build"`
+3. Redeploy
 
 #### Still getting 404 errors?
 
