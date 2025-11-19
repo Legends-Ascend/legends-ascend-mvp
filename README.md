@@ -240,6 +240,38 @@ For questions, suggestions, or collaboration opportunities:
 - Inspired by classic football management games and modern AI technology
 - Built with passion for football and gaming
 
+## Documentation Structure
+
+### `/docs` Folder
+Comprehensive project documentation is organized in the `/docs` folder:
+
+- **TECHNICAL_ARCHITECTURE.md** - Central technical reference covering:
+  - Technology stack and dependencies
+  - Repository layout and code organization
+  - API design and data formats
+  - Frontend routing protection patterns
+  - API restructuring for Vercel
+  - Deployment strategy and infrastructure
+  - Pre-deployment verification checklist
+  - Environment management
+
+- **BRANDING_GUIDELINE.md** - Brand standards and UI/UX guidelines
+- **ACCESSIBILITY_REQUIREMENTS.md** - Accessibility compliance documentation
+- **QUICKSTART.md** - Quick setup guide for new developers
+- **Other guides** - User stories, game systems, database docs, and more
+
+### `/test-reports` Folder
+All test results and validation reports are consolidated in the `/test-reports` folder for easy access and historical tracking.
+
+### Root Level
+The repository root contains:
+- **README.md** - This file (project overview and getting started)
+- **package.json** & **pnpm-workspace.yaml** - Workspace configuration
+- **.env.example** - Environment variables template
+- **CHANGELOG.md** - Version history and release notes
+
+**Note:** Deployment-specific documentation has been consolidated into `TECHNICAL_ARCHITECTURE.md` to maintain a single source of truth for technical specifications.
+
 ---
 
 **Ready to build the future of football management?** Check out our [Contributing Guidelines](#contribution-guidelines) and join the team!
