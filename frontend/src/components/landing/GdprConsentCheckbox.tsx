@@ -9,6 +9,7 @@ interface GdprConsentCheckboxProps {
 /**
  * GDPR Consent Checkbox Component
  * Per US-001 requirements: explicit consent with Privacy Policy link
+ * Enhanced error visibility per WCAG 2.1 AA and ACCESSIBILITY_REQUIREMENTS.md
  */
 export const GdprConsentCheckbox: React.FC<GdprConsentCheckboxProps> = ({
   checked,
@@ -17,7 +18,14 @@ export const GdprConsentCheckbox: React.FC<GdprConsentCheckboxProps> = ({
 }) => {
   return (
     <div className="space-y-2">
-      <div className="flex items-start">
+      {/* Wrapper with error state visual feedback */}
+      <div 
+        className={`flex items-start p-3 rounded-md transition-colors ${
+          error 
+            ? 'bg-error-red/10 border-2 border-error-red' 
+            : 'border-2 border-transparent'
+        }`}
+      >
         <div className="flex items-center h-5">
           <input
             id="gdpr-consent"
@@ -25,8 +33,10 @@ export const GdprConsentCheckbox: React.FC<GdprConsentCheckboxProps> = ({
             type="checkbox"
             checked={checked}
             onChange={(e) => onChange(e.target.checked)}
-            className="h-5 w-5 text-primary-blue border-2 border-dark-navy rounded focus:ring-2 focus:ring-primary-blue focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-blue"
-            aria-describedby="gdpr-consent-description"
+            className={`h-5 w-5 text-primary-blue rounded focus:ring-2 focus:ring-primary-blue focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary-blue ${
+              error ? 'border-2 border-error-red' : 'border-2 border-dark-navy'
+            }`}
+            aria-describedby={error ? 'gdpr-consent-description gdpr-consent-error' : 'gdpr-consent-description'}
             aria-invalid={!!error}
           />
         </div>
@@ -51,10 +61,21 @@ export const GdprConsentCheckbox: React.FC<GdprConsentCheckboxProps> = ({
           </label>
         </div>
       </div>
+      {/* Enhanced error message with icon, prominent styling, and screen reader support */}
       {error && (
-        <p className="text-error-red text-sm mt-1" role="alert">
-          {error}
-        </p>
+        <div
+          id="gdpr-consent-error"
+          className="flex items-start gap-2 p-3 bg-error-red/15 border-l-4 border-error-red rounded"
+          role="alert"
+          aria-live="polite"
+        >
+          <span className="text-error-red text-lg flex-shrink-0" aria-hidden="true">
+            ⚠️
+          </span>
+          <p className="text-error-red text-sm font-semibold leading-tight">
+            {error}
+          </p>
+        </div>
       )}
     </div>
   );
