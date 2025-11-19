@@ -84,7 +84,9 @@ describe('EmailSignupForm', () => {
       await waitFor(() => {
         const error = screen.getByText(/you must consent to receive emails/i);
         expect(error).toBeInTheDocument();
-        expect(error).toHaveAttribute('role', 'alert');
+        // Error message is now inside a container with role="alert"
+        const errorContainer = error.closest('[role="alert"]');
+        expect(errorContainer).toBeInTheDocument();
       });
     });
 
