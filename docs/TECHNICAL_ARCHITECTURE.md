@@ -195,3 +195,139 @@ Before deploying, verify:
 
 **Development:** Use `.env` file, reference `.env.example` for required variables
 **Production:** Environment variables set in Vercel dashboard, `VITE_LANDING_PAGE_ENABLED=true`
+
+## 8. Deployment Troubleshooting & Common Issues
+
+### Issue: Subscription API Returns 405 Error
+
+**Symptoms:**
+- Form submission fails
+- Browser console shows: `POST https://your-frontend.vercel.app/api/v1/subscribe net::ERR_ABORTED 405 (Method Not Allowed)`
+- Error message: "The subscription service is not configured correctly"
+
+**Root Cause:** Frontend calling API on its own domain instead of backend API domain. Occurs when `VITE_API_URL` not set during build.
+
+**Solution:**
+1. Deploy backend first and note the URL
+2. Set `VITE_API_URL` in Vercel dashboard → Frontend Project → Settings → Environment Variables
+   - Key: `VITE_API_URL`
+   - Value: `https://your-backend.vercel.app/api` (for separate deployments) or `/api` (for monorepo)
+3. Set for all environments: Production, Preview, Development
+4. Redeploy frontend
+
+**Common Mistakes:**
+- ❌ Setting `VITE_API_URL` to frontend URL instead of backend
+- ❌ Not redeploying after setting environment variable
+- ❌ Setting variable in backend project instead of frontend
+- ❌ Forgetting `/api` suffix in URL
+
+### Issue: CORS Errors
+
+**Symptoms:**
+- Browser console shows CORS policy errors
+- Requests blocked before reaching backend
+
+**Solution:**
+1. Update backend `ALLOWED_ORIGINS` environment variable
+2. Include all frontend domains (with and without www)
+3. Ensure no trailing slashes in origins
+4. Redeploy backend after changing environment variables
+
+### Issue: Database Connection Errors
+
+**Symptoms:**
+- 500 errors from API
+- Backend logs show database connection failures
+
+**Solution:**
+1. Verify `LA_POSTGRES_URL` or `DATABASE_URL` set correctly
+2. Check database credentials and network access
+3. For Vercel + Neon: ensure connection pooling enabled
+4. Verify database accepts connections from Vercel IPs
+
+### Issue: vercel.json Routing Conflicts
+
+**Symptoms:**
+- 404 errors on API routes
+- Frontend routes not working
+- API returning wrong responses
+
+**Root Cause:** Conflicting `vercel.json` files at frontend and root levels
+
+**Solution:**
+- For monorepo deployment: **delete** `frontend/vercel.json`, use only root `vercel.json`
+- Root `vercel.json` must route:
+  - `/api/*` → backend serverless function
+  - Everything else → frontend static files (`frontend/dist/index.html`)
+
+### Issue: VITE_API_URL Environment Variable Not Recognized
+
+**Symptoms:**
+- Console warning: "VITE_API_URL is not configured"
+- API calls going to wrong URL
+- Monorepo deployments showing 405 errors
+
+**Solution:**
+1. Verify variable set in Vercel dashboard (not in vercel.json)
+2. Set `VITE_API_URL=/api` for monorepo
+3. Set `VITE_API_URL=https://backend-url.vercel.app/api` for separate deployments
+4. Redeploy frontend to apply changes
+
+## 9. Deployment Verification Checklist
+
+**Backend Health Check:**
+```bash
+curl https://your-backend.vercel.app/api/health
+# Expected: {"status":"ok","message":"Legends Ascend API is running"}
+```
+
+**Frontend Access:**
+- Open `https://your-frontend.vercel.app` (or `https://your-app.vercel.app` for monorepo)
+- Verify landing page loads
+- Check browser console for errors
+
+**Subscription Flow:**
+- Submit "Join Waitlist" form
+- Verify success message appears
+- Check EmailOctopus dashboard for new subscriber
+- Verify network tab shows successful POST to `/api/v1/subscribe`
+
+**CORS Verification:**
+- Open browser developer tools → Network tab
+- Submit form and verify:
+  - OPTIONS preflight request succeeds (204 status)
+  - POST request succeeds (200 status)
+  - No CORS errors in console
+
+**Security Checklist:**
+- ✓ `NODE_ENV=production` set on backend
+- ✓ HTTPS enabled on both frontend and backend
+- ✓ `ALLOWED_ORIGINS` configured with production domains only
+- ✓ Database credentials secure (not hardcoded)
+- ✓ All sensitive environment variables in hosting dashboard, not code
+- ✓ CORS configured correctly
+- ✓ Rate limiting enabled on API endpoints
+- ✓ No console.log statements in production code
+
+## 10. Monorepo vs Separate Deployments
+
+**Monorepo Deployment (Recommended for MVP):**
+- Single Vercel project, one domain
+- `VITE_API_URL=/api` (relative URL)
+- CORS not strictly required
+- Lower complexity, single configuration
+- Uses root `/api/*` routes for backend
+
+**Separate Deployments:**
+- Two Vercel projects, two domains
+- `VITE_API_URL=https://backend.vercel.app/api` (absolute URL)
+- CORS required and must be configured
+- Higher complexity, coordinate deployments
+- More flexibility for independent scaling
+
+**Migration Path:**
+If scaling requires separate deployments:
+1. Deploy backend as separate Vercel project
+2. Update `VITE_API_URL` to backend's absolute URL
+3. Configure CORS on backend with frontend domain
+4. Remove backend build/routes from root `vercel.json`
