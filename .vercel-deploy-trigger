@@ -1,0 +1,10 @@
+# Vercel Deployment Trigger
+
+This file was created to trigger a fresh deployment after fixing the monorepo configuration.
+
+## Changes:
+- Removed frontend/vercel.json (was conflicting with root config)
+- Root vercel.json now properly routes /api/* to backend serverless function
+- Backend properly exports Express app for Vercel serverless
+
+Deployment timestamp: 2025-11-19T13:21:00Z
