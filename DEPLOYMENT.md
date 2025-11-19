@@ -1,25 +1,160 @@
 # Deployment Guide
 
-This document outlines the deployment process for the Legends Ascend MVP, including frontend and backend deployment configurations.
+This document outlines the deployment process for the Legends Ascend MVP.
 
-## Architecture Overview
+## Recommended Deployment: Monorepo (Single Vercel Project)
 
-The application consists of two separate deployable components:
+**This is the current and recommended deployment approach.**
 
-1. **Frontend**: React + Vite SPA (deployed to Vercel or similar)
-2. **Backend**: Express API (deployed to Vercel, Railway, Render, or similar)
+The application is deployed as a single Vercel project with:
+- **Frontend**: React + Vite SPA (static files)
+- **Backend**: Express API (serverless function in `/api` directory)
 
-**Important**: The frontend and backend are deployed separately. The frontend makes HTTP requests to the backend API.
+### How It Works
 
-## Prerequisites
+1. Both frontend and backend are deployed to the same Vercel project
+2. The root `vercel.json` configures:
+   - Frontend build from `/frontend` directory
+   - Backend serverless function from `/api/index.ts`
+   - Routing: `/api/*` → backend function, everything else → frontend SPA
+3. No CORS configuration needed (same origin)
+4. Single domain, single deployment
+
+### Prerequisites
 
 - [ ] Node.js LTS (v20.x)
-- [ ] npm or pnpm package manager
-- [ ] Vercel account (or alternative hosting provider)
-- [ ] Backend hosting account
-- [ ] EmailOctopus API credentials (for waitlist functionality)
+- [ ] pnpm package manager (v9.11.0)
+- [ ] Vercel account
+- [ ] PostgreSQL database (e.g., Neon, Supabase)
+- [ ] EmailOctopus API credentials (optional, for waitlist functionality)
 
-## Backend Deployment
+### Environment Variables
+
+Set these in your Vercel project settings (Settings → Environment Variables):
+
+**Required:**
+```bash
+# Frontend - tells it to use relative /api URL (same origin)
+VITE_API_URL=/api
+
+# Backend - database connection
+DATABASE_URL=postgresql://user:password@host:5432/database
+
+# Backend - environment
+NODE_ENV=production
+```
+
+**Optional:**
+```bash
+# EmailOctopus integration for newsletter (US-001)
+EMAILOCTOPUS_API_KEY=your_api_key_here
+EMAILOCTOPUS_LIST_ID=your_list_id_here
+
+# CORS - usually not needed for monorepo, but can be set to *
+ALLOWED_ORIGINS=*
+```
+
+### Vercel Project Settings
+
+**IMPORTANT**: The `vercel.json` file in the repository root handles the build configuration. You should use the following Vercel project settings:
+
+1. **Root Directory**: `/` (leave empty or set to root)
+2. **Build Command**: Override with `pnpm install && pnpm --filter=./frontend run build`
+3. **Output Directory**: Override with `frontend/dist`
+4. **Install Command**: `pnpm install`
+
+> **Note**: The `vercel.json` file will automatically configure the `/api` serverless function. You only need to ensure the frontend builds correctly.
+
+### Deployment Steps
+
+1. **Initial Setup**:
+   ```bash
+   # Clone the repository
+   git clone <repository-url>
+   cd legends-ascend-mvp
+   
+   # Install dependencies
+   pnpm install
+   ```
+
+2. **Deploy to Vercel**:
+   ```bash
+   # Install Vercel CLI (if not already installed)
+   npm install -g vercel
+   
+   # Deploy (from repository root)
+   vercel --prod
+   ```
+
+3. **Configure Environment Variables**:
+   - Go to Vercel dashboard → Your Project → Settings → Environment Variables
+   - Add all required variables listed above
+   - Redeploy for changes to take effect
+
+### Testing Your Deployment
+
+1. **Test Backend API**:
+   ```bash
+   curl https://your-app.vercel.app/api/health
+   ```
+   Expected: `{"status":"ok","message":"Legends Ascend API is running"}`
+
+2. **Test Frontend**:
+   - Visit `https://your-app.vercel.app`
+   - Navigate to landing page
+   - Try newsletter subscription
+   - Check browser console - should show no errors
+
+3. **Test Subscribe Endpoint**:
+   ```bash
+   curl -X POST https://your-app.vercel.app/api/v1/subscribe \
+     -H "Content-Type: application/json" \
+     -d '{"email":"test@example.com","gdprConsent":true,"timestamp":"2025-11-19T12:00:00Z"}'
+   ```
+
+### Troubleshooting
+
+#### Issue: Newsletter subscription returns 404
+
+**Symptoms**:
+- POST to `/api/v1/subscribe` returns 404
+- Browser console shows: `POST https://your-app.vercel.app/api/v1/subscribe 404 (Not Found)`
+
+**Solution**:
+1. Verify `vercel.json` in repository root has correct configuration
+2. Ensure `VITE_API_URL=/api` is set in Vercel environment variables
+3. Redeploy the application
+4. Check Vercel build logs for errors
+
+#### Issue: VITE_API_URL configuration warning in console
+
+**Symptoms**:
+- Console shows: "VITE_API_URL is not configured"
+- Deployment configuration error messages
+
+**Solution**:
+1. Go to Vercel dashboard → Settings → Environment Variables
+2. Add: `VITE_API_URL=/api` for all environments (Production, Preview, Development)
+3. Redeploy the frontend
+
+#### Issue: Database connection errors
+
+**Symptoms**:
+- 500 errors from API
+- Backend logs show database connection failures
+
+**Solution**:
+1. Verify `DATABASE_URL` is set correctly in Vercel
+2. Check database credentials and network access
+3. Ensure database accepts connections from Vercel IPs
+
+---
+
+## Alternative Deployment: Separate Projects
+
+**Note: This approach is more complex and requires CORS configuration. Use monorepo approach above instead.**
+
+The application can also be deployed as two separate Vercel projects:
 
 ### Environment Variables
 
