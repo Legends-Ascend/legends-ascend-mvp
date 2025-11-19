@@ -20,7 +20,7 @@ app.set('trust proxy', 1); // Ensure correct client IP detection behind proxies
 // CORS configuration - explicit setup for development and production
 const corsOptions = {
   origin: process.env.NODE_ENV === 'production' 
-    ? process.env.ALLOWED_ORIGINS?.split(',') || []
+    ? process.env.ALLOWED_ORIGINS?.split(',') || ['*']
     : ['http://localhost:5173', 'http://localhost:3000', 'http://127.0.0.1:5173', 'http://127.0.0.1:3000'],
   credentials: true,
   optionsSuccessStatus: 200,
@@ -44,19 +44,55 @@ app.get('/api/health', (req, res) => {
   res.json({ status: 'ok', message: 'Legends Ascend API is running' });
 });
 
-// Initialize database and start server
-const startServer = async () => {
-  try {
-    await initializeDatabase();
-    console.log('Database initialized successfully');
-    
-    app.listen(PORT, () => {
-      console.log(`Server is running on port ${PORT}`);
-    });
-  } catch (error) {
-    console.error('Failed to start server:', error);
-    process.exit(1);
+// Database initialization
+let dbInitialized = false;
+
+const ensureDbInitialized = async () => {
+  if (!dbInitialized) {
+    try {
+      await initializeDatabase();
+      dbInitialized = true;
+      console.log('Database initialized successfully');
+    } catch (error) {
+      console.error('Failed to initialize database:', error);
+      throw error;
+    }
   }
 };
 
-startServer();
+// For serverless deployment (Vercel)
+if (process.env.VERCEL) {
+  // Initialize database on first request
+  app.use(async (req, res, next) => {
+    try {
+      await ensureDbInitialized();
+      next();
+    } catch (error) {
+      console.error('Database initialization error:', error);
+      res.status(500).json({ 
+        success: false, 
+        message: 'Service temporarily unavailable' 
+      });
+    }
+  });
+  
+  // Export the Express app for Vercel
+  export default app;
+} else {
+  // Traditional server deployment
+  const startServer = async () => {
+    try {
+      await initializeDatabase();
+      console.log('Database initialized successfully');
+      
+      app.listen(PORT, () => {
+        console.log(`Server is running on port ${PORT}`);
+      });
+    } catch (error) {
+      console.error('Failed to start server:', error);
+      process.exit(1);
+    }
+  };
+
+  startServer();
+}
