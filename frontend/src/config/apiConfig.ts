@@ -16,14 +16,22 @@ export function getApiUrl(): string {
 /**
  * Validate API configuration for production deployments
  * This helps catch the common issue where VITE_API_URL is not set in production
+ * 
+ * Note: In development, relative URLs (/api) are valid due to Vite proxy configuration
  */
 export function validateApiConfig(): { isValid: boolean; warnings: string[] } {
   const warnings: string[] = [];
   const apiUrl = getApiUrl();
   
+  // Only validate in production builds
+  // In development, the Vite proxy handles /api requests correctly
+  if (!import.meta.env.PROD) {
+    return { isValid: true, warnings: [] };
+  }
+  
   // In production builds, check if we're using a relative URL
   // This indicates VITE_API_URL was not set at build time
-  if (import.meta.env.PROD && apiUrl.startsWith('/')) {
+  if (apiUrl.startsWith('/')) {
     warnings.push(
       'VITE_API_URL is not configured. API requests will fail in production. ' +
       'Please set VITE_API_URL in your deployment environment variables to your backend API URL ' +
@@ -63,8 +71,10 @@ export function logConfigWarnings(): void {
 
 /**
  * Check if we're in a production environment with invalid configuration
+ * Returns false in development mode since Vite proxy handles /api correctly
  */
 export function isProductionMisconfigured(): boolean {
+  // In development, relative URLs are handled by Vite proxy - not a misconfiguration
   if (!import.meta.env.PROD) {
     return false;
   }
