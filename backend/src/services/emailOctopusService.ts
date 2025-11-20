@@ -48,8 +48,8 @@ export async function subscribeToEmailList(
   const apiUrl = `https://emailoctopus.com/api/1.6/lists/${config.listId}/contacts`;
 
   try {
-    // Using global fetch API
-    const response: FetchResponse = await fetch(apiUrl, {
+    // Using global fetch API - cast to any then to our interface to avoid type conflicts
+    const response = (await fetch(apiUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -62,7 +62,7 @@ export async function subscribeToEmailList(
           ConsentTimestamp: consentTimestamp,
         },
       }),
-    });
+    })) as any as FetchResponse;
 
     const data = await response.json() as EmailOctopusResponse;
 
