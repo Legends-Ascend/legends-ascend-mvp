@@ -9,7 +9,9 @@ import type { GameView } from './Dashboard';
 import { LogoutButton } from '../auth/LogoutButton';
 import { useAuth } from '../../hooks/useAuth';
 
-const SidebarContainer = styled.aside<{ isOpen: boolean }>`
+const SidebarContainer = styled.aside.withConfig({
+  shouldForwardProp: (prop) => prop !== 'isOpen',
+})<{ isOpen: boolean }>`
   position: fixed;
   top: 64px;
   left: 0;
@@ -30,8 +32,8 @@ const SidebarContainer = styled.aside<{ isOpen: boolean }>`
   }
 `;
 
-const Overlay = styled.div<{ isOpen: boolean }>`
-  display: ${props => props.isOpen ? 'block' : 'none'};
+const Overlay = styled.div<{ $isOpen: boolean }>`
+  display: ${props => props.$isOpen ? 'block' : 'none'};
   position: fixed;
   top: 64px;
   left: 0;
@@ -59,17 +61,17 @@ const NavItem = styled.li`
   margin: 0;
 `;
 
-const NavButton = styled.button<{ active: boolean }>`
+const NavButton = styled.button<{ $active: boolean }>`
   font-family: 'Inter', 'Poppins', sans-serif;
   font-size: 16px;
-  font-weight: ${props => props.active ? '600' : '500'};
+  font-weight: ${props => props.$active ? '600' : '500'};
   width: 100%;
   padding: 12px 24px;
   text-align: left;
-  background: ${props => props.active ? '#1E3A8A' : 'transparent'};
-  color: ${props => props.active ? '#FFFFFF' : '#64748B'};
+  background: ${props => props.$active ? '#1E3A8A' : 'transparent'};
+  color: ${props => props.$active ? '#FFFFFF' : '#64748B'};
   border: none;
-  border-left: ${props => props.active ? '4px solid #F59E0B' : '4px solid transparent'};
+  border-left: ${props => props.$active ? '4px solid #F59E0B' : '4px solid transparent'};
   cursor: pointer;
   transition: all 0.2s;
   display: flex;
@@ -78,8 +80,8 @@ const NavButton = styled.button<{ active: boolean }>`
   min-height: 44px;
 
   &:hover {
-    background: ${props => props.active ? '#1E3A8A' : '#E2E8F0'};
-    color: ${props => props.active ? '#FFFFFF' : '#1E3A8A'};
+    background: ${props => props.$active ? '#1E3A8A' : '#E2E8F0'};
+    color: ${props => props.$active ? '#FFFFFF' : '#1E3A8A'};
   }
 
   &:focus {
@@ -140,7 +142,7 @@ export function Sidebar({ currentView, onNavigate, isOpen, onClose }: SidebarPro
 
   return (
     <>
-      <Overlay isOpen={isOpen} onClick={onClose} aria-hidden="true" />
+      <Overlay $isOpen={isOpen} onClick={onClose} aria-hidden="true" />
       
       <SidebarContainer
         isOpen={isOpen}
@@ -152,7 +154,7 @@ export function Sidebar({ currentView, onNavigate, isOpen, onClose }: SidebarPro
             {navigationItems.map(({ view, label, icon }) => (
               <NavItem key={view}>
                 <NavButton
-                  active={currentView === view}
+                  $active={currentView === view}
                   onClick={() => handleNavigation(view)}
                   aria-current={currentView === view ? 'page' : undefined}
                 >

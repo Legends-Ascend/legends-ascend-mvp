@@ -61,7 +61,7 @@ const HamburgerButton = styled.button`
   }
 `;
 
-const HamburgerIcon = styled.div<{ isOpen: boolean }>`
+const HamburgerIcon = styled.div<{ $isOpen: boolean }>`
   width: 24px;
   height: 2px;
   background: #1E3A8A;
@@ -86,7 +86,7 @@ const HamburgerIcon = styled.div<{ isOpen: boolean }>`
     top: 8px;
   }
 
-  ${props => props.isOpen && `
+  ${props => props.$isOpen && `
     background-color: transparent;
 
     &::before {
@@ -142,15 +142,15 @@ const Nav = styled.nav`
   }
 `;
 
-const NavLink = styled.button<{ active: boolean }>`
+const NavLink = styled.button<{ $active: boolean }>`
   font-family: 'Inter', 'Poppins', sans-serif;
   font-size: 16px;
-  font-weight: ${props => props.active ? '600' : '500'};
+  font-weight: ${props => props.$active ? '600' : '500'};
   padding: 10px 16px;
-  background: ${props => props.active ? '#1E3A8A' : 'transparent'};
-  color: ${props => props.active ? '#FFFFFF' : '#64748B'};
+  background: ${props => props.$active ? '#1E3A8A' : 'transparent'};
+  color: ${props => props.$active ? '#FFFFFF' : '#64748B'};
   border: none;
-  border-bottom: ${props => props.active ? '2px solid #F59E0B' : '2px solid transparent'};
+  border-bottom: ${props => props.$active ? '2px solid #F59E0B' : '2px solid transparent'};
   border-radius: 6px 6px 0 0;
   cursor: pointer;
   transition: all 0.2s;
@@ -158,8 +158,8 @@ const NavLink = styled.button<{ active: boolean }>`
   min-height: 44px;
 
   &:hover {
-    background: ${props => props.active ? '#1E3A8A' : '#F1F5F9'};
-    color: ${props => props.active ? '#FFFFFF' : '#1E3A8A'};
+    background: ${props => props.$active ? '#1E3A8A' : '#F1F5F9'};
+    color: ${props => props.$active ? '#FFFFFF' : '#1E3A8A'};
   }
 
   &:focus {
@@ -219,7 +219,7 @@ export function Header({ user, currentView, onNavigate, onToggleSidebar, isSideb
             aria-label={isSidebarOpen ? 'Close navigation menu' : 'Open navigation menu'}
             aria-expanded={isSidebarOpen}
           >
-            <HamburgerIcon isOpen={isSidebarOpen} />
+            <HamburgerIcon $isOpen={isSidebarOpen} />
           </HamburgerButton>
 
           <LogoLink
@@ -242,7 +242,7 @@ export function Header({ user, currentView, onNavigate, onToggleSidebar, isSideb
           {navigationItems.map(({ view, label }) => (
             <NavLink
               key={view}
-              active={currentView === view}
+              $active={currentView === view}
               onClick={() => onNavigate(view)}
               aria-current={currentView === view ? 'page' : undefined}
             >
