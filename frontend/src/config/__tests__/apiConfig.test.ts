@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { afterEach, describe, it, expect, vi } from 'vitest';
 import { getApiUrl, validateApiConfig, logConfigWarnings, isProductionMisconfigured } from '../apiConfig';
 
 /**
@@ -73,29 +73,48 @@ describe('apiConfig - Development Mode Behavior (B-EX2)', () => {
   });
 
   describe('Production Mode Validation Logic', () => {
-    it('should have correct validation logic for production URLs', () => {
-      // Test the validation logic with production-like URLs
-      // These tests verify the logic without changing import.meta.env.PROD
-      
-      const testCases = [
-        { url: '/api', shouldWarn: false }, // Now valid for monorepo deployments
-        { url: 'https://backend.example.com/api', shouldWarn: false },
-        { url: 'https://frontend.vercel.app/api', shouldWarn: true },
-        { url: 'https://api.example.com/api', shouldWarn: false },
-      ];
-      
-      // This verifies the URL validation logic is correct
-      testCases.forEach(({ url, shouldWarn }) => {
-        const startsWithSlash = url.startsWith('/');
-        const looksLikeFrontend = url.includes('vercel.app') && 
-                                   !url.includes('backend') && 
-                                   !url.includes('api.');
-        
-        // Only warn for frontend URLs, not relative URLs (monorepo deployments)
-        const wouldWarn = !startsWithSlash && looksLikeFrontend;
-        
-        expect(wouldWarn).toBe(shouldWarn);
+    const originalEnv = { ...import.meta.env };
+
+    const setEnv = (overrides: Record<string, unknown>) => {
+      Object.assign(import.meta.env as Record<string, unknown>, overrides);
+    };
+
+    afterEach(() => {
+      Object.keys(import.meta.env).forEach((key) => {
+        delete (import.meta.env as Record<string, unknown>)[key];
       });
+
+      Object.assign(import.meta.env as Record<string, unknown>, originalEnv);
+    });
+
+    it('should treat /api as valid for monorepo deployments', () => {
+      setEnv({ PROD: true, VITE_API_URL: '/api' });
+
+      const result = validateApiConfig();
+
+      expect(result.isValid).toBe(true);
+      expect(result.warnings).toHaveLength(0);
+      expect(isProductionMisconfigured()).toBe(false);
+    });
+
+    it('should treat backend URLs as valid and not warn', () => {
+      setEnv({ PROD: true, VITE_API_URL: 'https://backend.example.com/api' });
+
+      const result = validateApiConfig();
+
+      expect(result.isValid).toBe(true);
+      expect(result.warnings).toHaveLength(0);
+      expect(isProductionMisconfigured()).toBe(false);
+    });
+
+    it('should warn when pointing to a frontend deployment', () => {
+      setEnv({ PROD: true, VITE_API_URL: 'https://frontend.vercel.app/api' });
+
+      const result = validateApiConfig();
+
+      expect(result.isValid).toBe(false);
+      expect(result.warnings).toHaveLength(1);
+      expect(isProductionMisconfigured()).toBe(true);
     });
   });
 });
