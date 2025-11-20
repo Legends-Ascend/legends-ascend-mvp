@@ -50,22 +50,6 @@ export const EmailSignupForm: React.FC = () => {
       // Get API URL from configuration
       const apiUrl = getApiUrl();
       
-      // Log configuration issue if detected
-      if (isProductionMisconfigured()) {
-        console.error(
-          '❌ DEPLOYMENT CONFIGURATION ERROR:\n' +
-          'VITE_API_URL environment variable is not set.\n' +
-          'The API URL must be configured in your Vercel project settings.\n\n' +
-          'Steps to fix:\n' +
-          '1. Go to your Vercel dashboard\n' +
-          '2. Select your frontend project\n' +
-          '3. Go to Settings > Environment Variables\n' +
-          '4. Add VITE_API_URL with your backend URL (e.g., https://your-backend.vercel.app/api)\n' +
-          '5. Redeploy your frontend\n\n' +
-          'See DEPLOYMENT.md for detailed instructions.'
-        );
-      }
-      
       const response = await fetch(`${apiUrl}/v1/subscribe`, {
         method: 'POST',
         headers: {
@@ -97,21 +81,25 @@ export const EmailSignupForm: React.FC = () => {
         } else if (response.status === 405) {
           // Method Not Allowed - likely API configuration issue
           errorMessage = 'The subscription service is not configured correctly. Please contact support.';
-          console.error(
-            '❌ 405 Method Not Allowed Error:\n' +
-            'This error typically means VITE_API_URL is not configured correctly.\n\n' +
-            'Current API URL: ' + getApiUrl() + '\n' +
-            'Request attempted to: ' + getApiUrl() + '/v1/subscribe\n\n' +
-            'If this is a production deployment, VITE_API_URL must be set to your backend API URL.\n' +
-            'Steps to fix:\n' +
-            '1. Deploy your backend API to Vercel, Railway, or another hosting provider\n' +
-            '2. Note the backend URL (e.g., https://your-backend.vercel.app)\n' +
-            '3. In Vercel dashboard for your FRONTEND project:\n' +
-            '   - Go to Settings > Environment Variables\n' +
-            '   - Add: VITE_API_URL = https://your-backend.vercel.app/api\n' +
-            '4. Redeploy your frontend\n\n' +
-            'See DEPLOYMENT.md for detailed instructions.'
-          );
+          
+          // Only log detailed configuration help in production when actually misconfigured
+          if (isProductionMisconfigured()) {
+            console.error(
+              '❌ 405 Method Not Allowed Error:\n' +
+              'This error typically means VITE_API_URL is not configured correctly.\n\n' +
+              'Current API URL: ' + getApiUrl() + '\n' +
+              'Request attempted to: ' + getApiUrl() + '/v1/subscribe\n\n' +
+              'If this is a production deployment, VITE_API_URL must be set to your backend API URL.\n' +
+              'Steps to fix:\n' +
+              '1. Deploy your backend API to Vercel, Railway, or another hosting provider\n' +
+              '2. Note the backend URL (e.g., https://your-backend.vercel.app)\n' +
+              '3. In Vercel dashboard for your FRONTEND project:\n' +
+              '   - Go to Settings > Environment Variables\n' +
+              '   - Add: VITE_API_URL = https://your-backend.vercel.app/api\n' +
+              '4. Redeploy your frontend\n\n' +
+              'See DEPLOYMENT.md for detailed instructions.'
+            );
+          }
         }
         
         setSubmitStatus('error');
