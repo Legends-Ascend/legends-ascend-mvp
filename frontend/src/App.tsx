@@ -113,7 +113,9 @@ function App() {
     } else if (path === '/register') {
       setCurrentView('register');
     } else if (path === '/game') {
-      setCurrentView('players');
+      setCurrentView('dashboard');
+      setDashboardView('lineup');
+      window.history.replaceState({}, '', '/game/lineup');
     } else if (path.startsWith('/game/')) {
       // New dashboard routes
       const match = path.match(/\/game\/(\w+)/);

@@ -194,8 +194,8 @@ export function LoginPage() {
 
     try {
       await login(email, password);
-      // Redirect to /game after successful login
-      window.location.href = '/game';
+      // Redirect to dashboard after successful login
+      window.location.href = '/game/lineup';
     } catch (error) {
       setErrors({
         form: error instanceof Error ? error.message : 'Login failed',
