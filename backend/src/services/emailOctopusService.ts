@@ -16,6 +16,8 @@ interface EmailOctopusConfig {
   betaAccessTag?: string;
 }
 
+const DEFAULT_BETA_ACCESS_TAG = 'beta';
+
 interface EmailOctopusResponse {
   id?: string;
   email_address?: string;
@@ -58,8 +60,9 @@ export async function subscribeToEmailList(
   requestBody.append('fields[ConsentTimestamp]', consentTimestamp);
   requestBody.append('update_existing', 'true');
 
-  // Add beta-access tag if configured
-  const tags: string[] = config.betaAccessTag ? [config.betaAccessTag] : [];
+  // Add beta-access tag if configured or fall back to a safe default
+  const resolvedTag = config.betaAccessTag || DEFAULT_BETA_ACCESS_TAG;
+  const tags: string[] = [resolvedTag];
   tags.forEach((tag) => requestBody.append('tags[]', tag));
 
   const debugEnabled = process.env.EMAILOCTOPUS_DEBUG !== 'false';
@@ -85,6 +88,8 @@ export async function subscribeToEmailList(
             .replace(/api_key=[^&]+/i, 'api_key=[REDACTED]'),
           tagsApplied: tags,
           updateExisting: true,
+          configuredTag: config.betaAccessTag ?? null,
+          tagFallbackUsed: !config.betaAccessTag,
         }
       : undefined;
 

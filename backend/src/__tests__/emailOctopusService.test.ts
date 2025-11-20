@@ -13,7 +13,7 @@ describe('emailOctopusService', () => {
       EMAILOCTOPUS_API_KEY: 'test-api-key',
       EMAILOCTOPUS_LIST_ID: 'test-list-id',
       EMAILOCTOPUS_DEBUG: 'false',
-      // Don't set EMAILOCTOPUS_BETA_ACCESS_TAG by default to preserve existing test behavior
+      // Don't set EMAILOCTOPUS_BETA_ACCESS_TAG by default to validate fallback tag behavior
     };
   });
 
@@ -54,6 +54,7 @@ describe('emailOctopusService', () => {
               status: 'SUBSCRIBED',
               'fields[ConsentTimestamp]': timestamp,
               update_existing: 'true',
+              'tags[]': 'beta',
             }).toString(),
           })
         );
@@ -96,6 +97,53 @@ describe('emailOctopusService', () => {
 
         expect((result.debug as any).requestBodyPreview).toContain('api_key=[REDACTED]');
         expect((result.debug as any).requestBodyPreview).toContain('tags%5B%5D=beta');
+      });
+
+      it('should fall back to the default tag and report the source when not configured', async () => {
+        process.env.EMAILOCTOPUS_DEBUG = 'true';
+
+        const email = 'fallback@example.com';
+        const timestamp = '2025-11-14T09:00:00.000Z';
+
+        (global.fetch as jest.Mock).mockResolvedValue({
+          status: 201,
+          json: async () => ({
+            id: '999',
+            email_address: email,
+            status: 'SUBSCRIBED',
+          }),
+        });
+
+        const result = await subscribeToEmailList(email, timestamp);
+
+        expect(global.fetch).toHaveBeenCalledWith(
+          'https://emailoctopus.com/api/1.6/lists/test-list-id/contacts',
+          expect.objectContaining({
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+              api_key: 'test-api-key',
+              email_address: email,
+              status: 'SUBSCRIBED',
+              'fields[ConsentTimestamp]': timestamp,
+              update_existing: 'true',
+              'tags[]': 'beta',
+            }).toString(),
+          })
+        );
+
+        expect(result).toEqual({
+          success: true,
+          message: 'Thank you! Check your email to confirm your subscription.',
+          status: 'pending_confirmation',
+          debug: expect.objectContaining({
+            tagsApplied: ['beta'],
+            configuredTag: null,
+            tagFallbackUsed: true,
+          }),
+        });
       });
 
       it('should include tags and update_existing flag when configured', async () => {
@@ -477,7 +525,7 @@ describe('emailOctopusService', () => {
         expect(callBody.get('status')).toBe('SUBSCRIBED');
       });
 
-      it('should not include tags when EMAILOCTOPUS_BETA_ACCESS_TAG is not set', async () => {
+      it('should include the default tag when EMAILOCTOPUS_BETA_ACCESS_TAG is not set', async () => {
         // Arrange
         const email = 'test@example.com';
         const timestamp = '2025-11-14T09:00:00.000Z';
@@ -496,7 +544,7 @@ describe('emailOctopusService', () => {
 
         // Assert
         const callBody = new URLSearchParams((global.fetch as jest.Mock).mock.calls[0][1].body);
-        expect(callBody.getAll('tags[]')).toEqual([]);
+        expect(callBody.getAll('tags[]')).toEqual(['beta']);
         expect(callBody.get('api_key')).toBe('test-api-key');
         expect(callBody.get('email_address')).toBe(email);
       });
