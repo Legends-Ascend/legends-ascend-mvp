@@ -13,6 +13,7 @@ interface FetchResponse {
 interface EmailOctopusConfig {
   apiKey: string;
   listId: string;
+  betaAccessTag?: string;
 }
 
 interface EmailOctopusResponse {
@@ -38,6 +39,7 @@ export async function subscribeToEmailList(
   const config: EmailOctopusConfig = {
     apiKey: process.env.EMAILOCTOPUS_API_KEY || '',
     listId: process.env.EMAILOCTOPUS_LIST_ID || '',
+    betaAccessTag: process.env.EMAILOCTOPUS_BETA_ACCESS_TAG,
   };
 
   // Validate configuration
@@ -47,6 +49,21 @@ export async function subscribeToEmailList(
 
   const apiUrl = `https://emailoctopus.com/api/1.6/lists/${config.listId}/contacts`;
 
+  // Build request body with optional tags
+  const requestBody: any = {
+    api_key: config.apiKey,
+    email_address: email,
+    status: 'SUBSCRIBED',
+    fields: {
+      ConsentTimestamp: consentTimestamp,
+    },
+  };
+
+  // Add beta-access tag if configured
+  if (config.betaAccessTag) {
+    requestBody.tags = [config.betaAccessTag];
+  }
+
   try {
     // Using global fetch API - cast to any then to our interface to avoid type conflicts
     const response = (await fetch(apiUrl, {
@@ -54,14 +71,7 @@ export async function subscribeToEmailList(
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        api_key: config.apiKey,
-        email_address: email,
-        status: 'SUBSCRIBED',
-        fields: {
-          ConsentTimestamp: consentTimestamp,
-        },
-      }),
+      body: JSON.stringify(requestBody),
     })) as any as FetchResponse;
 
     const data = await response.json() as EmailOctopusResponse;

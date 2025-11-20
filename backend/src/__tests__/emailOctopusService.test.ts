@@ -12,6 +12,7 @@ describe('emailOctopusService', () => {
       ...originalEnv,
       EMAILOCTOPUS_API_KEY: 'test-api-key',
       EMAILOCTOPUS_LIST_ID: 'test-list-id',
+      // Don't set EMAILOCTOPUS_BETA_ACCESS_TAG by default to preserve existing test behavior
     };
   });
 
@@ -370,6 +371,56 @@ describe('emailOctopusService', () => {
           'https://emailoctopus.com/api/1.6/lists/test-list-id/contacts',
           expect.any(Object)
         );
+      });
+
+      it('should include beta-access tag when EMAILOCTOPUS_BETA_ACCESS_TAG is set', async () => {
+        // Arrange
+        process.env.EMAILOCTOPUS_BETA_ACCESS_TAG = 'beta-access';
+        const email = 'test@example.com';
+        const timestamp = '2025-11-14T09:00:00.000Z';
+
+        (global.fetch as jest.Mock).mockResolvedValue({
+          status: 201,
+          json: async () => ({
+            id: '123',
+            email_address: email,
+            status: 'SUBSCRIBED',
+          }),
+        });
+
+        // Act
+        await subscribeToEmailList(email, timestamp);
+
+        // Assert
+        const callBody = JSON.parse((global.fetch as jest.Mock).mock.calls[0][1].body);
+        expect(callBody.tags).toEqual(['beta-access']);
+        expect(callBody.api_key).toBe('test-api-key');
+        expect(callBody.email_address).toBe(email);
+        expect(callBody.status).toBe('SUBSCRIBED');
+      });
+
+      it('should not include tags when EMAILOCTOPUS_BETA_ACCESS_TAG is not set', async () => {
+        // Arrange
+        const email = 'test@example.com';
+        const timestamp = '2025-11-14T09:00:00.000Z';
+
+        (global.fetch as jest.Mock).mockResolvedValue({
+          status: 201,
+          json: async () => ({
+            id: '123',
+            email_address: email,
+            status: 'SUBSCRIBED',
+          }),
+        });
+
+        // Act
+        await subscribeToEmailList(email, timestamp);
+
+        // Assert
+        const callBody = JSON.parse((global.fetch as jest.Mock).mock.calls[0][1].body);
+        expect(callBody.tags).toBeUndefined();
+        expect(callBody.api_key).toBe('test-api-key');
+        expect(callBody.email_address).toBe(email);
       });
     });
   });
