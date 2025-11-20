@@ -41,8 +41,11 @@ The `vercel.json` file in this repository is now fully configured to handle both
 **What happens automatically:**
 - Frontend builds using `@vercel/static-build` from `frontend/package.json`
 - The `vercel-build` script runs: `pnpm run build`
+- Build output is in `dist` directory (relative to `frontend/package.json` location)
 - Backend API deploys as serverless function from `api/index.ts`
 - Routing is configured: `/api/*` → backend, everything else → frontend
+
+> **Important**: The `distDir` in `vercel.json` is `"dist"`, which is relative to the `frontend/package.json` location (not the repository root). This means Vercel looks for `frontend/dist` when deploying the static files.
 
 #### 3. Redeploy
 
