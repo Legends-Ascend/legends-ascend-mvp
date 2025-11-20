@@ -4,6 +4,12 @@
  * Per US-001 requirements
  */
 
+// Type for the fetch API Response (not Express Response)
+interface FetchResponse {
+  status: number;
+  json(): Promise<any>;
+}
+
 interface EmailOctopusConfig {
   apiKey: string;
   listId: string;
@@ -42,7 +48,8 @@ export async function subscribeToEmailList(
   const apiUrl = `https://emailoctopus.com/api/1.6/lists/${config.listId}/contacts`;
 
   try {
-    const response = await fetch(apiUrl, {
+    // Using global fetch API
+    const response: FetchResponse = await fetch(apiUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
