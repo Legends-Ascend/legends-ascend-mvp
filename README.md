@@ -231,7 +231,7 @@ This project is proprietary software. All rights reserved.
 For questions, suggestions, or collaboration opportunities:
 
 - **GitHub Issues**: [Create an issue](https://github.com/Legends-Ascend/legends-ascend-mvp/issues/new)
-- **Email**: info@legends-ascend.com (coming soon)
+- **Email**: info@legendsascend.com (coming soon)
 - **Discord**: Join our community (coming soon)
 
 ## Acknowledgments
