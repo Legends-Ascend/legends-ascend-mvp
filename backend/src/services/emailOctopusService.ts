@@ -56,13 +56,16 @@ export async function subscribeToEmailList(
   requestBody.append('email_address', email);
   requestBody.append('status', 'SUBSCRIBED');
   requestBody.append('fields[ConsentTimestamp]', consentTimestamp);
+  requestBody.append('update_existing', 'true');
 
   // Add beta-access tag if configured
   if (config.betaAccessTag) {
     requestBody.append('tags[]', config.betaAccessTag);
   }
 
-  const debugEnabled = process.env.EMAILOCTOPUS_DEBUG === 'true';
+  const debugEnabled =
+    process.env.EMAILOCTOPUS_DEBUG === 'true' ||
+    (process.env.NODE_ENV !== 'production' && process.env.EMAILOCTOPUS_DEBUG !== 'false');
 
   try {
     // Using global fetch API - cast to any then to our interface to avoid type conflicts

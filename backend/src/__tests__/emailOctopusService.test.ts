@@ -12,6 +12,7 @@ describe('emailOctopusService', () => {
       ...originalEnv,
       EMAILOCTOPUS_API_KEY: 'test-api-key',
       EMAILOCTOPUS_LIST_ID: 'test-list-id',
+      EMAILOCTOPUS_DEBUG: 'false',
       // Don't set EMAILOCTOPUS_BETA_ACCESS_TAG by default to preserve existing test behavior
     };
   });
@@ -52,6 +53,52 @@ describe('emailOctopusService', () => {
               email_address: email,
               status: 'SUBSCRIBED',
               'fields[ConsentTimestamp]': timestamp,
+              update_existing: 'true',
+            }).toString(),
+          })
+        );
+
+        expect(result).toEqual({
+          success: true,
+          message: 'Thank you! Check your email to confirm your subscription.',
+          status: 'pending_confirmation',
+        });
+      });
+
+      it('should include tags and update_existing flag when configured', async () => {
+        // Arrange
+        process.env.EMAILOCTOPUS_BETA_ACCESS_TAG = 'beta-access';
+        const email = 'tagged@example.com';
+        const timestamp = '2025-11-14T09:00:00.000Z';
+
+        (global.fetch as jest.Mock).mockResolvedValue({
+          status: 201,
+          json: async () => ({
+            id: '456',
+            email_address: email,
+            status: 'SUBSCRIBED',
+            tags: ['beta-access'],
+          }),
+        });
+
+        // Act
+        const result = await subscribeToEmailList(email, timestamp);
+
+        // Assert
+        expect(global.fetch).toHaveBeenCalledWith(
+          'https://emailoctopus.com/api/1.6/lists/test-list-id/contacts',
+          expect.objectContaining({
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+              api_key: 'test-api-key',
+              email_address: email,
+              status: 'SUBSCRIBED',
+              'fields[ConsentTimestamp]': timestamp,
+              update_existing: 'true',
+              'tags[]': 'beta-access',
             }).toString(),
           })
         );
