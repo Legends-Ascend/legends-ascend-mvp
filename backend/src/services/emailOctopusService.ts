@@ -35,7 +35,7 @@ interface EmailOctopusResponse {
 export async function subscribeToEmailList(
   email: string,
   consentTimestamp: string
-): Promise<{ success: boolean; message: string; status: string }> {
+): Promise<{ success: boolean; message: string; status: string; debug?: Record<string, unknown> }> {
   const config: EmailOctopusConfig = {
     apiKey: process.env.EMAILOCTOPUS_API_KEY || '',
     listId: process.env.EMAILOCTOPUS_LIST_ID || '',
@@ -49,32 +49,40 @@ export async function subscribeToEmailList(
 
   const apiUrl = `https://emailoctopus.com/api/1.6/lists/${config.listId}/contacts`;
 
-  // Build request body with optional tags
-  const requestBody: any = {
-    api_key: config.apiKey,
-    email_address: email,
-    status: 'SUBSCRIBED',
-    fields: {
-      ConsentTimestamp: consentTimestamp,
-    },
-  };
+  // Build request body per EmailOctopus API docs
+  // https://emailoctopus.com/api-documentation/lists/create-contact
+  const requestBody = new URLSearchParams();
+  requestBody.append('api_key', config.apiKey);
+  requestBody.append('email_address', email);
+  requestBody.append('status', 'SUBSCRIBED');
+  requestBody.append('fields[ConsentTimestamp]', consentTimestamp);
 
   // Add beta-access tag if configured
   if (config.betaAccessTag) {
-    requestBody.tags = [config.betaAccessTag];
+    requestBody.append('tags[]', config.betaAccessTag);
   }
+
+  const debugEnabled = process.env.EMAILOCTOPUS_DEBUG === 'true';
 
   try {
     // Using global fetch API - cast to any then to our interface to avoid type conflicts
     const response = (await fetch(apiUrl, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/x-www-form-urlencoded',
       },
-      body: JSON.stringify(requestBody),
+      body: requestBody.toString(),
     })) as any as FetchResponse;
 
     const data = await response.json() as EmailOctopusResponse;
+
+    const debugPayload = debugEnabled
+      ? {
+          httpStatus: response.status,
+          emailOctopusResponse: data,
+          requestBody: requestBody.toString(),
+        }
+      : undefined;
 
     // Handle different response codes
     if (response.status === 200 || response.status === 201) {
@@ -82,12 +90,14 @@ export async function subscribeToEmailList(
         success: true,
         message: 'Thank you! Check your email to confirm your subscription.',
         status: 'pending_confirmation',
+        ...(debugPayload ? { debug: debugPayload } : {}),
       };
     } else if (response.status === 409 || data.error?.code === 'MEMBER_EXISTS_WITH_EMAIL_ADDRESS') {
       return {
         success: true,
         message: 'This email is already on our list. Check your inbox for updates.',
         status: 'already_subscribed',
+        ...(debugPayload ? { debug: debugPayload } : {}),
       };
     } else {
       console.error('EmailOctopus API error:', data.error);
@@ -95,6 +105,7 @@ export async function subscribeToEmailList(
         success: false,
         message: 'Unable to subscribe. Please try again later.',
         status: 'error',
+        ...(debugPayload ? { debug: debugPayload } : {}),
       };
     }
   } catch (error) {
@@ -103,6 +114,13 @@ export async function subscribeToEmailList(
       success: false,
       message: 'Unable to connect. Please try again later.',
       status: 'error',
+      ...(debugEnabled
+        ? {
+            debug: {
+              error: error instanceof Error ? error.message : 'Unknown error',
+            },
+          }
+        : {}),
     };
   }
 }

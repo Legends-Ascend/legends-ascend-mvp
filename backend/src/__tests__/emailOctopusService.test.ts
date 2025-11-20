@@ -45,16 +45,14 @@ describe('emailOctopusService', () => {
           expect.objectContaining({
             method: 'POST',
             headers: {
-              'Content-Type': 'application/json',
+              'Content-Type': 'application/x-www-form-urlencoded',
             },
-            body: JSON.stringify({
+            body: new URLSearchParams({
               api_key: 'test-api-key',
               email_address: email,
               status: 'SUBSCRIBED',
-              fields: {
-                ConsentTimestamp: timestamp,
-              },
-            }),
+              'fields[ConsentTimestamp]': timestamp,
+            }).toString(),
           })
         );
 
@@ -300,7 +298,7 @@ describe('emailOctopusService', () => {
         expect(global.fetch).toHaveBeenCalledWith(
           expect.any(String),
           expect.objectContaining({
-            body: expect.stringContaining(email),
+            body: expect.stringContaining(`email_address=${encodeURIComponent(email)}`),
           })
         );
       });
@@ -345,12 +343,12 @@ describe('emailOctopusService', () => {
         expect(global.fetch).toHaveBeenCalledWith(
           expect.any(String),
           expect.objectContaining({
-            body: expect.stringContaining(timestamp),
+            body: expect.any(String),
           })
         );
 
-        const callBody = JSON.parse((global.fetch as jest.Mock).mock.calls[0][1].body);
-        expect(callBody.fields.ConsentTimestamp).toBe(timestamp);
+        const callBody = new URLSearchParams((global.fetch as jest.Mock).mock.calls[0][1].body);
+        expect(callBody.get('fields[ConsentTimestamp]')).toBe(timestamp);
       });
 
       it('should use correct API endpoint URL', async () => {
@@ -392,11 +390,11 @@ describe('emailOctopusService', () => {
         await subscribeToEmailList(email, timestamp);
 
         // Assert
-        const callBody = JSON.parse((global.fetch as jest.Mock).mock.calls[0][1].body);
-        expect(callBody.tags).toEqual(['beta-access']);
-        expect(callBody.api_key).toBe('test-api-key');
-        expect(callBody.email_address).toBe(email);
-        expect(callBody.status).toBe('SUBSCRIBED');
+        const callBody = new URLSearchParams((global.fetch as jest.Mock).mock.calls[0][1].body);
+        expect(callBody.getAll('tags[]')).toEqual(['beta-access']);
+        expect(callBody.get('api_key')).toBe('test-api-key');
+        expect(callBody.get('email_address')).toBe(email);
+        expect(callBody.get('status')).toBe('SUBSCRIBED');
       });
 
       it('should not include tags when EMAILOCTOPUS_BETA_ACCESS_TAG is not set', async () => {
@@ -417,10 +415,10 @@ describe('emailOctopusService', () => {
         await subscribeToEmailList(email, timestamp);
 
         // Assert
-        const callBody = JSON.parse((global.fetch as jest.Mock).mock.calls[0][1].body);
-        expect(callBody.tags).toBeUndefined();
-        expect(callBody.api_key).toBe('test-api-key');
-        expect(callBody.email_address).toBe(email);
+        const callBody = new URLSearchParams((global.fetch as jest.Mock).mock.calls[0][1].body);
+        expect(callBody.getAll('tags[]')).toEqual([]);
+        expect(callBody.get('api_key')).toBe('test-api-key');
+        expect(callBody.get('email_address')).toBe(email);
       });
     });
   });
