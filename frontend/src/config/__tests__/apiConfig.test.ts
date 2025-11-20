@@ -78,20 +78,21 @@ describe('apiConfig - Development Mode Behavior (B-EX2)', () => {
       // These tests verify the logic without changing import.meta.env.PROD
       
       const testCases = [
-        { url: '/api', shouldWarn: true, reason: 'relative URL in production' },
-        { url: 'https://backend.example.com/api', shouldWarn: false, reason: 'valid absolute URL' },
-        { url: 'https://frontend.vercel.app/api', shouldWarn: true, reason: 'frontend URL instead of backend' },
-        { url: 'https://api.example.com/api', shouldWarn: false, reason: 'valid api subdomain' },
+        { url: '/api', shouldWarn: false }, // Now valid for monorepo deployments
+        { url: 'https://backend.example.com/api', shouldWarn: false },
+        { url: 'https://frontend.vercel.app/api', shouldWarn: true },
+        { url: 'https://api.example.com/api', shouldWarn: false },
       ];
       
       // This verifies the URL validation logic is correct
-      testCases.forEach(({ url, shouldWarn, reason }) => {
+      testCases.forEach(({ url, shouldWarn }) => {
         const startsWithSlash = url.startsWith('/');
         const looksLikeFrontend = url.includes('vercel.app') && 
                                    !url.includes('backend') && 
                                    !url.includes('api.');
         
-        const wouldWarn = startsWithSlash || looksLikeFrontend;
+        // Only warn for frontend URLs, not relative URLs (monorepo deployments)
+        const wouldWarn = !startsWithSlash && looksLikeFrontend;
         
         expect(wouldWarn).toBe(shouldWarn);
       });
