@@ -51,7 +51,7 @@ const ensureDbInitialized = async () => {
 };
 
 // Initialize database on first request
-app.use(async (req, res, next) => {
+app.use(async (req: express.Request, res: express.Response, next: express.NextFunction) => {
   try {
     await ensureDbInitialized();
     next();
@@ -65,7 +65,7 @@ app.use(async (req, res, next) => {
 });
 
 // Health check at root of API
-app.get('/api/health', (req, res) => {
+app.get('/api/health', (req: express.Request, res: express.Response) => {
   res.json({ status: 'ok', message: 'Legends Ascend API is running' });
 });
 
