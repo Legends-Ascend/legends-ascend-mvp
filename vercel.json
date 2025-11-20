@@ -1,8 +1,14 @@
 {
   "version": 2,
-  "buildCommand": "cd frontend && pnpm run build",
-  "outputDirectory": "frontend/dist",
   "builds": [
+    {
+      "src": "frontend/package.json",
+      "use": "@vercel/static-build",
+      "config": {
+        "buildCommand": "pnpm -C frontend run build",
+        "distDir": "dist"
+      }
+    },
     {
       "src": "api/index.ts",
       "use": "@vercel/node"
