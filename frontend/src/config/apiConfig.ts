@@ -16,22 +16,25 @@ export function getApiUrl(): string {
 /**
  * Validate API configuration for production deployments
  * This helps catch the common issue where VITE_API_URL is not set in production
+ * 
+ * Note: In development, relative URLs (/api) are valid due to Vite proxy configuration.
+ * In production, relative URLs are also valid for monorepo deployments with server rewrites.
  */
 export function validateApiConfig(): { isValid: boolean; warnings: string[] } {
   const warnings: string[] = [];
   const apiUrl = getApiUrl();
   
-  // In production builds, check if we're using a relative URL
-  // This indicates VITE_API_URL was not set at build time
-  if (import.meta.env.PROD && apiUrl.startsWith('/')) {
-    warnings.push(
-      'VITE_API_URL is not configured. API requests will fail in production. ' +
-      'Please set VITE_API_URL in your deployment environment variables to your backend API URL ' +
-      '(e.g., https://your-backend.vercel.app/api)'
-    );
+  // Skip validation in development mode - Vite proxy handles /api
+  if (!import.meta.env.PROD) {
+    return { isValid: true, warnings: [] };
   }
   
+  // In production, relative URLs (/api) are valid for monorepo deployments
+  // where the frontend and backend are deployed together with server rewrites.
+  // We no longer warn about this since it's a supported deployment pattern.
+  
   // Check if API URL looks like a frontend URL (common misconfiguration)
+  // Only warn if explicitly configured to point to wrong URL
   if (apiUrl.includes('vercel.app') && !apiUrl.includes('backend') && !apiUrl.includes('api.')) {
     warnings.push(
       'VITE_API_URL appears to point to a frontend deployment. ' +
@@ -63,14 +66,21 @@ export function logConfigWarnings(): void {
 
 /**
  * Check if we're in a production environment with invalid configuration
+ * Returns false for valid deployment patterns (dev mode, monorepo deployments)
  */
 export function isProductionMisconfigured(): boolean {
+  // In development, relative URLs are handled by Vite proxy - not a misconfiguration
   if (!import.meta.env.PROD) {
     return false;
   }
   
   const apiUrl = getApiUrl();
   
-  // Production should use absolute URLs
-  return apiUrl.startsWith('/');
+  // Relative URLs are valid in production for monorepo deployments with rewrites
+  // Only flag as misconfigured if pointing to an obviously wrong frontend URL
+  if (apiUrl.includes('vercel.app') && !apiUrl.includes('backend') && !apiUrl.includes('api.')) {
+    return true;
+  }
+  
+  return false;
 }
