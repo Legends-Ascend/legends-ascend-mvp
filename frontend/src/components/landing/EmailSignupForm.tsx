@@ -15,6 +15,8 @@ export const EmailSignupForm: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitStatus, setSubmitStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [statusMessage, setStatusMessage] = useState('');
+  const shouldLogEmailOctopusDebug =
+    import.meta.env.VITE_ENABLE_EMAILOCTOPUS_DEBUG !== 'false' || !import.meta.env.PROD;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -75,6 +77,16 @@ export const EmailSignupForm: React.FC = () => {
           try {
             const errorData = await response.json();
             errorMessage = errorData.message || errorMessage;
+
+            if (shouldLogEmailOctopusDebug && errorData?.debug) {
+              console.info('EmailOctopus debug (error response):', errorData.debug);
+            } else if (shouldLogEmailOctopusDebug) {
+              console.info('EmailOctopus response (error):', {
+                status: response.status,
+                body: errorData,
+                debugAvailable: Boolean(errorData?.debug),
+              });
+            }
           } catch {
             // If JSON parsing fails, use default message
           }
@@ -114,6 +126,15 @@ export const EmailSignupForm: React.FC = () => {
       } else {
         // No JSON content in response
         throw new Error('Invalid response format from server');
+      }
+
+      if (shouldLogEmailOctopusDebug && data.debug) {
+        console.info('EmailOctopus debug (success response):', data.debug);
+      } else if (shouldLogEmailOctopusDebug) {
+        console.info('EmailOctopus response (success):', {
+          status: response.status,
+          debugAvailable: Boolean(data.debug),
+        });
       }
 
       if (data.success) {

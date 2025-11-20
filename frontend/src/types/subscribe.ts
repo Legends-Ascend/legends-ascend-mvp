@@ -17,4 +17,12 @@ export interface SubscribeResponse {
   success: boolean;
   message: string;
   status?: 'pending_confirmation' | 'already_subscribed' | 'error';
+  debug?: {
+    httpStatus?: number;
+    emailOctopusResponse?: unknown;
+    requestBodyPreview?: string;
+    tagsApplied?: string[];
+    updateExisting?: boolean;
+    error?: string;
+  };
 }
