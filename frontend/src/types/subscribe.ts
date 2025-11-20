@@ -20,7 +20,9 @@ export interface SubscribeResponse {
   debug?: {
     httpStatus?: number;
     emailOctopusResponse?: unknown;
-    requestBody?: string;
+    requestBodyPreview?: string;
+    tagsApplied?: string[];
+    updateExisting?: boolean;
     error?: string;
   };
 }

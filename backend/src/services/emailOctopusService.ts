@@ -39,7 +39,7 @@ export async function subscribeToEmailList(
   const config: EmailOctopusConfig = {
     apiKey: process.env.EMAILOCTOPUS_API_KEY || '',
     listId: process.env.EMAILOCTOPUS_LIST_ID || '',
-    betaAccessTag: process.env.EMAILOCTOPUS_BETA_ACCESS_TAG,
+    betaAccessTag: process.env.EMAILOCTOPUS_BETA_ACCESS_TAG?.trim(),
   };
 
   // Validate configuration
@@ -59,13 +59,10 @@ export async function subscribeToEmailList(
   requestBody.append('update_existing', 'true');
 
   // Add beta-access tag if configured
-  if (config.betaAccessTag) {
-    requestBody.append('tags[]', config.betaAccessTag);
-  }
+  const tags: string[] = config.betaAccessTag ? [config.betaAccessTag] : [];
+  tags.forEach((tag) => requestBody.append('tags[]', tag));
 
-  const debugEnabled =
-    process.env.EMAILOCTOPUS_DEBUG === 'true' ||
-    (process.env.NODE_ENV !== 'production' && process.env.EMAILOCTOPUS_DEBUG !== 'false');
+  const debugEnabled = process.env.EMAILOCTOPUS_DEBUG !== 'false';
 
   try {
     // Using global fetch API - cast to any then to our interface to avoid type conflicts
@@ -83,7 +80,11 @@ export async function subscribeToEmailList(
       ? {
           httpStatus: response.status,
           emailOctopusResponse: data,
-          requestBody: requestBody.toString(),
+          requestBodyPreview: requestBody
+            .toString()
+            .replace(/api_key=[^&]+/i, 'api_key=[REDACTED]'),
+          tagsApplied: tags,
+          updateExisting: true,
         }
       : undefined;
 

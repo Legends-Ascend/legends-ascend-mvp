@@ -65,6 +65,39 @@ describe('emailOctopusService', () => {
         });
       });
 
+      it('should return sanitized debug payload when enabled', async () => {
+        process.env.EMAILOCTOPUS_DEBUG = 'true';
+
+        const email = 'debug@example.com';
+        const timestamp = '2025-11-14T09:00:00.000Z';
+        process.env.EMAILOCTOPUS_BETA_ACCESS_TAG = 'beta';
+
+        (global.fetch as jest.Mock).mockResolvedValue({
+          status: 201,
+          json: async () => ({
+            id: '789',
+            email_address: email,
+            status: 'SUBSCRIBED',
+          }),
+        });
+
+        const result = await subscribeToEmailList(email, timestamp);
+
+        expect(result).toEqual({
+          success: true,
+          message: 'Thank you! Check your email to confirm your subscription.',
+          status: 'pending_confirmation',
+          debug: expect.objectContaining({
+            httpStatus: 201,
+            tagsApplied: ['beta'],
+            updateExisting: true,
+          }),
+        });
+
+        expect((result.debug as any).requestBodyPreview).toContain('api_key=[REDACTED]');
+        expect((result.debug as any).requestBodyPreview).toContain('tags%5B%5D=beta');
+      });
+
       it('should include tags and update_existing flag when configured', async () => {
         // Arrange
         process.env.EMAILOCTOPUS_BETA_ACCESS_TAG = 'beta-access';
