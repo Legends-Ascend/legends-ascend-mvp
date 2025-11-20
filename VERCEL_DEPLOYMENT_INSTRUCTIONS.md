@@ -2,14 +2,14 @@
 
 ## After Merging This PR
 
-This PR fixes the newsletter subscription 404 error by properly configuring Vercel to deploy both the frontend and backend in a single project (monorepo approach).
+This PR fixes the homepage 404 error by properly configuring Vercel to deploy both the frontend and backend in a monorepo approach using the modern Vercel configuration.
 
 ### What Changed
 
-The root `vercel.json` now correctly configures:
+The root `vercel.json` now uses the modern Vercel configuration (not the legacy `builds` array):
 1. Frontend build from `/frontend` directory (static files)
 2. Backend API as a serverless function from `/api/index.ts`
-3. Proper routing: `/api/*` → backend, everything else → frontend
+3. Proper routing: `/api/*` → backend, everything else → frontend SPA
 
 ### Required Actions in Vercel Dashboard
 
@@ -34,15 +34,15 @@ Go to: **Vercel Dashboard → Your Project → Settings → Environment Variable
 
 #### 2. Build Settings
 
-> **Note**: When using the `builds` configuration in `vercel.json`, Vercel ignores the Build and Development Settings in your Project Settings. The configuration in `vercel.json` takes precedence.
-
-The `vercel.json` file in this repository is now fully configured to handle both frontend and backend builds. No manual build settings configuration is needed in the Vercel dashboard.
+The `vercel.json` file in this repository is now fully configured using the modern Vercel configuration format. The configuration at the repository level takes precedence over dashboard settings.
 
 **What happens automatically:**
-- Frontend builds using `@vercel/static-build` from `frontend/package.json`
-- The `vercel-build` script runs: `pnpm run build`
+- Build command: `cd frontend && pnpm run build`
+- Output directory: `frontend/dist`
 - Backend API deploys as serverless function from `api/index.ts`
 - Routing is configured: `/api/*` → backend, everything else → frontend
+
+> **Important**: This uses the modern Vercel configuration (not the legacy `builds` array). The `outputDirectory` points to `frontend/dist` which contains the built static files including `index.html`, assets, and all frontend code.
 
 #### 3. Redeploy
 
@@ -52,8 +52,6 @@ After updating the environment variables:
 3. Click on the latest deployment
 4. Click **"Redeploy"** button
 5. Or push a new commit to trigger automatic deployment
-
-> **Note**: You may see a warning during deployment: "Due to `builds` existing in your configuration file, the Build and Development Settings defined in your Project Settings will not apply." This is expected and correct behavior.
 
 ### Verification
 
