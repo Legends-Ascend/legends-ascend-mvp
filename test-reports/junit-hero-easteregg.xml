@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="27" failures="0" errors="0" time="0.73158473">
+    <testsuite name="src/components/landing/__tests__/Hero.easterEgg.test.tsx" timestamp="2025-11-21T16:30:22.232Z" hostname="runnervmg1sw1" tests="27" failures="0" errors="0" skipped="0" time="0.73158473">
+        <testcase classname="src/components/landing/__tests__/Hero.easterEgg.test.tsx" name="Hero Component - Easter Egg Feature &gt; Logo Click Counter &gt; should increment click counter on logo click" time="0.19282851">
+        </testcase>
+        <testcase classname="src/components/landing/__tests__/Hero.easterEgg.test.tsx" name="Hero Component - Easter Egg Feature &gt; Logo Click Counter &gt; should reset click counter after 3 seconds of inactivity" time="0.054826265">
+        </testcase>
+        <testcase classname="src/components/landing/__tests__/Hero.easterEgg.test.tsx" name="Hero Component - Easter Egg Feature &gt; Logo Click Counter &gt; should activate Easter egg on 5th consecutive click within 3 seconds" time="0.051168955">
+        </testcase>
+        <testcase classname="src/components/landing/__tests__/Hero.easterEgg.test.tsx" name="Hero Component - Easter Egg Feature &gt; Logo Click Counter &gt; should not activate Easter egg if clicks are too slow" time="0.042222386">
+        </testcase>
+        <testcase classname="src/components/landing/__tests__/Hero.easterEgg.test.tsx" name="Hero Component - Easter Egg Feature &gt; SessionStorage Persistence &gt; should save activation state to sessionStorage" time="0.041446572">
+        </testcase>
+        <testcase classname="src/components/landing/__tests__/Hero.easterEgg.test.tsx" name="Hero Component - Easter Egg Feature &gt; SessionStorage Persistence &gt; should restore Easter egg state from sessionStorage on mount" time="0.007424033">
+        </testcase>
+        <testcase classname="src/components/landing/__tests__/Hero.easterEgg.test.tsx" name="Hero Component - Easter Egg Feature &gt; SessionStorage Persistence &gt; should not show Easter egg if sessionStorage is not set" time="0.006341237">
+        </testcase>
+        <testcase classname="src/components/landing/__tests__/Hero.easterEgg.test.tsx" name="Hero Component - Easter Egg Feature &gt; Visual Feedback &gt; should apply glow effect when Easter egg is activated" time="0.039708426">
+        </testcase>
+        <testcase classname="src/components/landing/__tests__/Hero.easterEgg.test.tsx" name="Hero Component - Easter Egg Feature &gt; Visual Feedback &gt; should apply brightness and scale on click" time="0.02378121">
+        </testcase>
+        <testcase classname="src/components/landing/__tests__/Hero.easterEgg.test.tsx" name="Hero Component - Easter Egg Feature &gt; Visual Feedback &gt; should have cursor-pointer class to indicate clickability" time="0.028323938">
+        </testcase>
+        <testcase classname="src/components/landing/__tests__/Hero.easterEgg.test.tsx" name="Hero Component - Easter Egg Feature &gt; Login/Register Links Display &gt; should render Sign In button when Easter egg is active" time="0.007478014">
+        </testcase>
+        <testcase classname="src/components/landing/__tests__/Hero.easterEgg.test.tsx" name="Hero Component - Easter Egg Feature &gt; Login/Register Links Display &gt; should render Create Account button when Easter egg is active" time="0.008191352">
+        </testcase>
+        <testcase classname="src/components/landing/__tests__/Hero.easterEgg.test.tsx" name="Hero Component - Easter Egg Feature &gt; Login/Register Links Display &gt; should navigate to /login when Sign In is clicked" time="0.007871587">
+        </testcase>
+        <testcase classname="src/components/landing/__tests__/Hero.easterEgg.test.tsx" name="Hero Component - Easter Egg Feature &gt; Login/Register Links Display &gt; should navigate to /register when Create Account is clicked" time="0.005865902">
+        </testcase>
+        <testcase classname="src/components/landing/__tests__/Hero.easterEgg.test.tsx" name="Hero Component - Easter Egg Feature &gt; Login/Register Links Display &gt; should have proper styling for login/register buttons" time="0.00584329">
+        </testcase>
+        <testcase classname="src/components/landing/__tests__/Hero.easterEgg.test.tsx" name="Hero Component - Easter Egg Feature &gt; Login/Register Links Display &gt; should have fade-in animation on Easter egg links" time="0.005857677">
+        </testcase>
+        <testcase classname="src/components/landing/__tests__/Hero.easterEgg.test.tsx" name="Hero Component - Easter Egg Feature &gt; Keyboard Accessibility &gt; should have tabIndex for keyboard navigation" time="0.024992706">
+        </testcase>
+        <testcase classname="src/components/landing/__tests__/Hero.easterEgg.test.tsx" name="Hero Component - Easter Egg Feature &gt; Keyboard Accessibility &gt; should trigger Easter egg on Enter key press" time="0.037910519">
+        </testcase>
+        <testcase classname="src/components/landing/__tests__/Hero.easterEgg.test.tsx" name="Hero Component - Easter Egg Feature &gt; Keyboard Accessibility &gt; should not trigger on other key presses" time="0.030460897">
+        </testcase>
+        <testcase classname="src/components/landing/__tests__/Hero.easterEgg.test.tsx" name="Hero Component - Easter Egg Feature &gt; Keyboard Accessibility &gt; should have proper role and aria-label" time="0.025002163">
+        </testcase>
+        <testcase classname="src/components/landing/__tests__/Hero.easterEgg.test.tsx" name="Hero Component - Easter Egg Feature &gt; Keyboard Accessibility &gt; should have focus ring styles on login/register buttons" time="0.005614995">
+        </testcase>
+        <testcase classname="src/components/landing/__tests__/Hero.easterEgg.test.tsx" name="Hero Component - Easter Egg Feature &gt; Responsive Design &gt; should stack buttons vertically on mobile" time="0.006012485">
+        </testcase>
+        <testcase classname="src/components/landing/__tests__/Hero.easterEgg.test.tsx" name="Hero Component - Easter Egg Feature &gt; Responsive Design &gt; should have responsive gap between buttons" time="0.004578375">
+        </testcase>
+        <testcase classname="src/components/landing/__tests__/Hero.easterEgg.test.tsx" name="Hero Component - Easter Egg Feature &gt; Integration with Existing Hero Features &gt; should not interfere with email signup form rendering" time="0.023295706">
+        </testcase>
+        <testcase classname="src/components/landing/__tests__/Hero.easterEgg.test.tsx" name="Hero Component - Easter Egg Feature &gt; Integration with Existing Hero Features &gt; should not interfere with headline rendering" time="0.01776161">
+        </testcase>
+        <testcase classname="src/components/landing/__tests__/Hero.easterEgg.test.tsx" name="Hero Component - Easter Egg Feature &gt; Integration with Existing Hero Features &gt; should maintain logo alt text for accessibility" time="0.004948434">
+        </testcase>
+        <testcase classname="src/components/landing/__tests__/Hero.easterEgg.test.tsx" name="Hero Component - Easter Egg Feature &gt; Integration with Existing Hero Features &gt; should preserve existing logo responsive classes" time="0.019307237">
+        </testcase>
+    </testsuite>
+</testsuites>
