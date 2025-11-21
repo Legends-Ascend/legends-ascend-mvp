@@ -212,7 +212,7 @@ describe('Hero Component - Easter Egg Feature', () => {
       render(<Hero />);
       const container = screen.getByText('Sign In').parentElement;
 
-      expect(container?.className).toContain('animate-[fadeIn_0.6s_ease-in-out]');
+      expect(container?.className).toContain('animate-fadeIn');
     });
   });
 

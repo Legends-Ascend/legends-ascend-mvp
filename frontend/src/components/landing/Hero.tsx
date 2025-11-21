@@ -31,19 +31,22 @@ export const Hero: React.FC = () => {
     const now = Date.now();
     const timeSinceLastClick = now - lastClickTimeRef.current;
     
+    let newCount: number;
+    
     // Reset counter if more than 3 seconds have passed
     if (timeSinceLastClick > 3000) {
-      setClickCount(1);
+      newCount = 1;
     } else {
-      const newCount = clickCount + 1;
-      setClickCount(newCount);
-      
-      // Trigger Easter egg on 5th click
-      if (newCount >= 5) {
-        setEasterEggActivated(true);
-        sessionStorage.setItem('easterEggActivated', 'true');
-        setClickCount(0); // Reset counter after activation
-      }
+      newCount = clickCount + 1;
+    }
+    
+    setClickCount(newCount);
+    
+    // Trigger Easter egg on 5th click
+    if (newCount >= 5) {
+      setEasterEggActivated(true);
+      sessionStorage.setItem('easterEggActivated', 'true');
+      setClickCount(0); // Reset counter after activation
     }
     
     lastClickTimeRef.current = now;
@@ -89,7 +92,9 @@ export const Hero: React.FC = () => {
               alt="Legends Ascend"
               className={`h-32 sm:h-40 md:h-56 mx-auto mb-4 md:mb-8 object-contain cursor-pointer transition-all duration-300 ${
                 clickCount > 0 ? 'brightness-110 scale-105' : ''
-              } ${easterEggActivated ? 'drop-shadow-[0_0_15px_rgba(34,211,238,0.8)]' : ''}`}
+              } ${
+                easterEggActivated ? 'drop-shadow-[0_0_15px_rgba(34,211,238,0.8)]' : ''
+              }`}
               onClick={handleLogoClick}
               onKeyDown={handleLogoKeyDown}
               tabIndex={0}
@@ -121,7 +126,7 @@ export const Hero: React.FC = () => {
 
           {/* Easter Egg: Hidden Login/Register Links */}
           {easterEggActivated && (
-            <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center items-center animate-[fadeIn_0.6s_ease-in-out]">
+            <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center items-center animate-fadeIn">
               <button
                 onClick={() => handleNavigate('/login')}
                 className="px-8 py-3 bg-cyan-500 hover:bg-cyan-600 text-white font-bold rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2"
