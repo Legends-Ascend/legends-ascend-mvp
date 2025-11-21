@@ -1,17 +1,71 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { EmailSignupForm } from './EmailSignupForm';
 
 /**
  * Hero Section Component
  * Per US-001 requirements: Full-viewport hero with professional typography, background media, logo, headline, and signup form
  * Enhanced with professional fonts and typography improvements
+ * 
+ * Easter Egg Feature: Click the logo 5 times within 3 seconds to reveal login/register links
  */
 export const Hero: React.FC = () => {
     const [isVisible, setIsVisible] = useState(false);
+    const [clickCount, setClickCount] = useState(0);
+    const [easterEggActivated, setEasterEggActivated] = useState(false);
+    const lastClickTimeRef = useRef<number>(0);
 
         useEffect(() => {
                   setIsVisible(true);
+                  // Check if Easter egg was previously activated in this session
+                  const activated = sessionStorage.getItem('easterEggActivated');
+                  if (activated === 'true') {
+                    setEasterEggActivated(true);
+                  }
                 }, []);
+
+  /**
+   * Handle logo click for Easter egg activation
+   * Requires 5 clicks within 3 seconds to activate
+   */
+  const handleLogoClick = () => {
+    const now = Date.now();
+    const timeSinceLastClick = now - lastClickTimeRef.current;
+    
+    // Reset counter if more than 3 seconds have passed
+    if (timeSinceLastClick > 3000) {
+      setClickCount(1);
+    } else {
+      const newCount = clickCount + 1;
+      setClickCount(newCount);
+      
+      // Trigger Easter egg on 5th click
+      if (newCount >= 5) {
+        setEasterEggActivated(true);
+        sessionStorage.setItem('easterEggActivated', 'true');
+        setClickCount(0); // Reset counter after activation
+      }
+    }
+    
+    lastClickTimeRef.current = now;
+  };
+
+  /**
+   * Handle keyboard navigation for Easter egg
+   * Enter key triggers the same behavior as clicking
+   */
+  const handleLogoKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleLogoClick();
+    }
+  };
+
+  /**
+   * Navigate to login or register page
+   */
+  const handleNavigate = (path: string) => {
+    window.history.pushState({}, '', path);
+    window.location.href = path;
+  };
   
   return (
     <div>
@@ -29,12 +83,19 @@ export const Hero: React.FC = () => {
       {/* Content */}
       <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8">
         <div className="text-center max-w-4xl mx-auto">
-          {/* Logo */}
+          {/* Logo with Easter Egg Click Handler */}
           <div className="mb-8">
             <img
               src="/assets/branding/legends-ascend-logo-transparent.png"
               alt="Legends Ascend"
-              className="h-32 sm:h-40 md:h-56 mx-auto mb-4 md:mb-8 object-contain"
+              className={`h-32 sm:h-40 md:h-56 mx-auto mb-4 md:mb-8 object-contain cursor-pointer transition-all duration-300 ${
+                clickCount > 0 ? 'brightness-110 scale-105' : ''
+              } ${easterEggActivated ? 'drop-shadow-[0_0_15px_rgba(34,211,238,0.8)]' : ''}`}
+              onClick={handleLogoClick}
+              onKeyDown={handleLogoKeyDown}
+              tabIndex={0}
+              role="button"
+              aria-label="Legends Ascend logo (click 5 times for hidden menu)"
             />
           </div>
 
@@ -58,6 +119,26 @@ export const Hero: React.FC = () => {
           }`}>
             <EmailSignupForm />
           </div>
+
+          {/* Easter Egg: Hidden Login/Register Links */}
+          {easterEggActivated && (
+            <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center items-center animate-[fadeIn_0.6s_ease-in-out]">
+              <button
+                onClick={() => handleNavigate('/login')}
+                className="px-8 py-3 bg-cyan-500 hover:bg-cyan-600 text-white font-bold rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-offset-2"
+                aria-label="Sign in to your account"
+              >
+                Sign In
+              </button>
+              <button
+                onClick={() => handleNavigate('/register')}
+                className="px-8 py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-lg shadow-lg transition-all duration-300 transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:ring-offset-2"
+                aria-label="Create a new account"
+              >
+                Create Account
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
