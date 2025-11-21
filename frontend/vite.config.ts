@@ -13,13 +13,4 @@ export default defineConfig({
       },
     },
   },
-  preview: {
-    port: 4173,
-    strictPort: false,
-  },
-  build: {
-    outDir: 'dist',
-    assetsDir: 'assets',
-    sourcemap: false,
-  },
 })
