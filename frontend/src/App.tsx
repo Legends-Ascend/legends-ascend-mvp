@@ -11,6 +11,8 @@ import { LoginPage } from './components/auth/LoginPage';
 import { RegisterPage } from './components/auth/RegisterPage';
 import { LogoutButton } from './components/auth/LogoutButton';
 import { useAuth } from './hooks/useAuth';
+import { Dashboard } from './components/dashboard/Dashboard';
+import type { GameView } from './components/dashboard/Dashboard';
 
 const AppContainer = styled.div`
   min-height: 100vh;
@@ -88,10 +90,11 @@ const Main = styled.main`
   min-height: calc(100vh - 100px);
 `;
 
-type View = 'landing' | 'privacy' | 'login' | 'register' | 'players' | 'lineup' | 'simulator' | 'leaderboard';
+type View = 'landing' | 'privacy' | 'login' | 'register' | 'players' | 'lineup' | 'simulator' | 'leaderboard' | 'dashboard';
 
 function App() {
   const [currentView, setCurrentView] = useState<View>('landing');
+  const [dashboardView, setDashboardView] = useState<GameView>('lineup');
   const { isAuthenticated, user, loading } = useAuth();
 
   // Callback to redirect to landing page
@@ -110,7 +113,19 @@ function App() {
     } else if (path === '/register') {
       setCurrentView('register');
     } else if (path === '/game') {
-      setCurrentView('players');
+      setCurrentView('dashboard');
+      setDashboardView('lineup');
+      window.history.replaceState({}, '', '/game/lineup');
+    } else if (path.startsWith('/game/')) {
+      // New dashboard routes
+      const match = path.match(/\/game\/(\w+)/);
+      if (match && match[1]) {
+        const view = match[1] as GameView;
+        if (['lineup', 'gacha', 'matches', 'inventory', 'profile'].includes(view)) {
+          setCurrentView('dashboard');
+          setDashboardView(view);
+        }
+      }
     }
   }, []);
 
@@ -124,6 +139,8 @@ function App() {
         return <LoginPage />;
       case 'register':
         return <RegisterPage />;
+      case 'dashboard':
+        return <Dashboard initialView={dashboardView} />;
       case 'players':
         return <PlayerRoster />;
       case 'lineup':
@@ -142,6 +159,19 @@ function App() {
     return null;
   }
 
+  // If showing dashboard (new navigation), render the Dashboard component directly
+  if (currentView === 'dashboard') {
+    return (
+      <RouteGuard
+        currentView={currentView}
+        onRedirectToLanding={redirectToLanding}
+        isAuthenticated={isAuthenticated}
+      >
+        {renderView()}
+      </RouteGuard>
+    );
+  }
+
   // If showing landing, privacy, login, or register page, render without game header
   if (currentView === 'landing' || currentView === 'privacy' || currentView === 'login' || currentView === 'register') {
     return (
@@ -155,6 +185,7 @@ function App() {
     );
   }
 
+  // Legacy game views with old header (backward compatibility)
   return (
     <RouteGuard
       currentView={currentView}

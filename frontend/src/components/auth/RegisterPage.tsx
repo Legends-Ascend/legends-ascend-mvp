@@ -204,8 +204,8 @@ export function RegisterPage() {
 
     try {
       await register(email, password);
-      // Redirect to /game after successful registration
-      window.location.href = '/game';
+      // Redirect to dashboard after successful registration
+      window.location.href = '/game/lineup';
     } catch (error) {
       setErrors({
         form: error instanceof Error ? error.message : 'Registration failed',
