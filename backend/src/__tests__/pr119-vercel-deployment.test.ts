@@ -31,77 +31,62 @@ describe('PR #119: Vercel Deployment Configuration', () => {
       expect(typeof vercelConfig).toBe('object');
     });
 
-    test('should have version 2 configuration', () => {
-      expect(vercelConfig.version).toBe(2);
+    // PR #147: Updated to modern Vercel configuration using rewrites instead of routes
+    test('should use modern rewrites configuration (not deprecated routes)', () => {
+      // Ensure we're using rewrites, not the deprecated routes property
+      expect(vercelConfig.rewrites).toBeDefined();
+      expect(Array.isArray(vercelConfig.rewrites)).toBe(true);
+      expect(vercelConfig.rewrites.length).toBeGreaterThan(0);
     });
 
-    test('should have builds configuration', () => {
-      expect(vercelConfig.builds).toBeDefined();
-      expect(Array.isArray(vercelConfig.builds)).toBe(true);
-      expect(vercelConfig.builds.length).toBeGreaterThan(0);
+    test('should NOT have conflicting routes property with rewrites (PR #147 regression check)', () => {
+      // Critical: If both rewrites and routes exist, Vercel deployment will fail
+      // This test prevents regression of the bug fixed in PR #147
+      if (vercelConfig.rewrites) {
+        expect(vercelConfig.routes).toBeUndefined();
+      }
     });
 
-    test('should configure frontend build with @vercel/static-build', () => {
-      const frontendBuild = vercelConfig.builds.find(
-        (build: any) => build.src === 'frontend/package.json'
+    test('should have buildCommand configuration', () => {
+      expect(vercelConfig.buildCommand).toBeDefined();
+      expect(vercelConfig.buildCommand).toContain('frontend');
+      expect(vercelConfig.buildCommand).toContain('pnpm run build');
+    });
+
+    test('should have outputDirectory configuration', () => {
+      expect(vercelConfig.outputDirectory).toBeDefined();
+      expect(vercelConfig.outputDirectory).toBe('frontend/dist');
+    });
+
+    test('should route /api/* to serverless function via rewrites', () => {
+      const apiRewrite = vercelConfig.rewrites.find(
+        (rewrite: any) => rewrite.source === '/api/:path*'
       );
-      expect(frontendBuild).toBeDefined();
-      expect(frontendBuild.use).toBe('@vercel/static-build');
-      expect(frontendBuild.config.distDir).toBe('dist');
+      expect(apiRewrite).toBeDefined();
+      expect(apiRewrite.destination).toBe('/api/index.ts');
     });
 
-    test('should configure backend API with @vercel/node', () => {
-      const apiBuild = vercelConfig.builds.find(
-        (build: any) => build.src === 'api/index.ts'
+    test('should fallback to index.html for SPA routing (PR #147: /login and /register)', () => {
+      // Critical for PR #147: Ensures /login and /register routes work
+      const spaRewrite = vercelConfig.rewrites.find(
+        (rewrite: any) => rewrite.source === '/(.*)'
       );
-      expect(apiBuild).toBeDefined();
-      expect(apiBuild.use).toBe('@vercel/node');
+      expect(spaRewrite).toBeDefined();
+      expect(spaRewrite.destination).toBe('/index.html');
     });
 
-    test('should have routes configuration', () => {
-      expect(vercelConfig.routes).toBeDefined();
-      expect(Array.isArray(vercelConfig.routes)).toBe(true);
-      expect(vercelConfig.routes.length).toBeGreaterThan(0);
-    });
-
-    test('should route /api/* to serverless function', () => {
-      const apiRoute = vercelConfig.routes.find(
-        (route: any) => route.src === '/api/(.*)'
-      );
-      expect(apiRoute).toBeDefined();
-      expect(apiRoute.dest).toBe('/api/index.ts');
-    });
-
-    test('should handle filesystem for static files', () => {
-      const filesystemRoute = vercelConfig.routes.find(
-        (route: any) => route.handle === 'filesystem'
-      );
-      expect(filesystemRoute).toBeDefined();
-    });
-
-    test('should fallback to index.html for SPA routing', () => {
-      const spaRoute = vercelConfig.routes.find(
-        (route: any) => route.src === '/(.*)'
-      );
-      expect(spaRoute).toBeDefined();
-      expect(spaRoute.dest).toBe('/index.html');
-    });
-
-    test('should have correct route order (API first, filesystem, then SPA)', () => {
-      const routes = vercelConfig.routes;
+    test('should have correct rewrite order (API first, then SPA catch-all)', () => {
+      const rewrites = vercelConfig.rewrites;
       
-      const apiRouteIndex = routes.findIndex(
-        (route: any) => route.src === '/api/(.*)'
+      const apiRewriteIndex = rewrites.findIndex(
+        (rewrite: any) => rewrite.source === '/api/:path*'
       );
-      const filesystemRouteIndex = routes.findIndex(
-        (route: any) => route.handle === 'filesystem'
-      );
-      const spaRouteIndex = routes.findIndex(
-        (route: any) => route.src === '/(.*)'
+      const spaRewriteIndex = rewrites.findIndex(
+        (rewrite: any) => rewrite.source === '/(.*)'
       );
 
-      expect(apiRouteIndex).toBeLessThan(filesystemRouteIndex);
-      expect(filesystemRouteIndex).toBeLessThan(spaRouteIndex);
+      // API routes must come before catch-all to prevent SPA from capturing API calls
+      expect(apiRewriteIndex).toBeLessThan(spaRewriteIndex);
     });
   });
 
