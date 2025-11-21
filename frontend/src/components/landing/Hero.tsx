@@ -63,7 +63,6 @@ export const Hero: React.FC = () => {
    * Navigate to login or register page
    */
   const handleNavigate = (path: string) => {
-    window.history.pushState({}, '', path);
     window.location.href = path;
   };
   

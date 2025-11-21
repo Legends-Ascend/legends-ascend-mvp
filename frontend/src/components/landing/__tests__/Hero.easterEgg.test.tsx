@@ -7,13 +7,12 @@ describe('Hero Component - Easter Egg Feature', () => {
     // Clear sessionStorage before each test
     sessionStorage.clear();
     // Reset window.location
-    const mockLocation = { href: '', pushState: vi.fn() };
+    const mockLocation = { href: '' };
     Object.defineProperty(window, 'location', {
       value: mockLocation,
       writable: true,
       configurable: true,
     });
-    vi.spyOn(window.history, 'pushState');
   });
 
   describe('Logo Click Counter', () => {
@@ -185,7 +184,7 @@ describe('Hero Component - Easter Egg Feature', () => {
 
       fireEvent.click(signInButton);
 
-      expect(window.history.pushState).toHaveBeenCalledWith({}, '', '/login');
+      expect(window.location.href).toContain('/login');
     });
 
     it('should navigate to /register when Create Account is clicked', () => {
@@ -194,7 +193,7 @@ describe('Hero Component - Easter Egg Feature', () => {
 
       fireEvent.click(createAccountButton);
 
-      expect(window.history.pushState).toHaveBeenCalledWith({}, '', '/register');
+      expect(window.location.href).toContain('/register');
     });
 
     it('should have proper styling for login/register buttons', () => {
