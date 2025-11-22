@@ -3,8 +3,8 @@
 
 # Technical Architecture and Unified Development Principles
 
-> **Document Version:** Updated November 18, 2025  
-> **Latest Update:** Added Frontend Routing Protection section documenting the RouteGuard pattern for landing page protection.
+> **Document Version:** Updated November 22, 2025  
+> **Latest Update:** Added Reusable Components section documenting the NewsletterSubscription component pattern.
 
 This document defines the unified technical standards for all contributors and agents (GitHub Copilot, OpenAI Codex, Databricks Spark/ML agents, and human developers) working in this repository. It establishes binding conventions for code, data, APIs, tooling, CI/CD, and change control. Agents MUST proactively cross-check outputs against this standard before proposing changes. Agents and humans MUST NOT silently introduce incompatible approaches. All architectural changes MUST go through the documented decision process below.
 
@@ -144,6 +144,67 @@ All routing protection behavior is covered by comprehensive unit tests in `front
 4. **Update `isAuthenticated` prop** when implementing actual authentication
 5. **Test both enabled and disabled states** when modifying routing logic
 6. **Add new protected routes** to the RouteGuard logic and tests when expanding the application
+
+## 5.8 Reusable Components
+
+### NewsletterSubscription Component
+
+**Purpose:** Provides a reusable, type-safe component for capturing email subscriptions with GDPR compliance and configurable EmailOctopus tagging.
+
+**Location:** `frontend/src/components/NewsletterSubscription.tsx`
+
+**Documentation:** See detailed usage guide in `/docs/NEWSLETTER_SUBSCRIPTION.md`
+
+**Key Features:**
+- Configurable EmailOctopus tags for subscriber segmentation
+- GDPR compliant with consent checkbox and disclosure
+- Full TypeScript support with strict mode
+- WCAG 2.1 AA accessible
+- Customizable button text, success messages, and callbacks
+- Comprehensive error handling per architecture standards
+
+**Basic Usage:**
+
+```typescript
+import { NewsletterSubscription } from './components/NewsletterSubscription';
+
+// Default usage with 'beta' tag
+<NewsletterSubscription />
+
+// Custom tag for different campaigns
+<NewsletterSubscription tag="early-access" submitButtonText="Get Early Access" />
+<NewsletterSubscription tag="newsletter" submitButtonText="Subscribe" />
+<NewsletterSubscription tag="tournament-alerts" submitButtonText="Notify Me" />
+
+// With callbacks for analytics and error tracking
+<NewsletterSubscription
+  tag="beta"
+  onSuccess={(email) => analytics.track('Subscription', { email })}
+  onError={(error) => errorTracker.log(error)}
+/>
+```
+
+**Backend Integration:**
+
+The component sends requests to `/api/v1/subscribe` with an optional `tag` parameter. The backend service `emailOctopusService.ts` accepts the tag and applies it to the subscriber:
+
+```typescript
+// Backend service signature
+subscribeToEmailList(email: string, consentTimestamp: string, tag?: string)
+```
+
+**Tag Resolution Priority:**
+1. Tag passed from component prop
+2. `EMAILOCTOPUS_BETA_ACCESS_TAG` environment variable
+3. Default `'beta'` tag
+
+**Environment Variables:**
+- Frontend: `VITE_API_URL` (API endpoint), `VITE_ENABLE_EMAILOCTOPUS_DEBUG` (debug logging)
+- Backend: `EMAILOCTOPUS_API_KEY`, `EMAILOCTOPUS_LIST_ID`, `EMAILOCTOPUS_BETA_ACCESS_TAG`, `EMAILOCTOPUS_DEBUG`
+
+**Testing:** Comprehensive test coverage in `frontend/src/components/__tests__/NewsletterSubscription.test.tsx`
+
+For complete documentation, examples, and troubleshooting, see `/docs/NEWSLETTER_SUBSCRIPTION.md`.
 
 
 
