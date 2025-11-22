@@ -8,6 +8,7 @@ import matchRoutes from './routes/matchRoutes';
 import subscribeRoutes from './routes/subscribeRoutes';
 import inventoryRoutes from './routes/inventoryRoutes';
 import squadRoutes from './routes/squadRoutes';
+import authRoutes from './routes/authRoutes';
 
 dotenv.config();
 
@@ -36,6 +37,7 @@ app.use('/api/players', playerRoutes);
 app.use('/api/teams', teamRoutes);
 app.use('/api/matches', matchRoutes);
 app.use('/api/v1', subscribeRoutes); // US-001: Email subscription route
+app.use('/api/v1', authRoutes);
 app.use('/api/v1/players', inventoryRoutes); // US-044: Player inventory routes
 app.use('/api/v1/squads', squadRoutes); // US-044: Squad management routes
 
