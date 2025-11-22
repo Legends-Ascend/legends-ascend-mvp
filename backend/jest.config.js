@@ -6,8 +6,11 @@ module.exports = {
   testMatch: ['**/__tests__/**/*.ts', '**/*.test.ts', '**/*.spec.ts'],
   collectCoverageFrom: [
     'src/controllers/subscribeController.ts',
+    'src/controllers/authController.ts',
     'src/services/emailOctopusService.ts',
+    'src/services/authService.ts',
     'src/models/subscribeSchema.ts',
+    'src/models/User.ts',
     'src/middleware/rateLimiter.ts',
     'src/controllers/inventoryController.ts',
     'src/controllers/squadController.ts',
@@ -16,6 +19,7 @@ module.exports = {
     'src/middleware/authenticate.ts',
     'src/models/Squad.ts',
     'src/models/UserInventory.ts',
+    'src/routes/authRoutes.ts',
     '!src/**/*.d.ts',
   ],
   coverageThreshold: {
