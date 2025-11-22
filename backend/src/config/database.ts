@@ -26,6 +26,19 @@ export const initializeDatabase = async () => {
       )
     `);
 
+    // Add password_hash column if it doesn't exist (migration for existing tables)
+    await query(`
+      DO $$ 
+      BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM information_schema.columns 
+          WHERE table_name = 'users' AND column_name = 'password_hash'
+        ) THEN
+          ALTER TABLE users ADD COLUMN password_hash VARCHAR(255) NOT NULL DEFAULT '';
+        END IF;
+      END $$;
+    `);
+
     // Create players table (US-044)
     await query(`
       CREATE TABLE IF NOT EXISTS players (
