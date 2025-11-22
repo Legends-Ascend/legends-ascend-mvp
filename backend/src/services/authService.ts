@@ -1,0 +1,133 @@
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import { query } from '../config/database';
+import type { User } from '../models/User';
+
+/**
+ * Authentication Service
+ * Following TECHNICAL_ARCHITECTURE.md - JWT with short TTL
+ * Implements US-045 authentication requirements
+ */
+
+const JWT_SECRET = process.env.JWT_SECRET || 'legends-ascend-secret-key-change-in-production';
+const JWT_EXPIRES_IN = '7d';
+const SALT_ROUNDS = 10;
+
+export interface AuthResponse {
+  token: string;
+  user: {
+    id: string;
+    email: string;
+    created_at: Date;
+  };
+}
+
+/**
+ * Register a new user
+ * Hashes password using bcrypt before storing
+ */
+export async function registerUser(email: string, password: string): Promise<AuthResponse> {
+  // Check if user already exists
+  const existingUser = await query(
+    'SELECT id FROM users WHERE email = $1',
+    [email.toLowerCase()]
+  );
+
+  if (existingUser.rows.length > 0) {
+    throw new Error('Email already in use');
+  }
+
+  // Hash password
+  const password_hash = await bcrypt.hash(password, SALT_ROUNDS);
+
+  // Create user
+  const result = await query(
+    `INSERT INTO users (email, password_hash) 
+     VALUES ($1, $2) 
+     RETURNING id, email, created_at`,
+    [email.toLowerCase(), password_hash]
+  );
+
+  const user = result.rows[0];
+
+  // Generate JWT token
+  const token = jwt.sign(
+    { userId: user.id, email: user.email },
+    JWT_SECRET,
+    { expiresIn: JWT_EXPIRES_IN }
+  );
+
+  return {
+    token,
+    user: {
+      id: user.id,
+      email: user.email,
+      created_at: user.created_at,
+    },
+  };
+}
+
+/**
+ * Login an existing user
+ * Validates credentials and returns JWT token
+ */
+export async function loginUser(email: string, password: string): Promise<AuthResponse> {
+  // Find user by email
+  const result = await query(
+    'SELECT id, email, password_hash, created_at FROM users WHERE email = $1',
+    [email.toLowerCase()]
+  );
+
+  if (result.rows.length === 0) {
+    throw new Error('Invalid credentials');
+  }
+
+  const user = result.rows[0];
+
+  // Verify password
+  const isValidPassword = await bcrypt.compare(password, user.password_hash);
+
+  if (!isValidPassword) {
+    throw new Error('Invalid credentials');
+  }
+
+  // Generate JWT token
+  const token = jwt.sign(
+    { userId: user.id, email: user.email },
+    JWT_SECRET,
+    { expiresIn: JWT_EXPIRES_IN }
+  );
+
+  return {
+    token,
+    user: {
+      id: user.id,
+      email: user.email,
+      created_at: user.created_at,
+    },
+  };
+}
+
+/**
+ * Verify JWT token and return user data
+ */
+export async function verifyAuthToken(token: string): Promise<{ id: string; email: string; created_at: Date }> {
+  try {
+    // Verify token
+    const decoded = jwt.verify(token, JWT_SECRET) as { userId: string; email: string };
+
+    // Fetch user from database
+    const result = await query(
+      'SELECT id, email, created_at FROM users WHERE id = $1',
+      [decoded.userId]
+    );
+
+    if (result.rows.length === 0) {
+      throw new Error('User not found');
+    }
+
+    return result.rows[0];
+  } catch (error) {
+    throw new Error('Invalid or expired token');
+  }
+}
