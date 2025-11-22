@@ -14,6 +14,7 @@ import matchRoutes from '../backend/src/routes/matchRoutes';
 import subscribeRoutes from '../backend/src/routes/subscribeRoutes';
 import inventoryRoutes from '../backend/src/routes/inventoryRoutes';
 import squadRoutes from '../backend/src/routes/squadRoutes';
+import authRoutes from '../backend/src/routes/authRoutes';
 
 const app = express();
 
@@ -74,6 +75,7 @@ app.use('/api/players', playerRoutes);
 app.use('/api/teams', teamRoutes);
 app.use('/api/matches', matchRoutes);
 app.use('/api/v1', subscribeRoutes);
+app.use('/api/v1', authRoutes);
 app.use('/api/v1/players', inventoryRoutes);
 app.use('/api/v1/squads', squadRoutes);
 
