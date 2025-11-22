@@ -11,6 +11,9 @@ import * as authService from '../services/authService';
  * Following TECHNICAL_ARCHITECTURE.md - REST API testing patterns
  */
 
+// Set required environment variables for tests
+process.env.JWT_SECRET = 'test-secret-key-for-testing-only';
+
 // Mock the auth service
 jest.mock('../services/authService');
 

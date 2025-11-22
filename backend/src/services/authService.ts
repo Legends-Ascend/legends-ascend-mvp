@@ -5,13 +5,24 @@ import type { User } from '../models/User';
 
 /**
  * Authentication Service
- * Following TECHNICAL_ARCHITECTURE.md - JWT with short TTL
+ * Following TECHNICAL_ARCHITECTURE.md - JWT authentication
  * Implements US-045 authentication requirements
  */
 
-const JWT_SECRET = process.env.JWT_SECRET || 'legends-ascend-secret-key-change-in-production';
 const JWT_EXPIRES_IN = '7d';
 const SALT_ROUNDS = 10;
+
+/**
+ * Get JWT secret from environment variable
+ * Throws error if not set to enforce security
+ */
+function getJwtSecret(): string {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error('JWT_SECRET environment variable is required but not set');
+  }
+  return secret;
+}
 
 export interface AuthResponse {
   token: string;
@@ -53,7 +64,7 @@ export async function registerUser(email: string, password: string): Promise<Aut
   // Generate JWT token
   const token = jwt.sign(
     { userId: user.id, email: user.email },
-    JWT_SECRET,
+    getJwtSecret(),
     { expiresIn: JWT_EXPIRES_IN }
   );
 
@@ -94,7 +105,7 @@ export async function loginUser(email: string, password: string): Promise<AuthRe
   // Generate JWT token
   const token = jwt.sign(
     { userId: user.id, email: user.email },
-    JWT_SECRET,
+    getJwtSecret(),
     { expiresIn: JWT_EXPIRES_IN }
   );
 
@@ -114,7 +125,7 @@ export async function loginUser(email: string, password: string): Promise<AuthRe
 export async function verifyAuthToken(token: string): Promise<{ id: string; email: string; created_at: Date }> {
   try {
     // Verify token
-    const decoded = jwt.verify(token, JWT_SECRET) as { userId: string; email: string };
+    const decoded = jwt.verify(token, getJwtSecret()) as { userId: string; email: string };
 
     // Fetch user from database
     const result = await query(
