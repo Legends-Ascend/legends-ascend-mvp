@@ -32,13 +32,15 @@ interface EmailOctopusResponse {
  * Subscribe a user to the EmailOctopus mailing list
  * @param email - User's email address
  * @param consentTimestamp - ISO 8601 timestamp of consent
- * @param tag - Optional tag to apply to the subscriber (defaults to environment variable or 'beta')
+ * @param tag - Optional single tag (deprecated, use tags array)
+ * @param tags - Optional array of tags to apply to the subscriber
  * @returns Promise with subscription result
  */
 export async function subscribeToEmailList(
   email: string,
   consentTimestamp: string,
-  tag?: string
+  tag?: string,
+  tags?: string[]
 ): Promise<{ success: boolean; message: string; status: string; debug?: Record<string, unknown> }> {
   const config: EmailOctopusConfig = {
     apiKey: process.env.EMAILOCTOPUS_API_KEY || '',
@@ -62,10 +64,21 @@ export async function subscribeToEmailList(
   requestBody.append('fields[ConsentTimestamp]', consentTimestamp);
   requestBody.append('update_existing', 'true');
 
-  // Add tag: use passed tag, or fall back to configured tag, or use default
-  const resolvedTag = tag || config.betaAccessTag || DEFAULT_BETA_ACCESS_TAG;
-  const tags: string[] = [resolvedTag];
-  tags.forEach((tag) => requestBody.append('tags[]', tag));
+  // Add tags: use provided tags array, or single tag, or fall back to configured tag, or use default
+  let resolvedTags: string[];
+  if (tags && tags.length > 0) {
+    // Use provided tags array (takes precedence)
+    resolvedTags = tags;
+  } else if (tag) {
+    // Use single tag for backward compatibility
+    resolvedTags = [tag];
+  } else {
+    // Fall back to configured tag or default
+    const defaultTag = config.betaAccessTag || DEFAULT_BETA_ACCESS_TAG;
+    resolvedTags = [defaultTag];
+  }
+  
+  resolvedTags.forEach((tag) => requestBody.append('tags[]', tag));
 
   const debugEnabled = process.env.EMAILOCTOPUS_DEBUG !== 'false';
 
@@ -88,10 +101,10 @@ export async function subscribeToEmailList(
           requestBodyPreview: requestBody
             .toString()
             .replace(/api_key=[^&]+/i, 'api_key=[REDACTED]'),
-          tagsApplied: tags,
+          tagsApplied: resolvedTags,
           updateExisting: true,
           configuredTag: config.betaAccessTag ?? null,
-          tagFallbackUsed: !config.betaAccessTag,
+          tagFallbackUsed: !tags && !tag && !config.betaAccessTag,
         }
       : undefined;
 

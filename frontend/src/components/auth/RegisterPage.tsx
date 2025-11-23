@@ -167,11 +167,63 @@ const LoadingSpinner = styled.span`
   }
 `;
 
+const CheckboxGroup = styled.div`
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 8px;
+`;
+
+const Checkbox = styled.input`
+  width: 20px;
+  height: 20px;
+  border: 2px solid #64748B;
+  border-radius: 4px;
+  cursor: pointer;
+  flex-shrink: 0;
+  margin-top: 2px;
+  accent-color: #1E3A8A;
+
+  &:focus {
+    outline: 2px solid #1E3A8A;
+    outline-offset: 2px;
+  }
+
+  &:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+`;
+
+const CheckboxLabel = styled.label`
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  color: #0F172A;
+  cursor: pointer;
+  line-height: 1.5;
+
+  a {
+    color: #1E3A8A;
+    text-decoration: underline;
+    
+    &:hover {
+      color: #1e40af;
+    }
+
+    &:focus {
+      outline: 2px solid #1E3A8A;
+      outline-offset: 2px;
+      border-radius: 2px;
+    }
+  }
+`;
+
 export function RegisterPage() {
   const { register } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [newsletterOptIn, setNewsletterOptIn] = useState(false);
   const [errors, setErrors] = useState<{ 
     email?: string; 
     password?: string; 
@@ -185,7 +237,7 @@ export function RegisterPage() {
     setErrors({});
 
     // Client-side validation
-    const result = registerSchema.safeParse({ email, password, confirmPassword });
+    const result = registerSchema.safeParse({ email, password, confirmPassword, newsletterOptIn });
     if (!result.success) {
       const fieldErrors: { 
         email?: string; 
@@ -203,7 +255,7 @@ export function RegisterPage() {
     setIsSubmitting(true);
 
     try {
-      await register(email, password);
+      await register(email, password, newsletterOptIn);
       // Redirect to dashboard after successful registration
       window.location.href = '/game/lineup';
     } catch (error) {
@@ -280,6 +332,27 @@ export function RegisterPage() {
               </ErrorMessage>
             )}
           </FormGroup>
+
+          <CheckboxGroup>
+            <Checkbox
+              type="checkbox"
+              id="newsletterOptIn"
+              checked={newsletterOptIn}
+              onChange={(e) => setNewsletterOptIn(e.target.checked)}
+              disabled={isSubmitting}
+            />
+            <CheckboxLabel htmlFor="newsletterOptIn">
+              Sign me up for news and updates about Legends Ascend.{' '}
+              <a 
+                href="/privacy-policy" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+              >
+                Learn more about how we handle your data
+              </a>
+            </CheckboxLabel>
+          </CheckboxGroup>
 
           <Button type="submit" disabled={isSubmitting} aria-busy={isSubmitting}>
             {isSubmitting && <LoadingSpinner />}
