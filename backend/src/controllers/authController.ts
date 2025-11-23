@@ -28,10 +28,10 @@ export async function register(req: Request, res: Response) {
       });
     }
 
-    const { email, password } = validation.data;
+    const { email, password, newsletterOptIn } = validation.data;
 
-    // Register user
-    const authResponse = await registerUser(email, password);
+    // Register user with newsletter preference
+    const authResponse = await registerUser(email, password, newsletterOptIn);
 
     res.status(201).json({
       success: true,

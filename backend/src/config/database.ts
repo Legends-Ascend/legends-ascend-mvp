@@ -39,6 +39,34 @@ export const initializeDatabase = async () => {
       END $$;
     `);
 
+    // Add newsletter opt-in fields for US-048
+    await query(`
+      DO $$ 
+      BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM information_schema.columns 
+          WHERE table_name = 'users' AND column_name = 'newsletter_optin'
+        ) THEN
+          ALTER TABLE users ADD COLUMN newsletter_optin BOOLEAN DEFAULT false NOT NULL;
+        END IF;
+      END $$;
+    `);
+
+    await query(`
+      DO $$ 
+      BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM information_schema.columns 
+          WHERE table_name = 'users' AND column_name = 'newsletter_consent_timestamp'
+        ) THEN
+          ALTER TABLE users ADD COLUMN newsletter_consent_timestamp TIMESTAMP NULL;
+        END IF;
+      END $$;
+    `);
+
+    // Create index for newsletter preferences
+    await query(`CREATE INDEX IF NOT EXISTS idx_users_newsletter_optin ON users(newsletter_optin)`);
+
     // Create players table (US-044)
     await query(`
       CREATE TABLE IF NOT EXISTS players (

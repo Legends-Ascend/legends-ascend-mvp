@@ -22,10 +22,10 @@ export const subscribeEmail = async (req: Request, res: Response): Promise<void>
       return;
     }
 
-    const { email, timestamp, tag } = validationResult.data;
+    const { email, timestamp, tag, tags } = validationResult.data;
 
-    // Call EmailOctopus service with optional tag
-    const result = await subscribeToEmailList(email, timestamp, tag);
+    // Call EmailOctopus service with optional tag(s)
+    const result = await subscribeToEmailList(email, timestamp, tag, tags);
 
     // Map service status to HTTP response codes per FR-3
     const statusCodeMap: Record<string, number> = {
