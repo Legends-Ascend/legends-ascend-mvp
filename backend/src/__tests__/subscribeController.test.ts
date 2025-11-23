@@ -53,7 +53,7 @@ describe('subscribeController', () => {
           'test@example.com',
           '2025-11-14T09:00:00.000Z',
           undefined,  // tag parameter is optional
-          undefined
+          undefined   // tags array parameter
         );
         expect(statusMock).toHaveBeenCalledWith(200);
         expect(jsonMock).toHaveBeenCalledWith(mockResult);
@@ -110,7 +110,7 @@ describe('subscribeController', () => {
           'test@example.com',
           '2025-11-14T09:00:00.000Z',
           'newsletter',
-          undefined
+          undefined   // tags array parameter
         );
         expect(statusMock).toHaveBeenCalledWith(200);
         expect(jsonMock).toHaveBeenCalledWith(mockResult);
@@ -141,7 +141,7 @@ describe('subscribeController', () => {
           'earlyuser@example.com',
           '2025-11-14T09:00:00.000Z',
           'early-access',
-          undefined
+          undefined   // tags array parameter
         );
         expect(statusMock).toHaveBeenCalledWith(200);
       });
@@ -171,7 +171,7 @@ describe('subscribeController', () => {
           'tournament@example.com',
           '2025-11-14T09:00:00.000Z',
           'tournament-alerts',
-          undefined
+          undefined   // tags array parameter
         );
         expect(statusMock).toHaveBeenCalledWith(200);
       });
@@ -201,7 +201,7 @@ describe('subscribeController', () => {
           'test@example.com',
           '2025-11-14T09:00:00.000Z',
           '',
-          undefined
+          undefined   // tags array parameter
         );
         expect(statusMock).toHaveBeenCalledWith(200);
       });
@@ -407,7 +407,7 @@ describe('subscribeController', () => {
           'test+tag@example.co.uk',
           '2025-11-14T09:00:00.000Z',
           undefined,  // tag parameter is optional
-          undefined
+          undefined   // tags array parameter
         );
         expect(statusMock).toHaveBeenCalledWith(200);
       });
