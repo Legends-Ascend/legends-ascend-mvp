@@ -16,11 +16,23 @@ jobs:
     if: github.event.issue.pull_request && contains(github.event.comment.body, '/promote')
     outputs:
       triggered: true
+      head_ref: ${{ steps.get-pr-ref.outputs.head_ref }}
     steps:
-      - name: Acknowledge command
+      - name: Get PR Ref
+        id: get-pr-ref
         uses: actions/github-script@v7
         with:
           script: |
+            const pr = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number
+            });
+            
+            // Set the branch name as output
+            core.setOutput('head_ref', pr.data.head.ref);
+            
+            // Add a reaction to the comment
             await github.rest.reactions.createForIssueComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -36,6 +48,8 @@ jobs:
       user_story: ${{ steps.filter.outputs.user_story }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.check-trigger.outputs.head_ref }}
       
       - uses: dorny/paths-filter@v3
         id: filter
@@ -46,12 +60,14 @@ jobs:
               - '!docs/user-stories/README.md'
 
   promote:
-    needs: check-user-story-changes
+    needs: [check-trigger, check-user-story-changes]
     if: needs.check-user-story-changes.outputs.user_story == 'true'
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.check-trigger.outputs.head_ref }}
 
       - name: Create lean reference issues (single master per story)
         uses: actions/github-script@v7
@@ -263,7 +279,7 @@ jobs:
                   const statusField = fields.find(f => f.name === 'Status');
                   const typeField = fields.find(f => f.name === 'Type');
 
-                  // Set Status to \"Backlog\"
+                  // Set Status to \\\"Backlog\\\"
                   if (statusField) {
                     const backlogOption = statusField.options.find(o => o.name === 'Backlog');
                     if (backlogOption) {
@@ -290,7 +306,7 @@ jobs:
                     }
                   }
 
-                  // Set Type to \"Feature\"
+                  // Set Type to \\\"Feature\\\"
                   if (typeField) {
                     const featureOption = typeField.options.find(o => o.name === 'Feature');
                     if (featureOption) {
@@ -324,14 +340,4 @@ jobs:
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   issue_number: pr.number,
-                  body: '✅ Created lean story issue #' + issue.data.number + ' for ' + id + ' from ' + paths.join(', ')
-                })
-
-                core.info('Posted comment on PR #' + pr.number + ' about issue #' + issue.data.number);
-              }
-
-              core.info('Workflow completed successfully');
-            } catch (error) {
-              core.setFailed('Workflow failed: ' + error.message);
-              throw error;
-            }
+                  body: '✅ Created lean story issue #' + issue.data.number + ' for ' + id + ' from ' + paths.join(', ')\n                })\n\n                core.info('Posted comment on PR #' + pr.number + ' about issue #' + issue.data.number);\n              }\n\n              core.info('Workflow completed successfully');\n            } catch (error) {\n              core.setFailed('Workflow failed: ' + error.message);\n              throw error;\n            }\n"
