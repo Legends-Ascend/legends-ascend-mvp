@@ -132,7 +132,7 @@ export const NewsletterSubscription: React.FC<NewsletterSubscriptionProps> = ({
           email: validationResult.data.email,
           gdprConsent: validationResult.data.gdprConsent,
           timestamp: new Date().toISOString(),
-          ...(tags ? { tags } : { tag }), // Use tags array if provided, otherwise single tag
+          ...(tags?.length ? { tags } : { tag }), // Use tags array if non-empty, otherwise single tag
         }),
       });
 
