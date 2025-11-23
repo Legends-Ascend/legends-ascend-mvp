@@ -389,4 +389,325 @@ describe('NewsletterSubscription', () => {
       });
     });
   });
+
+  describe('Network Error Handling', () => {
+    it('should handle network fetch failures', async () => {
+      const user = userEvent.setup();
+      const mockFetch = vi.mocked(fetch);
+      
+      // Simulate network failure
+      mockFetch.mockRejectedValueOnce(new TypeError('Failed to fetch'));
+
+      render(<NewsletterSubscription />);
+      
+      const emailInput = screen.getByLabelText(/email address/i);
+      await user.type(emailInput, 'test@example.com');
+      
+      const checkbox = screen.getByRole('checkbox');
+      await user.click(checkbox);
+      
+      const submitButton = screen.getByRole('button', { name: /join the waitlist/i });
+      await user.click(submitButton);
+      
+      await waitFor(() => {
+        const errorMessage = screen.getByText(/unable to reach the server/i);
+        expect(errorMessage).toBeInTheDocument();
+      });
+    });
+
+    it('should handle JSON parsing errors', async () => {
+      const user = userEvent.setup();
+      const mockFetch = vi.mocked(fetch);
+      
+      // Simulate JSON parsing error
+      mockFetch.mockRejectedValueOnce(new SyntaxError('Unexpected token in JSON'));
+
+      render(<NewsletterSubscription />);
+      
+      const emailInput = screen.getByLabelText(/email address/i);
+      await user.type(emailInput, 'test@example.com');
+      
+      const checkbox = screen.getByRole('checkbox');
+      await user.click(checkbox);
+      
+      const submitButton = screen.getByRole('button', { name: /join the waitlist/i });
+      await user.click(submitButton);
+      
+      await waitFor(() => {
+        const errorMessage = screen.getByText(/service configuration error/i);
+        expect(errorMessage).toBeInTheDocument();
+      });
+    });
+
+    it('should handle generic errors', async () => {
+      const user = userEvent.setup();
+      const mockFetch = vi.mocked(fetch);
+      
+      // Simulate generic error
+      mockFetch.mockRejectedValueOnce(new Error('Generic error'));
+
+      render(<NewsletterSubscription />);
+      
+      const emailInput = screen.getByLabelText(/email address/i);
+      await user.type(emailInput, 'test@example.com');
+      
+      const checkbox = screen.getByRole('checkbox');
+      await user.click(checkbox);
+      
+      const submitButton = screen.getByRole('button', { name: /join the waitlist/i });
+      await user.click(submitButton);
+      
+      await waitFor(() => {
+        const errorMessage = screen.getByText(/unable to connect/i);
+        expect(errorMessage).toBeInTheDocument();
+      });
+    });
+
+    it('should handle non-JSON error responses', async () => {
+      const user = userEvent.setup();
+      const mockFetch = vi.mocked(fetch);
+      
+      // Simulate non-JSON error response
+      mockFetch.mockResolvedValueOnce(
+        createMockResponse(
+          {},
+          { 
+            ok: false, 
+            status: 500,
+            headers: { 'content-type': 'text/html' }
+          }
+        )
+      );
+
+      render(<NewsletterSubscription />);
+      
+      const emailInput = screen.getByLabelText(/email address/i);
+      await user.type(emailInput, 'test@example.com');
+      
+      const checkbox = screen.getByRole('checkbox');
+      await user.click(checkbox);
+      
+      const submitButton = screen.getByRole('button', { name: /join the waitlist/i });
+      await user.click(submitButton);
+      
+      await waitFor(() => {
+        const errorMessage = screen.getByText(/something went wrong/i);
+        expect(errorMessage).toBeInTheDocument();
+      });
+    });
+
+    it('should call onError callback on network failure', async () => {
+      const user = userEvent.setup();
+      const mockFetch = vi.mocked(fetch);
+      const onError = vi.fn();
+      
+      mockFetch.mockRejectedValueOnce(new TypeError('Failed to fetch'));
+
+      render(<NewsletterSubscription onError={onError} />);
+      
+      const emailInput = screen.getByLabelText(/email address/i);
+      await user.type(emailInput, 'test@example.com');
+      
+      const checkbox = screen.getByRole('checkbox');
+      await user.click(checkbox);
+      
+      const submitButton = screen.getByRole('button', { name: /join the waitlist/i });
+      await user.click(submitButton);
+      
+      await waitFor(() => {
+        expect(onError).toHaveBeenCalled();
+        expect(onError).toHaveBeenCalledWith('Unable to reach the server. Please check your internet connection or try disabling ad blockers.');
+      });
+    });
+  });
+
+  describe('Edge Cases', () => {
+    it('should handle successful response with non-success flag', async () => {
+      const user = userEvent.setup();
+      const mockFetch = vi.mocked(fetch);
+      
+      mockFetch.mockResolvedValueOnce(
+        createMockResponse({
+          success: false,
+          message: 'Already subscribed',
+          status: 'already_subscribed',
+        })
+      );
+
+      render(<NewsletterSubscription />);
+      
+      const emailInput = screen.getByLabelText(/email address/i);
+      await user.type(emailInput, 'test@example.com');
+      
+      const checkbox = screen.getByRole('checkbox');
+      await user.click(checkbox);
+      
+      const submitButton = screen.getByRole('button', { name: /join the waitlist/i });
+      await user.click(submitButton);
+      
+      await waitFor(() => {
+        const errorMessage = screen.getByText(/already subscribed/i);
+        expect(errorMessage).toBeInTheDocument();
+      });
+    });
+
+    it('should reset form after successful subscription', async () => {
+      const user = userEvent.setup();
+      const mockFetch = vi.mocked(fetch);
+      
+      mockFetch.mockResolvedValueOnce(
+        createMockResponse({
+          success: true,
+          message: 'Thank you! Check your email to confirm your subscription.',
+          status: 'pending_confirmation',
+        })
+      );
+
+      render(<NewsletterSubscription />);
+      
+      const emailInput = screen.getByLabelText(/email address/i) as HTMLInputElement;
+      await user.type(emailInput, 'test@example.com');
+      
+      const checkbox = screen.getByRole('checkbox') as HTMLInputElement;
+      await user.click(checkbox);
+      
+      const submitButton = screen.getByRole('button', { name: /join the waitlist/i });
+      await user.click(submitButton);
+      
+      // After successful submission, form should be hidden and success message shown
+      await waitFor(() => {
+        const successMessage = screen.getByText(/thank you/i);
+        expect(successMessage).toBeInTheDocument();
+      });
+    });
+
+    it('should display button text as "Joining..." during submission', async () => {
+      const user = userEvent.setup();
+      const mockFetch = vi.mocked(fetch);
+      
+      // Make the promise never resolve to test loading state
+      mockFetch.mockReturnValueOnce(new Promise(() => {}));
+
+      render(<NewsletterSubscription />);
+      
+      const emailInput = screen.getByLabelText(/email address/i);
+      await user.type(emailInput, 'test@example.com');
+      
+      const checkbox = screen.getByRole('checkbox');
+      await user.click(checkbox);
+      
+      const submitButton = screen.getByRole('button', { name: /join the waitlist/i });
+      await user.click(submitButton);
+      
+      await waitFor(() => {
+        expect(screen.getByText(/joining\.\.\./i)).toBeInTheDocument();
+      });
+    });
+
+    it('should handle success response without JSON content', async () => {
+      const user = userEvent.setup();
+      const mockFetch = vi.mocked(fetch);
+      
+      // Simulate response without JSON content
+      mockFetch.mockResolvedValueOnce(
+        createMockResponse(
+          {},
+          { 
+            ok: true,
+            status: 200,
+            headers: { 'content-type': 'text/plain' }
+          }
+        )
+      );
+
+      render(<NewsletterSubscription />);
+      
+      const emailInput = screen.getByLabelText(/email address/i);
+      await user.type(emailInput, 'test@example.com');
+      
+      const checkbox = screen.getByRole('checkbox');
+      await user.click(checkbox);
+      
+      const submitButton = screen.getByRole('button', { name: /join the waitlist/i });
+      await user.click(submitButton);
+      
+      await waitFor(() => {
+        const errorMessage = screen.getByText(/unable to connect/i);
+        expect(errorMessage).toBeInTheDocument();
+      });
+    });
+
+    it('should log debug information when debug data is present', async () => {
+      const user = userEvent.setup();
+      const mockFetch = vi.mocked(fetch);
+      const consoleInfoSpy = vi.spyOn(console, 'info');
+      
+      mockFetch.mockResolvedValueOnce(
+        createMockResponse({
+          success: true,
+          message: 'Thank you! Check your email to confirm your subscription.',
+          status: 'pending_confirmation',
+          debug: {
+            requestBody: 'test data',
+            response: 'success'
+          }
+        })
+      );
+
+      render(<NewsletterSubscription />);
+      
+      const emailInput = screen.getByLabelText(/email address/i);
+      await user.type(emailInput, 'test@example.com');
+      
+      const checkbox = screen.getByRole('checkbox');
+      await user.click(checkbox);
+      
+      const submitButton = screen.getByRole('button', { name: /join the waitlist/i });
+      await user.click(submitButton);
+      
+      await waitFor(() => {
+        expect(consoleInfoSpy).toHaveBeenCalledWith(
+          'EmailOctopus debug (success response):',
+          expect.objectContaining({
+            requestBody: 'test data',
+            response: 'success'
+          })
+        );
+      });
+
+      consoleInfoSpy.mockRestore();
+    });
+
+    it('should handle 405 Method Not Allowed error', async () => {
+      const user = userEvent.setup();
+      const mockFetch = vi.mocked(fetch);
+      
+      mockFetch.mockResolvedValueOnce(
+        createMockResponse(
+          {},
+          { 
+            ok: false,
+            status: 405,
+            headers: { 'content-type': 'text/html' }
+          }
+        )
+      );
+
+      render(<NewsletterSubscription />);
+      
+      const emailInput = screen.getByLabelText(/email address/i);
+      await user.type(emailInput, 'test@example.com');
+      
+      const checkbox = screen.getByRole('checkbox');
+      await user.click(checkbox);
+      
+      const submitButton = screen.getByRole('button', { name: /join the waitlist/i });
+      await user.click(submitButton);
+      
+      await waitFor(() => {
+        const errorMessage = screen.getByText(/subscription service is not configured correctly/i);
+        expect(errorMessage).toBeInTheDocument();
+      });
+    });
+  });
 });
