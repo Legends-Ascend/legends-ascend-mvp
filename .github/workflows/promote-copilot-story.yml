@@ -120,6 +120,7 @@ jobs:
 
                 // choose main file (longest filename heuristic)
                 const main = paths.reduce((a,b)=> (b.length>a.length?b:a))
+132
 
                 if (!fs.existsSync(main)) {
                   core.warning('Main file ' + main + ' does not exist - skipping');
@@ -127,8 +128,12 @@ jobs:
                 }
 
                 const content = fs.readFileSync(main,'utf8')
-                const titleMatch = content.match(/^#\\s+(.+)$/m)
-                const title = titleMatch ? (id + ': ' + titleMatch[1]) : id
+                const 125
+                = content.match(/^#\\s+(.+)$/m)
+                133
+                = 132
+                ? (id + ': ' + 130
+                [1]) : id
 
                 // GitHub issue body character limit is ~65,536 characters
                 const MAX_ISSUE_LENGTH = 60000; // Leave buffer for safety
