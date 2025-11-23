@@ -14,10 +14,8 @@ process.env.JWT_SECRET = 'test-secret-key-for-newsletter-optin-testing';
 // Mock database queries
 jest.mock('../config/database');
 
-// Mock emailOctopusService
-jest.mock('../services/emailOctopusService', () => ({
-  subscribeToEmailList: jest.fn(),
-}));
+// Mock emailOctopusService before importing authService
+jest.mock('../services/emailOctopusService');
 
 const mockQuery = database.query as jest.MockedFunction<typeof database.query>;
 const mockSubscribeToEmailList = emailOctopusService.subscribeToEmailList as jest.MockedFunction<
@@ -27,6 +25,12 @@ const mockSubscribeToEmailList = emailOctopusService.subscribeToEmailList as jes
 describe('Newsletter Opt-In During Registration (US-048)', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    // Setup default mock implementation for subscribeToEmailList
+    mockSubscribeToEmailList.mockResolvedValue({
+      success: true,
+      message: 'Subscribed successfully',
+      status: 'pending_confirmation',
+    });
   });
 
   describe('User opts in for newsletter', () => {

@@ -2,11 +2,13 @@ import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { query } from '../config/database';
 import type { User } from '../models/User';
+import { subscribeToEmailList } from './emailOctopusService';
 
 /**
  * Authentication Service
  * Following TECHNICAL_ARCHITECTURE.md - JWT authentication
  * Implements US-045 authentication requirements
+ * Implements US-048 newsletter opt-in during registration
  */
 
 const JWT_EXPIRES_IN = '7d';
@@ -80,19 +82,17 @@ export async function registerUser(
   const tags = newsletterOptIn ? ['registered', 'news'] : ['registered'];
   const consentTimestamp = (newsletterConsentTimestamp || new Date()).toISOString();
   
-  // Import subscribeToEmailList at the top of the file if not already imported
-  import('../services/emailOctopusService')
-    .then(({ subscribeToEmailList }) => {
-      return subscribeToEmailList(email, consentTimestamp, undefined, tags);
-    })
+  // Fire and forget pattern - newsletter subscription should not block registration
+  subscribeToEmailList(email, consentTimestamp, undefined, tags)
     .catch((error) => {
-      // Log error but don't throw (non-blocking)
+      // Log error but don't throw (non-blocking per FR-6)
       console.error('Newsletter subscription failed during registration:', {
         email,
         newsletterOptIn,
         tags,
         error: error instanceof Error ? error.message : 'Unknown error',
       });
+      // TODO: In production, send to error tracking service (e.g., Sentry) and/or retry queue
     });
 
   return {
