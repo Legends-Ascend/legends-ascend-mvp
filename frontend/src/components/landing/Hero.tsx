@@ -84,7 +84,8 @@ export const Hero: React.FC = () => {
 
       {/* Content */}
       <div className="relative z-10 min-h-screen flex flex-col items-center justify-center px-4 sm:px-6 lg:px-8">
-        <div className="text-center max-w-4xl mx-auto">
+        {/* Semi-opaque container for improved text/form visibility and contrast */}
+        <div className="text-center max-w-4xl mx-auto bg-dark-navy/80 backdrop-blur-md rounded-2xl px-6 py-10 sm:px-8 sm:py-12 md:px-12 md:py-16 shadow-2xl border border-white/10">
           {/* Logo with Easter Egg Click Handler */}
           <div className="mb-8">
             <img
@@ -103,15 +104,15 @@ export const Hero: React.FC = () => {
             />
           </div>
 
-          {/* Headline - Professional typography */}
-          <h1 className={`font-display text-5xl sm:text-6xl md:text-7xl font-black text-white leading-tight drop-shadow-lg mb-6 transition-all duration-1000 ${
+          {/* Headline - Professional typography with improved contrast */}
+          <h1 className={`font-display text-5xl sm:text-6xl md:text-7xl font-black text-white leading-tight drop-shadow-2xl mb-6 transition-all duration-1000 ${
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
           }`}>
             Forge Your Football Legacy
           </h1>
 
-          {/* Subheadline - Enhanced typography */}
-          <p className={`font-sans text-lg sm:text-xl md:text-2xl text-white max-w-2xl mx-auto leading-relaxed drop-shadow-lg mb-8 md:mb-12 transition-all duration-1000 delay-200 ${
+          {/* Subheadline - Enhanced typography with improved contrast */}
+          <p className={`font-sans text-lg sm:text-xl md:text-2xl text-white max-w-2xl mx-auto leading-relaxed drop-shadow-2xl mb-8 md:mb-12 transition-all duration-1000 delay-200 ${
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'
           }`}>
             Experience the <span className="font-bold text-cyan-400">AI-powered</span> football management game where every choice defines your journey.
