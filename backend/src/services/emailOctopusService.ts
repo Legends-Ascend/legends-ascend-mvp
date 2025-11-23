@@ -32,11 +32,13 @@ interface EmailOctopusResponse {
  * Subscribe a user to the EmailOctopus mailing list
  * @param email - User's email address
  * @param consentTimestamp - ISO 8601 timestamp of consent
+ * @param tag - Optional tag to apply to the subscriber (defaults to environment variable or 'beta')
  * @returns Promise with subscription result
  */
 export async function subscribeToEmailList(
   email: string,
-  consentTimestamp: string
+  consentTimestamp: string,
+  tag?: string
 ): Promise<{ success: boolean; message: string; status: string; debug?: Record<string, unknown> }> {
   const config: EmailOctopusConfig = {
     apiKey: process.env.EMAILOCTOPUS_API_KEY || '',
@@ -60,8 +62,8 @@ export async function subscribeToEmailList(
   requestBody.append('fields[ConsentTimestamp]', consentTimestamp);
   requestBody.append('update_existing', 'true');
 
-  // Add beta-access tag if configured or fall back to a safe default
-  const resolvedTag = config.betaAccessTag || DEFAULT_BETA_ACCESS_TAG;
+  // Add tag: use passed tag, or fall back to configured tag, or use default
+  const resolvedTag = tag || config.betaAccessTag || DEFAULT_BETA_ACCESS_TAG;
   const tags: string[] = [resolvedTag];
   tags.forEach((tag) => requestBody.append('tags[]', tag));
 

@@ -51,7 +51,8 @@ describe('subscribeController', () => {
         // Assert
         expect(emailOctopusService.subscribeToEmailList).toHaveBeenCalledWith(
           'test@example.com',
-          '2025-11-14T09:00:00.000Z'
+          '2025-11-14T09:00:00.000Z',
+          undefined  // tag parameter is optional
         );
         expect(statusMock).toHaveBeenCalledWith(200);
         expect(jsonMock).toHaveBeenCalledWith(mockResult);
@@ -79,6 +80,125 @@ describe('subscribeController', () => {
         // Assert
         expect(statusMock).toHaveBeenCalledWith(409);
         expect(jsonMock).toHaveBeenCalledWith(mockResult);
+      });
+    });
+
+    describe('Tag Parameter Tests', () => {
+      it('should pass custom tag to EmailOctopus service when provided', async () => {
+        // Arrange
+        req.body = {
+          email: 'test@example.com',
+          gdprConsent: true,
+          timestamp: '2025-11-14T09:00:00.000Z',
+          tag: 'newsletter',
+        };
+
+        const mockResult = {
+          success: true,
+          message: 'Thank you! Check your email to confirm your subscription.',
+          status: 'pending_confirmation',
+        };
+
+        (emailOctopusService.subscribeToEmailList as jest.Mock).mockResolvedValue(mockResult);
+
+        // Act
+        await subscribeEmail(req as Request, res as Response);
+
+        // Assert
+        expect(emailOctopusService.subscribeToEmailList).toHaveBeenCalledWith(
+          'test@example.com',
+          '2025-11-14T09:00:00.000Z',
+          'newsletter'
+        );
+        expect(statusMock).toHaveBeenCalledWith(200);
+        expect(jsonMock).toHaveBeenCalledWith(mockResult);
+      });
+
+      it('should handle early-access tag', async () => {
+        // Arrange
+        req.body = {
+          email: 'earlyuser@example.com',
+          gdprConsent: true,
+          timestamp: '2025-11-14T09:00:00.000Z',
+          tag: 'early-access',
+        };
+
+        const mockResult = {
+          success: true,
+          message: 'Thank you! Check your email to confirm your subscription.',
+          status: 'pending_confirmation',
+        };
+
+        (emailOctopusService.subscribeToEmailList as jest.Mock).mockResolvedValue(mockResult);
+
+        // Act
+        await subscribeEmail(req as Request, res as Response);
+
+        // Assert
+        expect(emailOctopusService.subscribeToEmailList).toHaveBeenCalledWith(
+          'earlyuser@example.com',
+          '2025-11-14T09:00:00.000Z',
+          'early-access'
+        );
+        expect(statusMock).toHaveBeenCalledWith(200);
+      });
+
+      it('should handle tournament-alerts tag', async () => {
+        // Arrange
+        req.body = {
+          email: 'tournament@example.com',
+          gdprConsent: true,
+          timestamp: '2025-11-14T09:00:00.000Z',
+          tag: 'tournament-alerts',
+        };
+
+        const mockResult = {
+          success: true,
+          message: 'Thank you! Check your email to confirm your subscription.',
+          status: 'pending_confirmation',
+        };
+
+        (emailOctopusService.subscribeToEmailList as jest.Mock).mockResolvedValue(mockResult);
+
+        // Act
+        await subscribeEmail(req as Request, res as Response);
+
+        // Assert
+        expect(emailOctopusService.subscribeToEmailList).toHaveBeenCalledWith(
+          'tournament@example.com',
+          '2025-11-14T09:00:00.000Z',
+          'tournament-alerts'
+        );
+        expect(statusMock).toHaveBeenCalledWith(200);
+      });
+
+      it('should handle empty string tag', async () => {
+        // Arrange
+        req.body = {
+          email: 'test@example.com',
+          gdprConsent: true,
+          timestamp: '2025-11-14T09:00:00.000Z',
+          tag: '',
+        };
+
+        const mockResult = {
+          success: true,
+          message: 'Thank you! Check your email to confirm your subscription.',
+          status: 'pending_confirmation',
+        };
+
+        (emailOctopusService.subscribeToEmailList as jest.Mock).mockResolvedValue(mockResult);
+
+        // Act
+        await subscribeEmail(req as Request, res as Response);
+
+        // Assert
+        expect(emailOctopusService.subscribeToEmailList).toHaveBeenCalledWith(
+          'test@example.com',
+          '2025-11-14T09:00:00.000Z',
+          ''
+        );
+        expect(statusMock).toHaveBeenCalledWith(200);
       });
     });
 
@@ -280,7 +400,8 @@ describe('subscribeController', () => {
         // Assert
         expect(emailOctopusService.subscribeToEmailList).toHaveBeenCalledWith(
           'test+tag@example.co.uk',
-          '2025-11-14T09:00:00.000Z'
+          '2025-11-14T09:00:00.000Z',
+          undefined  // tag parameter is optional
         );
         expect(statusMock).toHaveBeenCalledWith(200);
       });

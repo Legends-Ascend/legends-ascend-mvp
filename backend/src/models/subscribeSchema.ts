@@ -3,6 +3,7 @@ import { z } from 'zod';
 /**
  * Validation schema for email subscription requests
  * Per US-001 requirements: email, GDPR consent, and timestamp
+ * Optional tag parameter for segmenting subscribers
  */
 export const SubscribeRequestSchema = z.object({
   email: z.string().email('Invalid email format'),
@@ -10,6 +11,7 @@ export const SubscribeRequestSchema = z.object({
     message: 'GDPR consent is required',
   }),
   timestamp: z.string().datetime(),
+  tag: z.string().optional(),
 });
 
 export type SubscribeRequest = z.infer<typeof SubscribeRequestSchema>;
