@@ -69,8 +69,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
     setUser(userData);
   };
 
-  const register = async (email: string, password: string) => {
-    const { token, user: userData } = await registerUser({ email, password });
+  const register = async (email: string, password: string, newsletterOptIn: boolean = false) => {
+    const { token, user: userData } = await registerUser({ email, password, newsletterOptIn });
     
     // Store token and user data
     localStorage.setItem('authToken', token);

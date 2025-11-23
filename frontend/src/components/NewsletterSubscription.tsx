@@ -5,10 +5,16 @@ import { getApiUrl, isProductionMisconfigured } from '../config/apiConfig';
 
 export interface NewsletterSubscriptionProps {
   /**
-   * EmailOctopus tag to apply to subscribers
+   * EmailOctopus tag to apply to subscribers (deprecated, use tags array)
    * @default 'beta'
    */
   tag?: string;
+  
+  /**
+   * Array of EmailOctopus tags to apply to subscribers (US-048)
+   * Takes precedence over single tag if both are provided
+   */
+  tags?: string[];
   
   /**
    * Custom button text for the submit button
@@ -42,7 +48,7 @@ export interface NewsletterSubscriptionProps {
  * Reusable Newsletter Subscription Component
  * 
  * A flexible component for capturing email subscriptions with GDPR compliance.
- * Allows configuring the EmailOctopus tag to segment subscribers.
+ * Allows configuring EmailOctopus tags to segment subscribers (US-048).
  * 
  * @example
  * // Basic usage with default 'beta' tag
@@ -51,6 +57,10 @@ export interface NewsletterSubscriptionProps {
  * @example
  * // Custom tag for early access program
  * <NewsletterSubscription tag="early-access" submitButtonText="Join Early Access" />
+ * 
+ * @example
+ * // Multiple tags (US-048)
+ * <NewsletterSubscription tags={['registered', 'news']} />
  * 
  * @example
  * // Newsletter signup with custom callbacks
@@ -62,6 +72,7 @@ export interface NewsletterSubscriptionProps {
  */
 export const NewsletterSubscription: React.FC<NewsletterSubscriptionProps> = ({
   tag = 'beta',
+  tags,
   submitButtonText = 'Join the Waitlist',
   successMessage,
   onSuccess,
@@ -121,7 +132,7 @@ export const NewsletterSubscription: React.FC<NewsletterSubscriptionProps> = ({
           email: validationResult.data.email,
           gdprConsent: validationResult.data.gdprConsent,
           timestamp: new Date().toISOString(),
-          tag, // Pass the configurable tag
+          ...(tags ? { tags } : { tag }), // Use tags array if provided, otherwise single tag
         }),
       });
 

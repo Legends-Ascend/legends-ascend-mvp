@@ -22,6 +22,7 @@ export type LoginFormData = z.infer<typeof loginSchema>;
  * - Email: Valid email format (RFC 5322)
  * - Password: Minimum 8 characters with uppercase, lowercase, and number
  * - Confirm Password: Must match password
+ * - Newsletter Opt-In: Optional boolean for newsletter subscription (US-048)
  */
 export const registerSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
@@ -32,6 +33,7 @@ export const registerSchema = z.object({
     .regex(/[a-z]/, 'Password must include at least one lowercase letter')
     .regex(/[0-9]/, 'Password must include at least one number'),
   confirmPassword: z.string(),
+  newsletterOptIn: z.boolean().optional().default(false),
 }).refine((data) => data.password === data.confirmPassword, {
   message: 'Passwords do not match',
   path: ['confirmPassword'],

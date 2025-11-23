@@ -36,8 +36,13 @@ export interface AuthResponse {
 /**
  * Register a new user
  * Hashes password using bcrypt before storing
+ * Handles newsletter opt-in per US-048
  */
-export async function registerUser(email: string, password: string): Promise<AuthResponse> {
+export async function registerUser(
+  email: string, 
+  password: string, 
+  newsletterOptIn: boolean = false
+): Promise<AuthResponse> {
   // Check if user already exists
   const existingUser = await query(
     'SELECT id FROM users WHERE email = $1',
@@ -51,12 +56,15 @@ export async function registerUser(email: string, password: string): Promise<Aut
   // Hash password
   const password_hash = await bcrypt.hash(password, SALT_ROUNDS);
 
-  // Create user
+  // Prepare newsletter consent timestamp
+  const newsletterConsentTimestamp = newsletterOptIn ? new Date() : null;
+
+  // Create user with newsletter preferences
   const result = await query(
-    `INSERT INTO users (email, password_hash) 
-     VALUES ($1, $2) 
-     RETURNING id, email, created_at`,
-    [email.toLowerCase(), password_hash]
+    `INSERT INTO users (email, password_hash, newsletter_optin, newsletter_consent_timestamp) 
+     VALUES ($1, $2, $3, $4) 
+     RETURNING id, email, created_at, newsletter_optin`,
+    [email.toLowerCase(), password_hash, newsletterOptIn, newsletterConsentTimestamp]
   );
 
   const user = result.rows[0];
@@ -67,6 +75,25 @@ export async function registerUser(email: string, password: string): Promise<Aut
     getJwtSecret(),
     { expiresIn: JWT_EXPIRES_IN }
   );
+
+  // Subscribe to newsletter asynchronously (non-blocking)
+  const tags = newsletterOptIn ? ['registered', 'news'] : ['registered'];
+  const consentTimestamp = (newsletterConsentTimestamp || new Date()).toISOString();
+  
+  // Import subscribeToEmailList at the top of the file if not already imported
+  import('../services/emailOctopusService')
+    .then(({ subscribeToEmailList }) => {
+      return subscribeToEmailList(email, consentTimestamp, undefined, tags);
+    })
+    .catch((error) => {
+      // Log error but don't throw (non-blocking)
+      console.error('Newsletter subscription failed during registration:', {
+        email,
+        newsletterOptIn,
+        tags,
+        error: error instanceof Error ? error.message : 'Unknown error',
+      });
+    });
 
   return {
     token,

@@ -19,6 +19,7 @@ export type User = z.infer<typeof UserSchema>;
 export const CreateUserSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8),
+  newsletterOptIn: z.boolean().optional().default(false),
 });
 
 export type CreateUser = z.infer<typeof CreateUserSchema>;
