@@ -52,7 +52,8 @@ describe('subscribeController', () => {
         expect(emailOctopusService.subscribeToEmailList).toHaveBeenCalledWith(
           'test@example.com',
           '2025-11-14T09:00:00.000Z',
-          undefined  // tag parameter is optional
+          undefined,  // tag parameter is optional
+          undefined   // tags array parameter
         );
         expect(statusMock).toHaveBeenCalledWith(200);
         expect(jsonMock).toHaveBeenCalledWith(mockResult);
@@ -108,7 +109,8 @@ describe('subscribeController', () => {
         expect(emailOctopusService.subscribeToEmailList).toHaveBeenCalledWith(
           'test@example.com',
           '2025-11-14T09:00:00.000Z',
-          'newsletter'
+          'newsletter',
+          undefined   // tags array parameter
         );
         expect(statusMock).toHaveBeenCalledWith(200);
         expect(jsonMock).toHaveBeenCalledWith(mockResult);
@@ -138,7 +140,8 @@ describe('subscribeController', () => {
         expect(emailOctopusService.subscribeToEmailList).toHaveBeenCalledWith(
           'earlyuser@example.com',
           '2025-11-14T09:00:00.000Z',
-          'early-access'
+          'early-access',
+          undefined   // tags array parameter
         );
         expect(statusMock).toHaveBeenCalledWith(200);
       });
@@ -167,7 +170,8 @@ describe('subscribeController', () => {
         expect(emailOctopusService.subscribeToEmailList).toHaveBeenCalledWith(
           'tournament@example.com',
           '2025-11-14T09:00:00.000Z',
-          'tournament-alerts'
+          'tournament-alerts',
+          undefined   // tags array parameter
         );
         expect(statusMock).toHaveBeenCalledWith(200);
       });
@@ -196,7 +200,8 @@ describe('subscribeController', () => {
         expect(emailOctopusService.subscribeToEmailList).toHaveBeenCalledWith(
           'test@example.com',
           '2025-11-14T09:00:00.000Z',
-          ''
+          '',
+          undefined   // tags array parameter
         );
         expect(statusMock).toHaveBeenCalledWith(200);
       });
@@ -401,7 +406,8 @@ describe('subscribeController', () => {
         expect(emailOctopusService.subscribeToEmailList).toHaveBeenCalledWith(
           'test+tag@example.co.uk',
           '2025-11-14T09:00:00.000Z',
-          undefined  // tag parameter is optional
+          undefined,  // tag parameter is optional
+          undefined   // tags array parameter
         );
         expect(statusMock).toHaveBeenCalledWith(200);
       });

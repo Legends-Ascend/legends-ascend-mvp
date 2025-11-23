@@ -85,6 +85,7 @@ describe('RegisterPage', () => {
       expect(mockRegisterUser).toHaveBeenCalledWith({
         email: 'newuser@example.com',
         password: 'Password123',
+        newsletterOptIn: false,
       });
     });
   });
