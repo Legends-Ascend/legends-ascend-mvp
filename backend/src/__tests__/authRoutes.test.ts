@@ -68,7 +68,7 @@ describe('Authentication API - /api/v1/auth', () => {
       expect(response.body.success).toBe(true);
       expect(response.body.data.token).toBe('mock-jwt-token');
       expect(response.body.data.user.email).toBe('test@example.com');
-      expect(mockRegisterUser).toHaveBeenCalledWith('test@example.com', 'SecurePass123');
+      expect(mockRegisterUser).toHaveBeenCalledWith('test@example.com', 'SecurePass123', false);
     });
 
     it('should reject registration with invalid email format', async () => {
