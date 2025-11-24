@@ -7,9 +7,12 @@ import * as authService from '../../../services/authService';
 // Mock the authService
 vi.mock('../../../services/authService');
 
+const REMEMBER_USERNAME_KEY = 'legends-ascend-remember-username';
+
 describe('LoginPage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    localStorage.clear();
     delete (window as Window & { location: unknown }).location;
     (window as Window & { location: { href: string } }).location = { href: '' };
   });
@@ -38,6 +41,16 @@ describe('LoginPage', () => {
     const registerLink = screen.getByText('Register');
     expect(registerLink).toBeInTheDocument();
     expect(registerLink.closest('a')).toHaveAttribute('href', '/register');
+  });
+
+  it('should handle register link click navigation', () => {
+    renderLoginPage();
+    
+    const registerLink = screen.getByText('Register');
+    fireEvent.click(registerLink);
+    
+    // Verify that window.location.href was set to /register
+    expect((window as Window & { location: { href: string } }).location.href).toBe('/register');
   });
 
   it('should validate password is required', async () => {
@@ -130,5 +143,320 @@ describe('LoginPage', () => {
     
     expect(emailInput).toHaveAttribute('id', 'email');
     expect(passwordInput).toHaveAttribute('id', 'password');
+  });
+
+  describe('Remember username functionality', () => {
+    it('should render remember username checkbox', () => {
+      renderLoginPage();
+      
+      const checkbox = screen.getByLabelText('Remember username');
+      expect(checkbox).toBeInTheDocument();
+      expect(checkbox).toHaveAttribute('type', 'checkbox');
+      expect(checkbox).not.toBeChecked();
+    });
+
+    it('should load remembered username on mount', () => {
+      localStorage.setItem(REMEMBER_USERNAME_KEY, 'remembered@example.com');
+      
+      renderLoginPage();
+      
+      const emailInput = screen.getByLabelText('Email') as HTMLInputElement;
+      const checkbox = screen.getByLabelText('Remember username') as HTMLInputElement;
+      
+      expect(emailInput.value).toBe('remembered@example.com');
+      expect(checkbox.checked).toBe(true);
+    });
+
+    it('should save username to localStorage when checkbox is checked', async () => {
+      const mockLoginUser = vi.spyOn(authService, 'loginUser').mockResolvedValue({
+        token: 'test-token',
+        user: {
+          id: '123',
+          email: 'test@example.com',
+          created_at: '2025-11-18T00:00:00Z',
+        },
+      });
+
+      renderLoginPage();
+      
+      const emailInput = screen.getByLabelText('Email');
+      const passwordInput = screen.getByLabelText('Password');
+      const checkbox = screen.getByLabelText('Remember username');
+      const submitButton = screen.getByRole('button', { name: /log in/i });
+      
+      fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
+      fireEvent.change(passwordInput, { target: { value: 'Password123' } });
+      fireEvent.click(checkbox);
+      fireEvent.click(submitButton);
+      
+      await waitFor(() => {
+        expect(mockLoginUser).toHaveBeenCalled();
+      });
+
+      expect(localStorage.getItem(REMEMBER_USERNAME_KEY)).toBe('test@example.com');
+    });
+
+    it('should remove username from localStorage when checkbox is unchecked', async () => {
+      localStorage.setItem(REMEMBER_USERNAME_KEY, 'old@example.com');
+
+      const mockLoginUser = vi.spyOn(authService, 'loginUser').mockResolvedValue({
+        token: 'test-token',
+        user: {
+          id: '123',
+          email: 'test@example.com',
+          created_at: '2025-11-18T00:00:00Z',
+        },
+      });
+
+      renderLoginPage();
+      
+      const emailInput = screen.getByLabelText('Email');
+      const passwordInput = screen.getByLabelText('Password');
+      const checkbox = screen.getByLabelText('Remember username') as HTMLInputElement;
+      const submitButton = screen.getByRole('button', { name: /log in/i });
+      
+      // Checkbox should be checked because username was loaded
+      expect(checkbox.checked).toBe(true);
+      
+      // Change email and uncheck the box
+      fireEvent.change(emailInput, { target: { value: 'new@example.com' } });
+      fireEvent.change(passwordInput, { target: { value: 'Password123' } });
+      fireEvent.click(checkbox); // Uncheck
+      fireEvent.click(submitButton);
+      
+      await waitFor(() => {
+        expect(mockLoginUser).toHaveBeenCalled();
+      });
+
+      expect(localStorage.getItem(REMEMBER_USERNAME_KEY)).toBeNull();
+    });
+
+    it('should have proper label association for checkbox accessibility', () => {
+      renderLoginPage();
+      
+      const checkbox = screen.getByLabelText('Remember username');
+      expect(checkbox).toHaveAttribute('id', 'remember-username');
+    });
+
+    it('should disable checkbox during form submission', async () => {
+      vi.spyOn(authService, 'loginUser').mockImplementation(
+        () => new Promise((resolve) => setTimeout(resolve, 100))
+      );
+
+      renderLoginPage();
+      
+      const emailInput = screen.getByLabelText('Email');
+      const passwordInput = screen.getByLabelText('Password');
+      const checkbox = screen.getByLabelText('Remember username');
+      const submitButton = screen.getByRole('button', { name: /log in/i });
+      
+      fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
+      fireEvent.change(passwordInput, { target: { value: 'Password123' } });
+      fireEvent.click(submitButton);
+      
+      await waitFor(() => {
+        expect(checkbox).toBeDisabled();
+      });
+    });
+
+    it('should update remembered username when user changes email and logs in successfully', async () => {
+      localStorage.setItem(REMEMBER_USERNAME_KEY, 'old@example.com');
+
+      const mockLoginUser = vi.spyOn(authService, 'loginUser').mockResolvedValue({
+        token: 'test-token',
+        user: {
+          id: '123',
+          email: 'new@example.com',
+          created_at: '2025-11-18T00:00:00Z',
+        },
+      });
+
+      renderLoginPage();
+      
+      const emailInput = screen.getByLabelText('Email');
+      const passwordInput = screen.getByLabelText('Password');
+      const checkbox = screen.getByLabelText('Remember username') as HTMLInputElement;
+      const submitButton = screen.getByRole('button', { name: /log in/i });
+      
+      // Email should be pre-filled with old value and checkbox should be checked
+      expect((emailInput as HTMLInputElement).value).toBe('old@example.com');
+      expect(checkbox.checked).toBe(true);
+      
+      // Change to new email (checkbox remains checked)
+      fireEvent.change(emailInput, { target: { value: 'new@example.com' } });
+      fireEvent.change(passwordInput, { target: { value: 'Password123' } });
+      fireEvent.click(submitButton);
+      
+      await waitFor(() => {
+        expect(mockLoginUser).toHaveBeenCalled();
+      });
+
+      // Should update localStorage with new email
+      expect(localStorage.getItem(REMEMBER_USERNAME_KEY)).toBe('new@example.com');
+    });
+
+    it('should not save username on failed login even if checkbox is checked', async () => {
+      vi.spyOn(authService, 'loginUser').mockRejectedValue(new Error('Invalid credentials'));
+
+      renderLoginPage();
+      
+      const emailInput = screen.getByLabelText('Email');
+      const passwordInput = screen.getByLabelText('Password');
+      const checkbox = screen.getByLabelText('Remember username');
+      const submitButton = screen.getByRole('button', { name: /log in/i });
+      
+      fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
+      fireEvent.change(passwordInput, { target: { value: 'wrongpassword' } });
+      fireEvent.click(checkbox);
+      fireEvent.click(submitButton);
+      
+      await waitFor(() => {
+        expect(screen.getByText('Invalid credentials')).toBeInTheDocument();
+      });
+
+      // Should not save username on failed login
+      expect(localStorage.getItem(REMEMBER_USERNAME_KEY)).toBeNull();
+    });
+
+    it('should handle empty string in localStorage gracefully', () => {
+      localStorage.setItem(REMEMBER_USERNAME_KEY, '');
+      
+      renderLoginPage();
+      
+      const emailInput = screen.getByLabelText('Email') as HTMLInputElement;
+      const checkbox = screen.getByLabelText('Remember username') as HTMLInputElement;
+      
+      // Empty string is falsy, so should not pre-fill
+      expect(emailInput.value).toBe('');
+      expect(checkbox.checked).toBe(false);
+    });
+
+    it('should allow toggling checkbox multiple times before submission', () => {
+      renderLoginPage();
+      
+      const checkbox = screen.getByLabelText('Remember username') as HTMLInputElement;
+      
+      expect(checkbox.checked).toBe(false);
+      
+      // Toggle multiple times
+      fireEvent.click(checkbox);
+      expect(checkbox.checked).toBe(true);
+      
+      fireEvent.click(checkbox);
+      expect(checkbox.checked).toBe(false);
+      
+      fireEvent.click(checkbox);
+      expect(checkbox.checked).toBe(true);
+    });
+
+    it('should maintain checkbox state after validation error', async () => {
+      renderLoginPage();
+      
+      const emailInput = screen.getByLabelText('Email');
+      const checkbox = screen.getByLabelText('Remember username') as HTMLInputElement;
+      const submitButton = screen.getByRole('button', { name: /log in/i });
+      
+      // Check the remember username box
+      fireEvent.click(checkbox);
+      expect(checkbox.checked).toBe(true);
+      
+      // Submit with invalid data
+      fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
+      fireEvent.click(submitButton);
+      
+      await waitFor(() => {
+        expect(screen.getByText('Password is required')).toBeInTheDocument();
+      });
+      
+      // Checkbox should still be checked
+      expect(checkbox.checked).toBe(true);
+    });
+
+    it('should maintain remembered username through validation errors', async () => {
+      localStorage.setItem(REMEMBER_USERNAME_KEY, 'test@example.com');
+      
+      renderLoginPage();
+      
+      const submitButton = screen.getByRole('button', { name: /log in/i });
+      const emailInput = screen.getByLabelText('Email') as HTMLInputElement;
+      
+      // Email should be pre-filled
+      expect(emailInput.value).toBe('test@example.com');
+      
+      // Submit without password to trigger validation
+      fireEvent.click(submitButton);
+      
+      await waitFor(() => {
+        // Should show password validation error
+        expect(screen.getByText('Password is required')).toBeInTheDocument();
+      });
+      
+      // Email should still be populated
+      expect(emailInput.value).toBe('test@example.com');
+    });
+
+    it('should store username with special characters correctly', async () => {
+      const specialEmail = "test+tag@example.com";
+      
+      const mockLoginUser = vi.spyOn(authService, 'loginUser').mockResolvedValue({
+        token: 'test-token',
+        user: {
+          id: '123',
+          email: specialEmail,
+          created_at: '2025-11-18T00:00:00Z',
+        },
+      });
+
+      renderLoginPage();
+      
+      const emailInput = screen.getByLabelText('Email');
+      const passwordInput = screen.getByLabelText('Password');
+      const checkbox = screen.getByLabelText('Remember username');
+      const submitButton = screen.getByRole('button', { name: /log in/i });
+      
+      fireEvent.change(emailInput, { target: { value: specialEmail } });
+      fireEvent.change(passwordInput, { target: { value: 'Password123' } });
+      fireEvent.click(checkbox);
+      fireEvent.click(submitButton);
+      
+      await waitFor(() => {
+        expect(mockLoginUser).toHaveBeenCalled();
+      });
+
+      expect(localStorage.getItem(REMEMBER_USERNAME_KEY)).toBe(specialEmail);
+    });
+
+    it('should handle very long email addresses within RFC limits', async () => {
+      // Test with maximum valid local part length (64 chars) per RFC 5321
+      // This ensures the feature works with longest valid email addresses
+      const longEmail = 'a'.repeat(64) + '@example.com';
+      
+      const mockLoginUser = vi.spyOn(authService, 'loginUser').mockResolvedValue({
+        token: 'test-token',
+        user: {
+          id: '123',
+          email: longEmail,
+          created_at: '2025-11-18T00:00:00Z',
+        },
+      });
+
+      renderLoginPage();
+      
+      const emailInput = screen.getByLabelText('Email');
+      const passwordInput = screen.getByLabelText('Password');
+      const checkbox = screen.getByLabelText('Remember username');
+      const submitButton = screen.getByRole('button', { name: /log in/i });
+      
+      fireEvent.change(emailInput, { target: { value: longEmail } });
+      fireEvent.change(passwordInput, { target: { value: 'Password123' } });
+      fireEvent.click(checkbox);
+      fireEvent.click(submitButton);
+      
+      await waitFor(() => {
+        expect(mockLoginUser).toHaveBeenCalled();
+      });
+
+      expect(localStorage.getItem(REMEMBER_USERNAME_KEY)).toBe(longEmail);
+    });
   });
 });
