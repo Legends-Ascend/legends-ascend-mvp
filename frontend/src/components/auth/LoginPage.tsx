@@ -234,14 +234,15 @@ export function LoginPage() {
     setIsSubmitting(true);
 
     try {
-      // Handle remember username preference
+      await login(email, password);
+      
+      // Handle remember username preference after successful login
       if (rememberUsername) {
         localStorage.setItem(REMEMBER_USERNAME_KEY, email);
       } else {
         localStorage.removeItem(REMEMBER_USERNAME_KEY);
       }
-
-      await login(email, password);
+      
       // Redirect to dashboard after successful login
       window.location.href = '/game/lineup';
     } catch (error) {
