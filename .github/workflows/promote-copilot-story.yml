@@ -41,12 +41,12 @@ jobs:
             });
 
   check-user-story-changes:
-    needs: check-trigger
-    if: needs.check-trigger.outputs.triggered == 'true'
-    runs-on: ubuntu-latest
-    outputs:
+      needs: check-trigger
+      if: needs.check-trigger.outputs.triggered == 'true'
+      runs-on: ubuntu-latest
+      outputs:
       user_story: ${{ steps.filter.outputs.user_story }}
-    steps:
+      steps:
         pr_sha: ${{ steps.get-pr-sha.outputs.sha }}
       - uses: actions/checkout@v4
             
