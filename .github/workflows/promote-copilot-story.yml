@@ -40,7 +40,7 @@ jobs:
               content: 'rocket'
             });
 
-  check-user-story-changes:
+    check-user-story-changes:
       needs: check-trigger
       if: needs.check-trigger.outputs.triggered == 'true'
       runs-on: ubuntu-latest
