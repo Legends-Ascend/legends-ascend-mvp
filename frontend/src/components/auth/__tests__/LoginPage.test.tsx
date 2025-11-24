@@ -43,6 +43,16 @@ describe('LoginPage', () => {
     expect(registerLink.closest('a')).toHaveAttribute('href', '/register');
   });
 
+  it('should handle register link click navigation', () => {
+    renderLoginPage();
+    
+    const registerLink = screen.getByText('Register');
+    fireEvent.click(registerLink);
+    
+    // Verify that window.location.href was set to /register
+    expect((window as Window & { location: { href: string } }).location.href).toBe('/register');
+  });
+
   it('should validate password is required', async () => {
     renderLoginPage();
     
@@ -445,16 +455,6 @@ describe('LoginPage', () => {
       });
 
       expect(localStorage.getItem(REMEMBER_USERNAME_KEY)).toBe(longEmail);
-    });
-  });
-
-  describe('Register link functionality', () => {
-    it('should have correct href for register link', () => {
-      renderLoginPage();
-      
-      const registerLink = screen.getByText('Register');
-      expect(registerLink).toBeInTheDocument();
-      expect(registerLink.closest('a')).toHaveAttribute('href', '/register');
     });
   });
 });
