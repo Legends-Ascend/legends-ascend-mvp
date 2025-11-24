@@ -4,10 +4,12 @@
  * Implements US-045 FR-1
  */
 
-import { useState, type FormEvent } from 'react';
+import { useState, useEffect, type FormEvent } from 'react';
 import styled from 'styled-components';
 import { useAuth } from '../../hooks/useAuth';
 import { loginSchema } from '../../utils/validation';
+
+const REMEMBER_USERNAME_KEY = 'legends-ascend-remember-username';
 
 const Container = styled.div`
   min-height: 100vh;
@@ -128,6 +130,35 @@ const Button = styled.button`
   }
 `;
 
+const CheckboxContainer = styled.div`
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: -8px;
+`;
+
+const Checkbox = styled.input`
+  width: 18px;
+  height: 18px;
+  border: 2px solid #E2E8F0;
+  border-radius: 4px;
+  cursor: pointer;
+  accent-color: #1E3A8A;
+
+  &:focus {
+    outline: 2px solid #1E3A8A;
+    outline-offset: 2px;
+  }
+`;
+
+const CheckboxLabel = styled.label`
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  color: #0F172A;
+  cursor: pointer;
+  user-select: none;
+`;
+
 const LinkText = styled.p`
   font-family: 'Inter', sans-serif;
   font-size: 14px;
@@ -171,8 +202,18 @@ export function LoginPage() {
   const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [rememberUsername, setRememberUsername] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string; form?: string }>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Load remembered username on component mount
+  useEffect(() => {
+    const rememberedUsername = localStorage.getItem(REMEMBER_USERNAME_KEY);
+    if (rememberedUsername) {
+      setEmail(rememberedUsername);
+      setRememberUsername(true);
+    }
+  }, []);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -193,6 +234,13 @@ export function LoginPage() {
     setIsSubmitting(true);
 
     try {
+      // Handle remember username preference
+      if (rememberUsername) {
+        localStorage.setItem(REMEMBER_USERNAME_KEY, email);
+      } else {
+        localStorage.removeItem(REMEMBER_USERNAME_KEY);
+      }
+
       await login(email, password);
       // Redirect to dashboard after successful login
       window.location.href = '/game/lineup';
@@ -252,6 +300,19 @@ export function LoginPage() {
               </ErrorMessage>
             )}
           </FormGroup>
+
+          <CheckboxContainer>
+            <Checkbox
+              type="checkbox"
+              id="remember-username"
+              checked={rememberUsername}
+              onChange={(e) => setRememberUsername(e.target.checked)}
+              disabled={isSubmitting}
+            />
+            <CheckboxLabel htmlFor="remember-username">
+              Remember username
+            </CheckboxLabel>
+          </CheckboxContainer>
 
           <Button type="submit" disabled={isSubmitting} aria-busy={isSubmitting}>
             {isSubmitting && <LoadingSpinner />}
