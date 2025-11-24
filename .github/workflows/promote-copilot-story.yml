@@ -11,345 +11,345 @@ permissions:
 
 jobs:
   # Check if the comment is on a PR and contains the trigger command
-  check-trigger:
+check-trigger:
+  runs-on: ubuntu-latest
+  if: github.event.issue.pull_request && contains(github.event.comment.body, '/promote')
+  outputs:
+    triggered: true
+    head_ref: ${{ steps.get-pr-ref.outputs.head_ref }}
+  steps:
+    - name: Get PR Ref
+      id: get-pr-ref
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const pr = await github.rest.pulls.get({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            pull_number: context.issue.number
+          });
+          
+          // Set the branch name as output
+          core.setOutput('head_ref', pr.data.head.ref);
+          
+          // Add a reaction to the comment
+          await github.rest.reactions.createForIssueComment({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            comment_id: context.payload.comment.id,
+            content: 'rocket'
+          });
+
+  check-user-story-changes:
+    needs: check-trigger
+    if: needs.check-trigger.outputs.triggered == 'true'
     runs-on: ubuntu-latest
-    if: github.event.issue.pull_request && contains(github.event.comment.body, '/promote')
     outputs:
-      triggered: true
-      head_ref: ${{ steps.get-pr-ref.outputs.head_ref }}
+      user_story: ${{ steps.filter.outputs.user_story }}
+      pr_sha: ${{ steps.get-pr-sha.outputs.sha }}
     steps:
-      - name: Get PR Ref
-        id: get-pr-ref
-        uses: actions/github-script@v7
-        with:
-          script: |
-            const pr = await github.rest.pulls.get({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: context.issue.number
-            });
-            
-            // Set the branch name as output
-            core.setOutput('head_ref', pr.data.head.ref);
-            
-            // Add a reaction to the comment
-            await github.rest.reactions.createForIssueComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              comment_id: context.payload.comment.id,
-              content: 'rocket'
-            });
+    - uses: actions/checkout@v4
+          
+    - uses: actions/github-script@v7
+      id: get-pr-sha
+      with:
+        script: |
+          const pr = await github.rest.pulls.get({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            pull_number: context.issue.number
+          });
+          core.setOutput('sha', pr.data.head.sha);
+    
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ steps.get-pr-sha.outputs.sha }}
+    - uses: dorny/paths-filter@v3
+      id: filter
+      with:
+        filters: |
+          user_story:
+            - 'docs/user-stories/**.md'
+            - '!docs/user-stories/README.md'
 
-    check-user-story-changes:
-      needs: check-trigger
-      if: needs.check-trigger.outputs.triggered == 'true'
-      runs-on: ubuntu-latest
-      outputs:
-        user_story: ${{ steps.filter.outputs.user_story }}
-        pr_sha: ${{ steps.get-pr-sha.outputs.sha }}
-      steps:
-      - uses: actions/checkout@v4
-            
-      - uses: actions/github-script@v7
-        id: get-pr-sha
-        with:
-          script: |
-            const pr = await github.rest.pulls.get({
+promote:
+  needs: [check-trigger, check-user-story-changes]
+  if: needs.check-user-story-changes.outputs.user_story == 'true'
+  runs-on: ubuntu-latest
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+    ref: ${{ needs.check-user-story-changes.outputs.pr_sha }}
+    - name: Create lean reference issues (single master per story)
+      uses: actions/github-script@v7
+      with:
+        script: |
+          try {
+            // 1. Get PR Details (since we are in issue_comment trigger)
+            const prNumber = context.issue.number;
+            const { data: pr } = await github.rest.pulls.get({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              pull_number: context.issue.number
+              pull_number: prNumber
             });
-            core.setOutput('sha', pr.data.head.sha);
-      
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ steps.get-pr-sha.outputs.sha }}
-      - uses: dorny/paths-filter@v3
-        id: filter
-        with:
-          filters: |
-            user_story:
-              - 'docs/user-stories/**.md'
-              - '!docs/user-stories/README.md'
+            
+            if (!pr) { 
+              core.info('No PR context found');
+              return;
+            }
 
-  promote:
-    needs: [check-trigger, check-user-story-changes]
-    if: needs.check-user-story-changes.outputs.user_story == 'true'
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-      ref: ${{ needs.check-user-story-changes.outputs.pr_sha }}
-      - name: Create lean reference issues (single master per story)
-        uses: actions/github-script@v7
-        with:
-          script: |
-            try {
-              // 1. Get PR Details (since we are in issue_comment trigger)
-              const prNumber = context.issue.number;
-              const { data: pr } = await github.rest.pulls.get({
+            // 2. Get files changed in PR
+            const files = await github.paginate(
+              github.rest.pulls.listFiles,
+              { owner: context.repo.owner, repo: context.repo.repo, pull_number: pr.number, per_page: 100 }
+            )
+            
+            const storyFiles = files.map(f => f.filename)
+              .filter(p => p.startsWith('docs/user-stories/') && p.endsWith('.md') && p !== 'docs/user-stories/README.md')
+
+            if (!storyFiles.length) { 
+              core.info('No user story files found in this PR - skipping issue creation');
+              return;
+            }
+
+            core.info('Found ' + storyFiles.length + ' user story file(s): ' + storyFiles.join(', '));
+
+            // Group by US-XXX id
+            const groups = {}
+            for (const path of storyFiles) {
+              const m = path.match(/US-(\\d+)/)
+              const id = m ? 'US-' + m[1] : 'general'
+              if (!groups[id]) groups[id] = []
+              groups[id].push(path)
+            }
+
+            const fs = require('fs')
+
+            for (const id of Object.keys(groups)) {
+              const paths = groups[id]
+              core.info('Processing user story group: ' + id + ' with files: ' + paths.join(', '));
+
+              // choose main file (longest filename heuristic)
+              const main = paths.reduce((a,b)=> (b.length>a.length?b:a))
+
+              if (!fs.existsSync(main)) {
+                core.warning('Main file ' + main + ' does not exist - skipping');
+                continue;
+              }
+
+              const content = fs.readFileSync(main,'utf8')
+              const titleMatch = content.match(/^#\s+(.+)$/m)
+              const title = titleMatch ? titleMatch[1] : (id !== 'general' ? id : 'User Story')
+
+              // GitHub issue body character limit is ~65,536 characters
+              const MAX_ISSUE_LENGTH = 60000; // Leave buffer for safety
+
+              // Build comprehensive body with actual content
+              let body = '';
+
+              // Read all file contents
+              const allContents = [];
+              let totalLength = 0;
+
+              // Read main user story content
+              allContents.push({
+                path: main,
+                content: content,
+                type: 'User Story'
+              });
+              totalLength += content.length;
+
+              // Read related documents
+              for (const path of paths) {
+                if (path !== main && fs.existsSync(path)) {
+                  const docContent = fs.readFileSync(path, 'utf8');
+                  allContents.push({
+                    path: path,
+                    content: docContent,
+                    type: 'Related Document'
+                  });
+                  totalLength += docContent.length;
+                }
+              }
+
+              // Decide whether to include full content or use hyperlinks
+              if (totalLength < MAX_ISSUE_LENGTH) {
+                // Include full content
+                body = 'This issue tracks ' + id + ' from the BA Agent specification.\\n\\n';
+                body += 'The BA agent produced a comprehensive specification stored across multiple documents. ';
+                body += 'Use the documents below as the single source of truth.\\n\\n---\\n\\n';
+
+                for (const doc of allContents) {
+                  body += '## ' + doc.type + ': `' + doc.path + '`\\n\\n';
+                  body += doc.content + '\\n\\n---\\n\\n';
+                }
+
+                body += '## Notes for Coding Agent\\n\\n';
+                body += '- Read all files listed above for full requirements, ACs, and technical specifications\\n';
+                body += '- Adhere to TECHNICAL_ARCHITECTURE.md, BRANDING_GUIDELINE.md, and ACCESSIBILITY_REQUIREMENTS.md';
+              } else {
+                // Use clickable hyperlinks as fallback
+                const repoUrl = 'https://github.com/' + context.repo.owner + '/' + context.repo.repo;
+                const branch = pr.head.ref;
+
+                body = 'This issue tracks ' + id + ' from the BA Agent specification.\\n\\n';
+                body += 'The BA agent produced a comprehensive specification stored across multiple documents. ';
+                body += '**The content is too large to include directly in this issue.** ';
+                body += 'Click the links below to view the full documents:\\n\\n';
+                body += '## 📄 Documents\\n\\n';
+
+                for (const doc of allContents) {
+                  const fileUrl = repoUrl + '/blob/' + branch + '/' + doc.path;
+                  body += '- **[' + doc.type + ': `' + doc.path + '`](' + fileUrl + ')**\\n';
+                }
+
+                body += '\\n## 📋 Notes for Coding Agent\\n\\n';
+                body += '- Read all files listed above for full requirements, ACs, and technical specifications\\n';
+                body += '- Adhere to [TECHNICAL_ARCHITECTURE.md](' + repoUrl + '/blob/' + branch + '/docs/TECHNICAL_ARCHITECTURE.md), ';
+                body += '[BRANDING_GUIDELINE.md](' + repoUrl + '/blob/' + branch + '/docs/BRANDING_GUIDELINE.md), ';
+                body += 'and [ACCESSIBILITY_REQUIREMENTS.md](' + repoUrl + '/blob/' + branch + '/docs/ACCESSIBILITY_REQUIREMENTS.md)';
+              }
+
+              core.info('Creating issue for ' + id + ' with title: ' + title);
+              const issue = await github.rest.issues.create({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                pull_number: prNumber
-              });
-              
-              if (!pr) { 
-                core.info('No PR context found');
-                return;
-              }
+                title: title,
+                body: body,
+                labels: ['user-story','generated', id.toLowerCase()]
+              })
 
-              // 2. Get files changed in PR
-              const files = await github.paginate(
-                github.rest.pulls.listFiles,
-                { owner: context.repo.owner, repo: context.repo.repo, pull_number: pr.number, per_page: 100 }
-              )
-              
-              const storyFiles = files.map(f => f.filename)
-                .filter(p => p.startsWith('docs/user-stories/') && p.endsWith('.md') && p !== 'docs/user-stories/README.md')
+              core.info('Created issue #' + issue.data.number + ' for ' + id);
 
-              if (!storyFiles.length) { 
-                core.info('No user story files found in this PR - skipping issue creation');
-                return;
-              }
-
-              core.info('Found ' + storyFiles.length + ' user story file(s): ' + storyFiles.join(', '));
-
-              // Group by US-XXX id
-              const groups = {}
-              for (const path of storyFiles) {
-                const m = path.match(/US-(\\d+)/)
-                const id = m ? 'US-' + m[1] : 'general'
-                if (!groups[id]) groups[id] = []
-                groups[id].push(path)
-              }
-
-              const fs = require('fs')
-
-              for (const id of Object.keys(groups)) {
-                const paths = groups[id]
-                core.info('Processing user story group: ' + id + ' with files: ' + paths.join(', '));
-
-                // choose main file (longest filename heuristic)
-                const main = paths.reduce((a,b)=> (b.length>a.length?b:a))
-
-                if (!fs.existsSync(main)) {
-                  core.warning('Main file ' + main + ' does not exist - skipping');
-                  continue;
-                }
-
-                const content = fs.readFileSync(main,'utf8')
-                const titleMatch = content.match(/^#\s+(.+)$/m)
-                const title = titleMatch ? titleMatch[1] : (id !== 'general' ? id : 'User Story')
-
-                // GitHub issue body character limit is ~65,536 characters
-                const MAX_ISSUE_LENGTH = 60000; // Leave buffer for safety
-
-                // Build comprehensive body with actual content
-                let body = '';
-
-                // Read all file contents
-                const allContents = [];
-                let totalLength = 0;
-
-                // Read main user story content
-                allContents.push({
-                  path: main,
-                  content: content,
-                  type: 'User Story'
+              // Add issue to 'Legends Ascend' project (Projects V2) and set status/type
+              try {
+                // Get the project ID from the organization
+                const getProjectQuery = `
+                  query($org: String!, $number: Int!) {
+                    organization(login: $org) {
+                      projectV2(number: $number) {
+                        id
+                      }
+                    }
+                  }
+                `;
+                
+                const projectData = await github.graphql(getProjectQuery, {
+                  org: 'Legends-Ascend',
+                  number: 1
                 });
-                totalLength += content.length;
 
-                // Read related documents
-                for (const path of paths) {
-                  if (path !== main && fs.existsSync(path)) {
-                    const docContent = fs.readFileSync(path, 'utf8');
-                    allContents.push({
-                      path: path,
-                      content: docContent,
-                      type: 'Related Document'
-                    });
-                    totalLength += docContent.length;
-                  }
-                }
+                const projectId = projectData.organization.projectV2.id;
 
-                // Decide whether to include full content or use hyperlinks
-                if (totalLength < MAX_ISSUE_LENGTH) {
-                  // Include full content
-                  body = 'This issue tracks ' + id + ' from the BA Agent specification.\\n\\n';
-                  body += 'The BA agent produced a comprehensive specification stored across multiple documents. ';
-                  body += 'Use the documents below as the single source of truth.\\n\\n---\\n\\n';
-
-                  for (const doc of allContents) {
-                    body += '## ' + doc.type + ': `' + doc.path + '`\\n\\n';
-                    body += doc.content + '\\n\\n---\\n\\n';
-                  }
-
-                  body += '## Notes for Coding Agent\\n\\n';
-                  body += '- Read all files listed above for full requirements, ACs, and technical specifications\\n';
-                  body += '- Adhere to TECHNICAL_ARCHITECTURE.md, BRANDING_GUIDELINE.md, and ACCESSIBILITY_REQUIREMENTS.md';
-                } else {
-                  // Use clickable hyperlinks as fallback
-                  const repoUrl = 'https://github.com/' + context.repo.owner + '/' + context.repo.repo;
-                  const branch = pr.head.ref;
-
-                  body = 'This issue tracks ' + id + ' from the BA Agent specification.\\n\\n';
-                  body += 'The BA agent produced a comprehensive specification stored across multiple documents. ';
-                  body += '**The content is too large to include directly in this issue.** ';
-                  body += 'Click the links below to view the full documents:\\n\\n';
-                  body += '## 📄 Documents\\n\\n';
-
-                  for (const doc of allContents) {
-                    const fileUrl = repoUrl + '/blob/' + branch + '/' + doc.path;
-                    body += '- **[' + doc.type + ': `' + doc.path + '`](' + fileUrl + ')**\\n';
-                  }
-
-                  body += '\\n## 📋 Notes for Coding Agent\\n\\n';
-                  body += '- Read all files listed above for full requirements, ACs, and technical specifications\\n';
-                  body += '- Adhere to [TECHNICAL_ARCHITECTURE.md](' + repoUrl + '/blob/' + branch + '/docs/TECHNICAL_ARCHITECTURE.md), ';
-                  body += '[BRANDING_GUIDELINE.md](' + repoUrl + '/blob/' + branch + '/docs/BRANDING_GUIDELINE.md), ';
-                  body += 'and [ACCESSIBILITY_REQUIREMENTS.md](' + repoUrl + '/blob/' + branch + '/docs/ACCESSIBILITY_REQUIREMENTS.md)';
-                }
-
-                core.info('Creating issue for ' + id + ' with title: ' + title);
-                const issue = await github.rest.issues.create({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  title: title,
-                  body: body,
-                  labels: ['user-story','generated', id.toLowerCase()]
-                })
-
-                core.info('Created issue #' + issue.data.number + ' for ' + id);
-
-                // Add issue to 'Legends Ascend' project (Projects V2) and set status/type
-                try {
-                  // Get the project ID from the organization
-                  const getProjectQuery = `
-                    query($org: String!, $number: Int!) {
-                      organization(login: $org) {
-                        projectV2(number: $number) {
-                          id
-                        }
+                // Add the issue to the project
+                const addItemMutation = `
+                  mutation($projectId: ID!, $contentId: ID!) {
+                    addProjectV2ItemById(input: {projectId: $projectId, contentId: $contentId}) {
+                      item {
+                        id
                       }
                     }
-                  `;
-                  
-                  const projectData = await github.graphql(getProjectQuery, {
-                    org: 'Legends-Ascend',
-                    number: 1
-                  });
+                  }
+                `;
 
-                  const projectId = projectData.organization.projectV2.id;
+                const projectResponse = await github.graphql(addItemMutation, {
+                  projectId: projectId,
+                  contentId: issue.data.node_id
+                });
 
-                  // Add the issue to the project
-                  const addItemMutation = `
-                    mutation($projectId: ID!, $contentId: ID!) {
-                      addProjectV2ItemById(input: {projectId: $projectId, contentId: $contentId}) {
-                        item {
-                          id
-                        }
-                      }
-                    }
-                  `;
+                const itemId = projectResponse.addProjectV2ItemById.item.id;
+                core.info('Added issue #' + issue.data.number + ' to Legends Ascend project');
 
-                  const projectResponse = await github.graphql(addItemMutation, {
-                    projectId: projectId,
-                    contentId: issue.data.node_id
-                  });
-
-                  const itemId = projectResponse.addProjectV2ItemById.item.id;
-                  core.info('Added issue #' + issue.data.number + ' to Legends Ascend project');
-
-                  // Get field IDs for Status and Type
-                  const getFieldsQuery = `
-                    query($projectId: ID!) {
-                      node(id: $projectId) {
-                        ... on ProjectV2 {
-                          fields(first: 20) {
-                            nodes {
-                              ... on ProjectV2SingleSelectField {
+                // Get field IDs for Status and Type
+                const getFieldsQuery = `
+                  query($projectId: ID!) {
+                    node(id: $projectId) {
+                      ... on ProjectV2 {
+                        fields(first: 20) {
+                          nodes {
+                            ... on ProjectV2SingleSelectField {
+                              id
+                              name
+                              options {
                                 id
                                 name
-                                options {
-                                  id
-                                  name
-                                }
                               }
                             }
                           }
                         }
                       }
                     }
-                  `;
-
-                  const fieldsResponse = await github.graphql(getFieldsQuery, {
-                    projectId: projectId
-                  });
-
-                  const fields = fieldsResponse.node.fields.nodes;
-                  const statusField = fields.find(f => f.name === 'Status');
-                  const typeField = fields.find(f => f.name === 'Type');
-
-                  // Set Status to \\\"Backlog\\\"
-                  if (statusField) {
-                    const backlogOption = statusField.options.find(o => o.name === 'Backlog');
-                    if (backlogOption) {
-                      const updateMutation = `
-                        mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
-                          updateProjectV2ItemFieldValue(input: {
-                            projectId: $projectId
-                            itemId: $itemId
-                            fieldId: $fieldId
-                            value: {singleSelectOptionId: $optionId}
-                          }) {
-                            projectV2Item { id }
-                          }
-                        }
-                      `;
-                      
-                      await github.graphql(updateMutation, {
-                        projectId: projectId,
-                        itemId: itemId,
-                        fieldId: statusField.id,
-                        optionId: backlogOption.id
-                      });
-                      core.info('Set status to Backlog for issue #' + issue.data.number);
-                    }
                   }
+                `;
 
-                  // Set Type to \\\"Feature\\\"
-                  if (typeField) {
-                    const featureOption = typeField.options.find(o => o.name === 'Feature');
-                    if (featureOption) {
-                      const updateMutation = `
-                        mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
-                          updateProjectV2ItemFieldValue(input: {
-                            projectId: $projectId
-                            itemId: $itemId
-                            fieldId: $fieldId
-                            value: {singleSelectOptionId: $optionId}
-                          }) {
-                            projectV2Item { id }
-                          }
+                const fieldsResponse = await github.graphql(getFieldsQuery, {
+                  projectId: projectId
+                });
+
+                const fields = fieldsResponse.node.fields.nodes;
+                const statusField = fields.find(f => f.name === 'Status');
+                const typeField = fields.find(f => f.name === 'Type');
+
+                // Set Status to \\\"Backlog\\\"
+                if (statusField) {
+                  const backlogOption = statusField.options.find(o => o.name === 'Backlog');
+                  if (backlogOption) {
+                    const updateMutation = `
+                      mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
+                        updateProjectV2ItemFieldValue(input: {
+                          projectId: $projectId
+                          itemId: $itemId
+                          fieldId: $fieldId
+                          value: {singleSelectOptionId: $optionId}
+                        }) {
+                          projectV2Item { id }
                         }
-                      `;
-                      
-                      await github.graphql(updateMutation, {
-                        projectId: projectId,
-                        itemId: itemId,
-                        fieldId: typeField.id,
-                        optionId: featureOption.id
-                      });
-                      core.info('Set type to Feature for issue #' + issue.data.number);
-                    }
+                      }
+                    `;
+                    
+                    await github.graphql(updateMutation, {
+                      projectId: projectId,
+                      itemId: itemId,
+                      fieldId: statusField.id,
+                      optionId: backlogOption.id
+                    });
+                    core.info('Set status to Backlog for issue #' + issue.data.number);
                   }
-                } catch (error) {
-                  core.warning('Failed to add issue to project: ' + error.message + '. NOTE: Organization projects require a Personal Access Token (PAT) with `read:org` and `project` scopes, as GITHUB_TOKEN is repository-scoped.');
                 }
-                
-                await github.rest.issues.createComment({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  issue_number: pr.number,
-                  body: '✅ Created lean story issue #' + issue.data.number + ' for ' + id + ' from ' + paths.join(', ')\n                })\n\n                core.info('Posted comment on PR #' + pr.number + ' about issue #' + issue.data.number);\n              }\n\n              core.info('Workflow completed successfully');\n            } catch (error) {\n              core.setFailed('Workflow failed: ' + error.message);\n              throw error;\n            }\n"
+
+                // Set Type to \\\"Feature\\\"
+                if (typeField) {
+                  const featureOption = typeField.options.find(o => o.name === 'Feature');
+                  if (featureOption) {
+                    const updateMutation = `
+                      mutation($projectId: ID!, $itemId: ID!, $fieldId: ID!, $optionId: String!) {
+                        updateProjectV2ItemFieldValue(input: {
+                          projectId: $projectId
+                          itemId: $itemId
+                          fieldId: $fieldId
+                          value: {singleSelectOptionId: $optionId}
+                        }) {
+                          projectV2Item { id }
+                        }
+                      }
+                    `;
+                    
+                    await github.graphql(updateMutation, {
+                      projectId: projectId,
+                      itemId: itemId,
+                      fieldId: typeField.id,
+                      optionId: featureOption.id
+                    });
+                    core.info('Set type to Feature for issue #' + issue.data.number);
+                  }
+                }
+              } catch (error) {
+                core.warning('Failed to add issue to project: ' + error.message + '. NOTE: Organization projects require a Personal Access Token (PAT) with `read:org` and `project` scopes, as GITHUB_TOKEN is repository-scoped.');
+              }
+              
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: pr.number,
+                body: '✅ Created lean story issue #' + issue.data.number + ' for ' + id + ' from ' + paths.join(', ')\n                })\n\n                core.info('Posted comment on PR #' + pr.number + ' about issue #' + issue.data.number);\n              }\n\n              core.info('Workflow completed successfully');\n            } catch (error) {\n              core.setFailed('Workflow failed: ' + error.message);\n              throw error;\n            }\n"
