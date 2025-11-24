@@ -46,7 +46,7 @@ jobs:
       runs-on: ubuntu-latest
       outputs:
         user_story: ${{ steps.filter.outputs.user_story }}
-                pr_sha: ${{ steps.get-pr-sha.outputs.sha }}
+                      pr_sha: ${{ steps.get-pr-sha.outputs.sha }}
       steps:
       - uses: actions/checkout@v4
             
