@@ -1,0 +1,145 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="69" failures="0" errors="0" time="2.826421327">
+    <testsuite name="src/components/auth/__tests__/LoginPage.visual.test.tsx" timestamp="2025-11-24T16:25:14.875Z" hostname="runnervmg1sw1" tests="31" failures="0" errors="0" skipped="0" time="1.279178427">
+        <testcase classname="src/components/auth/__tests__/LoginPage.visual.test.tsx" name="LoginPage - Visual Elements (PR #184) &gt; Background Image &gt; should render the stadium background image" time="0.386559678">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/LoginPage.visual.test.tsx" name="LoginPage - Visual Elements (PR #184) &gt; Background Image &gt; should have proper accessibility attributes on background image" time="0.010364284">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/LoginPage.visual.test.tsx" name="LoginPage - Visual Elements (PR #184) &gt; Background Image &gt; should render background image as decorative element" time="0.008782213">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/LoginPage.visual.test.tsx" name="LoginPage - Visual Elements (PR #184) &gt; Background Image &gt; should have correct image source path" time="0.008416622">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/LoginPage.visual.test.tsx" name="LoginPage - Visual Elements (PR #184) &gt; Logo Image &gt; should render the Legends Ascend logo" time="0.008924901">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/LoginPage.visual.test.tsx" name="LoginPage - Visual Elements (PR #184) &gt; Logo Image &gt; should have correct logo source path" time="0.007911748">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/LoginPage.visual.test.tsx" name="LoginPage - Visual Elements (PR #184) &gt; Logo Image &gt; should have descriptive alt text for accessibility" time="0.007316097">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/LoginPage.visual.test.tsx" name="LoginPage - Visual Elements (PR #184) &gt; Logo Image &gt; should be an img element" time="0.006516822">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/LoginPage.visual.test.tsx" name="LoginPage - Visual Elements (PR #184) &gt; Logo Image &gt; should not be hidden from screen readers" time="0.006529329">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/LoginPage.visual.test.tsx" name="LoginPage - Visual Elements (PR #184) &gt; Background Overlay &gt; should render background overlay element" time="0.010686595">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/LoginPage.visual.test.tsx" name="LoginPage - Visual Elements (PR #184) &gt; Background Overlay &gt; should have aria-hidden attribute on overlay" time="0.008952748">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/LoginPage.visual.test.tsx" name="LoginPage - Visual Elements (PR #184) &gt; Visual Hierarchy and Layout &gt; should display logo above the title" time="0.139302269">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/LoginPage.visual.test.tsx" name="LoginPage - Visual Elements (PR #184) &gt; Visual Hierarchy and Layout &gt; should render all main visual elements" time="0.060286195">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/LoginPage.visual.test.tsx" name="LoginPage - Visual Elements (PR #184) &gt; Visual Hierarchy and Layout &gt; should maintain form visibility with background elements" time="0.209001345">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/LoginPage.visual.test.tsx" name="LoginPage - Visual Elements (PR #184) &gt; Image Loading Edge Cases &gt; should handle missing alt text gracefully on background" time="0.009746118">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/LoginPage.visual.test.tsx" name="LoginPage - Visual Elements (PR #184) &gt; Image Loading Edge Cases &gt; should have valid src attributes for both images" time="0.014823178">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/LoginPage.visual.test.tsx" name="LoginPage - Visual Elements (PR #184) &gt; Image Loading Edge Cases &gt; should render images with correct paths from public assets" time="0.008074258">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/LoginPage.visual.test.tsx" name="LoginPage - Visual Elements (PR #184) &gt; Image Loading Edge Cases &gt; should maintain stable image references across rerenders" time="0.011326058">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/LoginPage.visual.test.tsx" name="LoginPage - Visual Elements (PR #184) &gt; Accessibility Compliance &gt; should mark decorative images as aria-hidden" time="0.007704284">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/LoginPage.visual.test.tsx" name="LoginPage - Visual Elements (PR #184) &gt; Accessibility Compliance &gt; should provide meaningful alt text for logo" time="0.004717215">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/LoginPage.visual.test.tsx" name="LoginPage - Visual Elements (PR #184) &gt; Accessibility Compliance &gt; should not interfere with form accessibility" time="0.134216988">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/LoginPage.visual.test.tsx" name="LoginPage - Visual Elements (PR #184) &gt; Accessibility Compliance &gt; should maintain proper heading hierarchy" time="0.027746105">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/LoginPage.visual.test.tsx" name="LoginPage - Visual Elements (PR #184) &gt; Accessibility Compliance &gt; should not have duplicate alt text" time="0.006859478">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/LoginPage.visual.test.tsx" name="LoginPage - Visual Elements (PR #184) &gt; Responsive Design Considerations &gt; should render all visual elements on small screens" time="0.029774676">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/LoginPage.visual.test.tsx" name="LoginPage - Visual Elements (PR #184) &gt; Responsive Design Considerations &gt; should maintain content card visibility over background" time="0.007957643">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/LoginPage.visual.test.tsx" name="LoginPage - Visual Elements (PR #184) &gt; Performance and Optimization &gt; should use image elements with src attributes" time="0.00875014">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/LoginPage.visual.test.tsx" name="LoginPage - Visual Elements (PR #184) &gt; Performance and Optimization &gt; should have unique src paths for different images" time="0.005881993">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/LoginPage.visual.test.tsx" name="LoginPage - Visual Elements (PR #184) &gt; Performance and Optimization &gt; should load images from optimized asset directories" time="0.006711835">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/LoginPage.visual.test.tsx" name="LoginPage - Visual Elements (PR #184) &gt; Regression Tests &gt; should not break existing login functionality" time="0.048841826">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/LoginPage.visual.test.tsx" name="LoginPage - Visual Elements (PR #184) &gt; Regression Tests &gt; should maintain navigation to register page" time="0.011999136">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/LoginPage.visual.test.tsx" name="LoginPage - Visual Elements (PR #184) &gt; Regression Tests &gt; should preserve form validation behavior" time="0.052038235">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/auth/__tests__/RegisterPage.visual.test.tsx" timestamp="2025-11-24T16:25:14.881Z" hostname="runnervmg1sw1" tests="38" failures="0" errors="0" skipped="0" time="1.5472429">
+        <testcase classname="src/components/auth/__tests__/RegisterPage.visual.test.tsx" name="RegisterPage - Visual Elements (PR #184) &gt; Background Image &gt; should render the stadium background image" time="0.448778561">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/RegisterPage.visual.test.tsx" name="RegisterPage - Visual Elements (PR #184) &gt; Background Image &gt; should have proper accessibility attributes on background image" time="0.013707197">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/RegisterPage.visual.test.tsx" name="RegisterPage - Visual Elements (PR #184) &gt; Background Image &gt; should render background image as decorative element" time="0.013770356">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/RegisterPage.visual.test.tsx" name="RegisterPage - Visual Elements (PR #184) &gt; Background Image &gt; should have correct image source path" time="0.013572193">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/RegisterPage.visual.test.tsx" name="RegisterPage - Visual Elements (PR #184) &gt; Logo Image &gt; should render the Legends Ascend logo" time="0.012200689">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/RegisterPage.visual.test.tsx" name="RegisterPage - Visual Elements (PR #184) &gt; Logo Image &gt; should have correct logo source path" time="0.011650466">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/RegisterPage.visual.test.tsx" name="RegisterPage - Visual Elements (PR #184) &gt; Logo Image &gt; should have descriptive alt text for accessibility" time="0.010520774">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/RegisterPage.visual.test.tsx" name="RegisterPage - Visual Elements (PR #184) &gt; Logo Image &gt; should be an img element" time="0.010500145">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/RegisterPage.visual.test.tsx" name="RegisterPage - Visual Elements (PR #184) &gt; Logo Image &gt; should not be hidden from screen readers" time="0.01084941">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/RegisterPage.visual.test.tsx" name="RegisterPage - Visual Elements (PR #184) &gt; Background Overlay &gt; should render background overlay element" time="0.013765875">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/RegisterPage.visual.test.tsx" name="RegisterPage - Visual Elements (PR #184) &gt; Background Overlay &gt; should have aria-hidden attribute on overlay" time="0.012339967">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/RegisterPage.visual.test.tsx" name="RegisterPage - Visual Elements (PR #184) &gt; Visual Hierarchy and Layout &gt; should display logo above the title" time="0.130831194">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/RegisterPage.visual.test.tsx" name="RegisterPage - Visual Elements (PR #184) &gt; Visual Hierarchy and Layout &gt; should render all main visual elements" time="0.062467019">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/RegisterPage.visual.test.tsx" name="RegisterPage - Visual Elements (PR #184) &gt; Visual Hierarchy and Layout &gt; should maintain form visibility with background elements" time="0.229991593">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/RegisterPage.visual.test.tsx" name="RegisterPage - Visual Elements (PR #184) &gt; Image Loading Edge Cases &gt; should handle missing alt text gracefully on background" time="0.009659066">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/RegisterPage.visual.test.tsx" name="RegisterPage - Visual Elements (PR #184) &gt; Image Loading Edge Cases &gt; should have valid src attributes for both images" time="0.007806678">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/RegisterPage.visual.test.tsx" name="RegisterPage - Visual Elements (PR #184) &gt; Image Loading Edge Cases &gt; should render images with correct paths from public assets" time="0.008995875">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/RegisterPage.visual.test.tsx" name="RegisterPage - Visual Elements (PR #184) &gt; Image Loading Edge Cases &gt; should maintain stable image references across rerenders" time="0.016175607">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/RegisterPage.visual.test.tsx" name="RegisterPage - Visual Elements (PR #184) &gt; Accessibility Compliance &gt; should mark decorative images as aria-hidden" time="0.010944542">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/RegisterPage.visual.test.tsx" name="RegisterPage - Visual Elements (PR #184) &gt; Accessibility Compliance &gt; should provide meaningful alt text for logo" time="0.006461162">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/RegisterPage.visual.test.tsx" name="RegisterPage - Visual Elements (PR #184) &gt; Accessibility Compliance &gt; should not interfere with form accessibility" time="0.12082561">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/RegisterPage.visual.test.tsx" name="RegisterPage - Visual Elements (PR #184) &gt; Accessibility Compliance &gt; should maintain proper heading hierarchy" time="0.019252089">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/RegisterPage.visual.test.tsx" name="RegisterPage - Visual Elements (PR #184) &gt; Accessibility Compliance &gt; should not have duplicate alt text" time="0.007421625">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/RegisterPage.visual.test.tsx" name="RegisterPage - Visual Elements (PR #184) &gt; Accessibility Compliance &gt; should have accessible newsletter checkbox" time="0.098130587">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/RegisterPage.visual.test.tsx" name="RegisterPage - Visual Elements (PR #184) &gt; Responsive Design Considerations &gt; should render all visual elements on small screens" time="0.022261518">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/RegisterPage.visual.test.tsx" name="RegisterPage - Visual Elements (PR #184) &gt; Responsive Design Considerations &gt; should maintain content card visibility over background" time="0.00626026">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/RegisterPage.visual.test.tsx" name="RegisterPage - Visual Elements (PR #184) &gt; Performance and Optimization &gt; should use image elements with src attributes" time="0.005778248">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/RegisterPage.visual.test.tsx" name="RegisterPage - Visual Elements (PR #184) &gt; Performance and Optimization &gt; should have unique src paths for different images" time="0.004833899">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/RegisterPage.visual.test.tsx" name="RegisterPage - Visual Elements (PR #184) &gt; Performance and Optimization &gt; should load images from optimized asset directories" time="0.005162328">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/RegisterPage.visual.test.tsx" name="RegisterPage - Visual Elements (PR #184) &gt; Regression Tests &gt; should not break existing registration functionality" time="0.045741543">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/RegisterPage.visual.test.tsx" name="RegisterPage - Visual Elements (PR #184) &gt; Regression Tests &gt; should maintain navigation to login page" time="0.006474496">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/RegisterPage.visual.test.tsx" name="RegisterPage - Visual Elements (PR #184) &gt; Regression Tests &gt; should preserve newsletter opt-in functionality" time="0.069932739">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/RegisterPage.visual.test.tsx" name="RegisterPage - Visual Elements (PR #184) &gt; Regression Tests &gt; should preserve form validation behavior" time="0.044762334">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/RegisterPage.visual.test.tsx" name="RegisterPage - Visual Elements (PR #184) &gt; Consistency with LoginPage &gt; should use the same background image as LoginPage" time="0.005355808">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/RegisterPage.visual.test.tsx" name="RegisterPage - Visual Elements (PR #184) &gt; Consistency with LoginPage &gt; should use the same logo as LoginPage" time="0.007502491">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/RegisterPage.visual.test.tsx" name="RegisterPage - Visual Elements (PR #184) &gt; Consistency with LoginPage &gt; should have consistent accessibility patterns" time="0.00587775">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/RegisterPage.visual.test.tsx" name="RegisterPage - Visual Elements (PR #184) &gt; Edge Cases Specific to Registration &gt; should maintain visual elements with newsletter checkbox checked" time="0.006245001">
+        </testcase>
+        <testcase classname="src/components/auth/__tests__/RegisterPage.visual.test.tsx" name="RegisterPage - Visual Elements (PR #184) &gt; Edge Cases Specific to Registration &gt; should handle password mismatch error without affecting visuals" time="0.007469245">
+        </testcase>
+    </testsuite>
+</testsuites>
