@@ -25,7 +25,7 @@ describe('RegisterPage', () => {
   it('should render the registration form', () => {
     renderRegisterPage();
     
-    expect(screen.getByText('⚽ Legends Ascend')).toBeInTheDocument();
+    expect(screen.getByAltText('Legends Ascend logo')).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: /register/i })).toBeInTheDocument();
     expect(screen.getByLabelText('Email')).toBeInTheDocument();
     expect(screen.getByLabelText('Password')).toBeInTheDocument();
