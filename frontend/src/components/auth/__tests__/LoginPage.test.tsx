@@ -28,7 +28,7 @@ describe('LoginPage', () => {
   it('should render the login form', () => {
     renderLoginPage();
     
-    expect(screen.getByText('⚽ Legends Ascend')).toBeInTheDocument();
+    expect(screen.getByAltText('Legends Ascend logo')).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: /log in/i })).toBeInTheDocument();
     expect(screen.getByLabelText('Email')).toBeInTheDocument();
     expect(screen.getByLabelText('Password')).toBeInTheDocument();

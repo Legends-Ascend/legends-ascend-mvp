@@ -15,8 +15,25 @@ const Container = styled.div`
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background: linear-gradient(135deg, #1E3A8A 0%, #60A5FA 100%);
+  position: relative;
   padding: 20px;
+  overflow: hidden;
+`;
+
+const BackgroundImage = styled.img`
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+`;
+
+const BackgroundOverlay = styled.div`
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, rgba(15, 23, 42, 0.7), rgba(15, 23, 42, 0.5), rgba(15, 23, 42, 0.8));
+  z-index: 1;
 `;
 
 const Card = styled.div`
@@ -26,15 +43,16 @@ const Card = styled.div`
   width: 100%;
   max-width: 450px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  position: relative;
+  z-index: 2;
 `;
 
-const Logo = styled.h1`
-  font-family: 'Inter', 'Poppins', sans-serif;
-  font-size: 2rem;
-  font-weight: 700;
-  color: #1E3A8A;
-  text-align: center;
-  margin-bottom: 30px;
+const LogoImage = styled.img`
+  height: 120px;
+  width: auto;
+  margin: 0 auto 30px;
+  display: block;
+  object-fit: contain;
 `;
 
 const Title = styled.h2`
@@ -269,8 +287,17 @@ export function RegisterPage() {
 
   return (
     <Container>
+      <BackgroundImage 
+        src="/assets/backgrounds/stadium.jpg" 
+        alt=""
+        aria-hidden="true"
+      />
+      <BackgroundOverlay aria-hidden="true" />
       <Card>
-        <Logo>⚽ Legends Ascend</Logo>
+        <LogoImage 
+          src="/assets/branding/legends-ascend-logo-transparent.png" 
+          alt="Legends Ascend logo"
+        />
         <Title>Register</Title>
         <Form onSubmit={handleSubmit}>
           {errors.form && (
