@@ -48,9 +48,21 @@ jobs:
       user_story: ${{ steps.filter.outputs.user_story }}
     steps:
       - uses: actions/checkout@v4
+            
+      - uses: actions/github-script@v7
+        id: get-pr-sha
         with:
-          ref: ${{ needs.check-trigger.outputs.head_ref }}
+          script: |
+            const pr = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number
+            });
+            core.setOutput('sha', pr.data.head.sha);
       
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.get-pr-sha.outputs.sha }}
       - uses: dorny/paths-filter@v3
         id: filter
         with:
