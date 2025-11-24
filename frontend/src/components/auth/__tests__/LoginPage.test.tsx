@@ -275,12 +275,14 @@ describe('LoginPage', () => {
       
       const emailInput = screen.getByLabelText('Email');
       const passwordInput = screen.getByLabelText('Password');
+      const checkbox = screen.getByLabelText('Remember username') as HTMLInputElement;
       const submitButton = screen.getByRole('button', { name: /log in/i });
       
-      // Email should be pre-filled with old value
+      // Email should be pre-filled with old value and checkbox should be checked
       expect((emailInput as HTMLInputElement).value).toBe('old@example.com');
+      expect(checkbox.checked).toBe(true);
       
-      // Change to new email
+      // Change to new email (checkbox remains checked)
       fireEvent.change(emailInput, { target: { value: 'new@example.com' } });
       fireEvent.change(passwordInput, { target: { value: 'Password123' } });
       fireEvent.click(submitButton);
@@ -424,10 +426,10 @@ describe('LoginPage', () => {
       expect(localStorage.getItem(REMEMBER_USERNAME_KEY)).toBe(specialEmail);
     });
 
-    it('should handle very long email addresses', async () => {
-      // Test with email length near common localStorage limits (250 chars for local part)
-      // This ensures the feature works with edge case email lengths
-      const longEmail = 'a'.repeat(250) + '@example.com';
+    it('should handle very long email addresses within RFC limits', async () => {
+      // Test with maximum valid local part length (64 chars) per RFC 5321
+      // This ensures the feature works with longest valid email addresses
+      const longEmail = 'a'.repeat(64) + '@example.com';
       
       const mockLoginUser = vi.spyOn(authService, 'loginUser').mockResolvedValue({
         token: 'test-token',
