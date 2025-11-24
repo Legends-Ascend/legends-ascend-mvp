@@ -306,7 +306,7 @@ describe('LoginPage', () => {
       expect(localStorage.getItem(REMEMBER_USERNAME_KEY)).toBeNull();
     });
 
-    it('should handle empty/null value in localStorage gracefully', () => {
+    it('should handle empty string in localStorage gracefully', () => {
       localStorage.setItem(REMEMBER_USERNAME_KEY, '');
       
       renderLoginPage();
@@ -314,7 +314,7 @@ describe('LoginPage', () => {
       const emailInput = screen.getByLabelText('Email') as HTMLInputElement;
       const checkbox = screen.getByLabelText('Remember username') as HTMLInputElement;
       
-      // Should not pre-fill email with empty string
+      // Empty string is falsy, so should not pre-fill
       expect(emailInput.value).toBe('');
       expect(checkbox.checked).toBe(false);
     });
@@ -335,19 +335,6 @@ describe('LoginPage', () => {
       
       fireEvent.click(checkbox);
       expect(checkbox.checked).toBe(true);
-    });
-
-    it('should handle empty string in localStorage gracefully', () => {
-      localStorage.setItem(REMEMBER_USERNAME_KEY, '');
-      
-      renderLoginPage();
-      
-      const emailInput = screen.getByLabelText('Email') as HTMLInputElement;
-      const checkbox = screen.getByLabelText('Remember username') as HTMLInputElement;
-      
-      // Empty string is falsy, so should not pre-fill
-      expect(emailInput.value).toBe('');
-      expect(checkbox.checked).toBe(false);
     });
 
     it('should maintain checkbox state after validation error', async () => {
@@ -428,6 +415,8 @@ describe('LoginPage', () => {
     });
 
     it('should handle very long email addresses', async () => {
+      // Test with email length near common localStorage limits (250 chars for local part)
+      // This ensures the feature works with edge case email lengths
       const longEmail = 'a'.repeat(250) + '@example.com';
       
       const mockLoginUser = vi.spyOn(authService, 'loginUser').mockResolvedValue({
@@ -460,16 +449,12 @@ describe('LoginPage', () => {
   });
 
   describe('Register link functionality', () => {
-    it('should navigate to register page when register link is clicked', () => {
+    it('should have correct href for register link', () => {
       renderLoginPage();
       
       const registerLink = screen.getByText('Register');
       expect(registerLink).toBeInTheDocument();
-      
-      fireEvent.click(registerLink);
-      
-      // Verify navigation was attempted
-      expect((window as Window & { location: { href: string } }).location.href).toBe('/register');
+      expect(registerLink.closest('a')).toHaveAttribute('href', '/register');
     });
   });
 });
