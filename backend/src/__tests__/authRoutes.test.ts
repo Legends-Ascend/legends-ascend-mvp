@@ -51,6 +51,7 @@ describe('Authentication API - /api/v1/auth', () => {
         user: {
           id: '123e4567-e89b-12d3-a456-426614174000',
           email: 'test@example.com',
+          role: 'user' as const,
           created_at: new Date('2024-01-01T00:00:00Z'),
         },
       };
@@ -142,6 +143,7 @@ describe('Authentication API - /api/v1/auth', () => {
         user: {
           id: '123e4567-e89b-12d3-a456-426614174000',
           email: 'test@example.com',
+          role: 'user' as const,
           created_at: new Date('2024-01-01T00:00:00Z'),
         },
       };
@@ -200,6 +202,7 @@ describe('Authentication API - /api/v1/auth', () => {
       const mockUser = {
         id: '123e4567-e89b-12d3-a456-426614174000',
         email: 'test@example.com',
+        role: 'user' as const,
         created_at: new Date('2024-01-01T00:00:00Z'),
       };
 

@@ -1,4 +1,15 @@
+import bcrypt from 'bcrypt';
 import { query } from './config/database';
+
+/**
+ * Database Seed Script
+ * Following TECHNICAL_ARCHITECTURE.md
+ * Implements US-051 admin account creation
+ */
+
+const ADMIN_USERNAME = 'supersaiyan';
+const ADMIN_PASSWORD = 'wh4t15myd35t1ny!';
+const SALT_ROUNDS = 10;
 
 const samplePlayers = [
   // Forwards
@@ -23,9 +34,47 @@ const samplePlayers = [
   { name: 'Gabriel Mendes', position: 'GK', overall_rating: 88, pace: 45, shooting: 30, passing: 55, dribbling: 40, defending: 50, physical: 70 },
 ];
 
+/**
+ * Create admin account if it doesn't exist
+ * Per US-051 FR-1, FR-2, FR-3
+ */
+export async function seedAdminAccount(): Promise<void> {
+  try {
+    // Check if admin already exists
+    const existing = await query(
+      'SELECT id FROM users WHERE username = $1',
+      [ADMIN_USERNAME]
+    );
+
+    if (existing.rows.length > 0) {
+      console.log('Admin account already exists, skipping seed');
+      return;
+    }
+
+    // Hash password with bcrypt (10 salt rounds per security requirements)
+    const passwordHash = await bcrypt.hash(ADMIN_PASSWORD, SALT_ROUNDS);
+
+    // Create admin account with role 'admin'
+    // Admin has a special internal email that cannot be used for login
+    await query(
+      `INSERT INTO users (username, email, password_hash, role) 
+       VALUES ($1, $2, $3, 'admin')`,
+      [ADMIN_USERNAME, `${ADMIN_USERNAME}@admin.legendsascend.local`, passwordHash]
+    );
+
+    console.log('Admin account created successfully');
+  } catch (error) {
+    console.error('Error seeding admin account:', error);
+    throw error;
+  }
+}
+
 export const seedDatabase = async () => {
   try {
     console.log('Starting database seed...');
+
+    // Seed admin account first (US-051)
+    await seedAdminAccount();
 
     // Insert sample players
     for (const player of samplePlayers) {

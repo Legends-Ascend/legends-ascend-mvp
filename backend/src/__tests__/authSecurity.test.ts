@@ -149,6 +149,7 @@ describe('Authentication Security Tests', () => {
         user: {
           id: '123',
           email: 'test@example.com',
+          role: 'user' as const,
           created_at: new Date(),
         },
       });
@@ -302,6 +303,7 @@ describe('Authentication Security Tests', () => {
         user: {
           id: '123',
           email: 'test@example.com',
+          role: 'user' as const,
           created_at: new Date(),
         },
       });
@@ -323,6 +325,7 @@ describe('Authentication Security Tests', () => {
         user: {
           id: '123',
           email: 'test@example.com',
+          role: 'user' as const,
           created_at: new Date(),
         },
       });
@@ -350,6 +353,7 @@ describe('Authentication Security Tests', () => {
           user: {
             id: '123',
             email: 'test@example.com',
+            role: 'user' as const,
             created_at: new Date(),
           },
         });
@@ -447,6 +451,7 @@ describe('Authentication Security Tests', () => {
         user: {
           id: '123',
           email: 'test@example.com',
+          role: 'user' as const,
           created_at: new Date(),
         },
       });
@@ -477,6 +482,7 @@ describe('Authentication Security Tests', () => {
         user: {
           id: '123',
           email: 'test@example.com',
+          role: 'user' as const,
           created_at: new Date(),
         },
       });
@@ -500,6 +506,7 @@ describe('Authentication Security Tests', () => {
         user: {
           id: '123',
           email: 'test@example.com',
+          role: 'user' as const,
           created_at: new Date(),
         },
       });
@@ -519,6 +526,7 @@ describe('Authentication Security Tests', () => {
       mockVerifyAuthToken.mockResolvedValue({
         id: '123',
         email: 'test@example.com',
+        role: 'user' as const,
         created_at: new Date(),
       });
 

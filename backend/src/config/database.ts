@@ -67,6 +67,35 @@ export const initializeDatabase = async () => {
     // Create index for newsletter preferences
     await query(`CREATE INDEX IF NOT EXISTS idx_users_newsletter_optin ON users(newsletter_optin)`);
 
+    // Add role column for US-051 (Admin Account)
+    await query(`
+      DO $$ 
+      BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM information_schema.columns 
+          WHERE table_name = 'users' AND column_name = 'role'
+        ) THEN
+          ALTER TABLE users ADD COLUMN role VARCHAR(20) DEFAULT 'user' NOT NULL;
+        END IF;
+      END $$;
+    `);
+
+    // Add username column for US-051 (Admin Account)
+    await query(`
+      DO $$ 
+      BEGIN
+        IF NOT EXISTS (
+          SELECT 1 FROM information_schema.columns 
+          WHERE table_name = 'users' AND column_name = 'username'
+        ) THEN
+          ALTER TABLE users ADD COLUMN username VARCHAR(50) UNIQUE NULL;
+        END IF;
+      END $$;
+    `);
+
+    // Create index for username lookups
+    await query(`CREATE INDEX IF NOT EXISTS idx_users_username ON users(username) WHERE username IS NOT NULL`);
+
     // Create players table (US-044)
     await query(`
       CREATE TABLE IF NOT EXISTS players (
