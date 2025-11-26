@@ -182,11 +182,40 @@ describe('Authentication API - /api/v1/auth', () => {
       expect(response.body.error.message).toBe('Invalid credentials');
     });
 
-    it('should reject login with invalid email format', async () => {
+    it('should accept login with username (for admin)', async () => {
+      // Per US-051, login now accepts username instead of email for admin login
+      const mockAuthResponse = {
+        token: 'mock-admin-token',
+        user: {
+          id: '123e4567-e89b-12d3-a456-426614174001',
+          email: 'supersaiyan@admin.legendsascend.local',
+          username: 'supersaiyan',
+          role: 'admin' as const,
+          created_at: new Date('2024-01-01T00:00:00Z'),
+        },
+      };
+
+      mockLoginUser.mockResolvedValue(mockAuthResponse);
+
       const response = await request(app)
         .post('/api/v1/auth/login')
         .send({
-          email: 'not-an-email',
+          email: 'supersaiyan', // Username instead of email
+          password: 'wh4t15myd35t1ny!',
+        })
+        .expect(200);
+
+      expect(response.body.success).toBe(true);
+      expect(response.body.data.user.username).toBe('supersaiyan');
+      expect(response.body.data.user.role).toBe('admin');
+      expect(mockLoginUser).toHaveBeenCalledWith('supersaiyan', 'wh4t15myd35t1ny!');
+    });
+
+    it('should reject login with empty email/username', async () => {
+      const response = await request(app)
+        .post('/api/v1/auth/login')
+        .send({
+          email: '',
           password: 'SecurePass123',
         })
         .expect(400);
