@@ -84,6 +84,7 @@ const Main = styled.main`
   max-width: 1200px;
   margin: 0 auto;
   padding: 40px 20px;
+  padding-bottom: 80px; /* Account for fixed footer */
 `;
 
 const PageTitle = styled.h1`

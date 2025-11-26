@@ -7,6 +7,13 @@ import { query } from './config/database';
  * Implements US-051 admin account creation
  */
 
+/**
+ * Admin credentials as specified in US-051 requirements.
+ * NOTE: Per US-051 specification, admin credentials are defined in the seed script
+ * rather than environment variables to ensure consistent deployment. This is the
+ * designated location for MVP admin account setup. In production, consider migrating
+ * to a more secure configuration management approach.
+ */
 const ADMIN_USERNAME = 'supersaiyan';
 const ADMIN_PASSWORD = 'wh4t15myd35t1ny!';
 const SALT_ROUNDS = 10;
