@@ -30,7 +30,7 @@ describe('LoginPage', () => {
     
     expect(screen.getByAltText('Legends Ascend logo')).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: /log in/i })).toBeInTheDocument();
-    expect(screen.getByLabelText('Email')).toBeInTheDocument();
+    expect(screen.getByLabelText('Email or Username')).toBeInTheDocument();
     expect(screen.getByLabelText('Password')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /log in/i })).toBeInTheDocument();
   });
@@ -56,7 +56,7 @@ describe('LoginPage', () => {
   it('should validate password is required', async () => {
     renderLoginPage();
     
-    const emailInput = screen.getByLabelText('Email');
+    const emailInput = screen.getByLabelText('Email or Username');
     const submitButton = screen.getByRole('button', { name: /log in/i });
     
     fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
@@ -79,7 +79,7 @@ describe('LoginPage', () => {
 
     renderLoginPage();
     
-    const emailInput = screen.getByLabelText('Email');
+    const emailInput = screen.getByLabelText('Email or Username');
     const passwordInput = screen.getByLabelText('Password');
     const submitButton = screen.getByRole('button', { name: /log in/i });
     
@@ -100,7 +100,7 @@ describe('LoginPage', () => {
 
     renderLoginPage();
     
-    const emailInput = screen.getByLabelText('Email');
+    const emailInput = screen.getByLabelText('Email or Username');
     const passwordInput = screen.getByLabelText('Password');
     const submitButton = screen.getByRole('button', { name: /log in/i });
     
@@ -120,7 +120,7 @@ describe('LoginPage', () => {
 
     renderLoginPage();
     
-    const emailInput = screen.getByLabelText('Email');
+    const emailInput = screen.getByLabelText('Email or Username');
     const passwordInput = screen.getByLabelText('Password');
     const submitButton = screen.getByRole('button', { name: /log in/i });
     
@@ -138,7 +138,7 @@ describe('LoginPage', () => {
   it('should have proper ARIA attributes for accessibility', () => {
     renderLoginPage();
     
-    const emailInput = screen.getByLabelText('Email');
+    const emailInput = screen.getByLabelText('Email or Username');
     const passwordInput = screen.getByLabelText('Password');
     
     expect(emailInput).toHaveAttribute('id', 'email');
@@ -160,7 +160,7 @@ describe('LoginPage', () => {
       
       renderLoginPage();
       
-      const emailInput = screen.getByLabelText('Email') as HTMLInputElement;
+      const emailInput = screen.getByLabelText('Email or Username') as HTMLInputElement;
       const checkbox = screen.getByLabelText('Remember username') as HTMLInputElement;
       
       expect(emailInput.value).toBe('remembered@example.com');
@@ -179,7 +179,7 @@ describe('LoginPage', () => {
 
       renderLoginPage();
       
-      const emailInput = screen.getByLabelText('Email');
+      const emailInput = screen.getByLabelText('Email or Username');
       const passwordInput = screen.getByLabelText('Password');
       const checkbox = screen.getByLabelText('Remember username');
       const submitButton = screen.getByRole('button', { name: /log in/i });
@@ -210,7 +210,7 @@ describe('LoginPage', () => {
 
       renderLoginPage();
       
-      const emailInput = screen.getByLabelText('Email');
+      const emailInput = screen.getByLabelText('Email or Username');
       const passwordInput = screen.getByLabelText('Password');
       const checkbox = screen.getByLabelText('Remember username') as HTMLInputElement;
       const submitButton = screen.getByRole('button', { name: /log in/i });
@@ -245,7 +245,7 @@ describe('LoginPage', () => {
 
       renderLoginPage();
       
-      const emailInput = screen.getByLabelText('Email');
+      const emailInput = screen.getByLabelText('Email or Username');
       const passwordInput = screen.getByLabelText('Password');
       const checkbox = screen.getByLabelText('Remember username');
       const submitButton = screen.getByRole('button', { name: /log in/i });
@@ -273,7 +273,7 @@ describe('LoginPage', () => {
 
       renderLoginPage();
       
-      const emailInput = screen.getByLabelText('Email');
+      const emailInput = screen.getByLabelText('Email or Username');
       const passwordInput = screen.getByLabelText('Password');
       const checkbox = screen.getByLabelText('Remember username') as HTMLInputElement;
       const submitButton = screen.getByRole('button', { name: /log in/i });
@@ -300,7 +300,7 @@ describe('LoginPage', () => {
 
       renderLoginPage();
       
-      const emailInput = screen.getByLabelText('Email');
+      const emailInput = screen.getByLabelText('Email or Username');
       const passwordInput = screen.getByLabelText('Password');
       const checkbox = screen.getByLabelText('Remember username');
       const submitButton = screen.getByRole('button', { name: /log in/i });
@@ -323,7 +323,7 @@ describe('LoginPage', () => {
       
       renderLoginPage();
       
-      const emailInput = screen.getByLabelText('Email') as HTMLInputElement;
+      const emailInput = screen.getByLabelText('Email or Username') as HTMLInputElement;
       const checkbox = screen.getByLabelText('Remember username') as HTMLInputElement;
       
       // Empty string is falsy, so should not pre-fill
@@ -352,7 +352,7 @@ describe('LoginPage', () => {
     it('should maintain checkbox state after validation error', async () => {
       renderLoginPage();
       
-      const emailInput = screen.getByLabelText('Email');
+      const emailInput = screen.getByLabelText('Email or Username');
       const checkbox = screen.getByLabelText('Remember username') as HTMLInputElement;
       const submitButton = screen.getByRole('button', { name: /log in/i });
       
@@ -378,7 +378,7 @@ describe('LoginPage', () => {
       renderLoginPage();
       
       const submitButton = screen.getByRole('button', { name: /log in/i });
-      const emailInput = screen.getByLabelText('Email') as HTMLInputElement;
+      const emailInput = screen.getByLabelText('Email or Username') as HTMLInputElement;
       
       // Email should be pre-filled
       expect(emailInput.value).toBe('test@example.com');
@@ -409,7 +409,7 @@ describe('LoginPage', () => {
 
       renderLoginPage();
       
-      const emailInput = screen.getByLabelText('Email');
+      const emailInput = screen.getByLabelText('Email or Username');
       const passwordInput = screen.getByLabelText('Password');
       const checkbox = screen.getByLabelText('Remember username');
       const submitButton = screen.getByRole('button', { name: /log in/i });
@@ -442,7 +442,7 @@ describe('LoginPage', () => {
 
       renderLoginPage();
       
-      const emailInput = screen.getByLabelText('Email');
+      const emailInput = screen.getByLabelText('Email or Username');
       const passwordInput = screen.getByLabelText('Password');
       const checkbox = screen.getByLabelText('Remember username');
       const submitButton = screen.getByRole('button', { name: /log in/i });

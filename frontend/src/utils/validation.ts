@@ -1,17 +1,22 @@
 /**
  * Form validation utilities using Zod
  * Following TECHNICAL_ARCHITECTURE.md and US-045 requirements
+ * Updated for US-051 admin username support
  */
 
 import { z } from 'zod';
 
 /**
  * Login form validation schema
- * - Email: Valid email format (RFC 5322)
+ * - Email/Username: Required (can be email or username for admin)
  * - Password: Required (validation on login is minimal, just ensure it's provided)
+ * 
+ * Per US-051, the login form accepts either:
+ * - Email address for regular users
+ * - Username (e.g., 'supersaiyan') for admin users
  */
 export const loginSchema = z.object({
-  email: z.string().email('Please enter a valid email address'),
+  email: z.string().min(1, 'Email or username is required'),
   password: z.string().min(1, 'Password is required'),
 });
 

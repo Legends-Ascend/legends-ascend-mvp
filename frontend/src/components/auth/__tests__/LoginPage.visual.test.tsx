@@ -151,7 +151,7 @@ describe('LoginPage - Visual Elements (PR #184)', () => {
       renderLoginPage();
       
       // Verify form elements are still accessible
-      const emailInput = screen.getByLabelText('Email');
+      const emailInput = screen.getByLabelText('Email or Username');
       const passwordInput = screen.getByLabelText('Password');
       const submitButton = screen.getByRole('button', { name: /log in/i });
       
@@ -238,7 +238,7 @@ describe('LoginPage - Visual Elements (PR #184)', () => {
       renderLoginPage();
       
       // All form elements should still have proper labels
-      const emailInput = screen.getByLabelText('Email');
+      const emailInput = screen.getByLabelText('Email or Username');
       const passwordInput = screen.getByLabelText('Password');
       const rememberCheckbox = screen.getByLabelText('Remember username');
       
@@ -342,7 +342,7 @@ describe('LoginPage - Visual Elements (PR #184)', () => {
       renderLoginPage();
       
       // All original form elements should still work
-      const emailInput = screen.getByLabelText('Email');
+      const emailInput = screen.getByLabelText('Email or Username');
       const passwordInput = screen.getByLabelText('Password');
       const submitButton = screen.getByRole('button', { name: /log in/i });
       
@@ -363,7 +363,7 @@ describe('LoginPage - Visual Elements (PR #184)', () => {
       renderLoginPage();
       
       const submitButton = screen.getByRole('button', { name: /log in/i });
-      const emailInput = screen.getByLabelText('Email');
+      const emailInput = screen.getByLabelText('Email or Username');
       
       // Should still show validation errors
       expect(emailInput).toBeInTheDocument();
