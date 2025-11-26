@@ -12,15 +12,25 @@ describe('validation', () => {
       expect(result.success).toBe(true);
     });
 
-    it('should reject invalid email format', () => {
+    it('should accept username instead of email (for admin login)', () => {
+      // Per US-051, login accepts either email or username
       const result = loginSchema.safeParse({
-        email: 'notanemail',
+        email: 'supersaiyan', // Admin username
+        password: 'wh4t15myd35t1ny!',
+      });
+
+      expect(result.success).toBe(true);
+    });
+
+    it('should reject empty email/username', () => {
+      const result = loginSchema.safeParse({
+        email: '',
         password: 'Password123',
       });
 
       expect(result.success).toBe(false);
       if (!result.success) {
-        expect(result.error.issues[0].message).toBe('Please enter a valid email address');
+        expect(result.error.issues[0].message).toBe('Email or username is required');
       }
     });
 

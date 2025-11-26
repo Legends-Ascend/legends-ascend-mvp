@@ -319,15 +319,17 @@ describe('Authentication Service', () => {
         rows: [{
           id: testUserId,
           email: 'test@example.com',
+          username: null,
+          role: 'user',
           created_at: new Date(),
         }],
       } as any);
 
       await verifyAuthToken(token);
 
-      // Verify query was called with correct userId
+      // Verify query was called with correct userId (now includes username and role for US-051)
       expect(mockQuery).toHaveBeenCalledWith(
-        expect.stringContaining('SELECT id, email, created_at FROM users WHERE id = $1'),
+        expect.stringContaining('SELECT id, email, username, role, created_at FROM users WHERE id = $1'),
         [testUserId]
       );
     });

@@ -2,6 +2,7 @@
  * Authentication Context Provider
  * Following TECHNICAL_ARCHITECTURE.md - React 18+ patterns
  * Implements session state management per US-045 FR-3
+ * Implements US-051 admin authentication and redirect logic
  */
 
 import { createContext, useState, useEffect, useMemo, type ReactNode } from 'react';
@@ -67,6 +68,13 @@ export function AuthProvider({ children }: AuthProviderProps) {
     localStorage.setItem('authToken', token);
     localStorage.setItem('user', JSON.stringify(userData));
     setUser(userData);
+
+    // Redirect based on role (US-051 FR-7, FR-8)
+    if (userData.role === 'admin') {
+      window.location.href = '/admin';
+    } else {
+      window.location.href = '/game/lineup';
+    }
   };
 
   const register = async (email: string, password: string, newsletterOptIn: boolean = false) => {
@@ -94,6 +102,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
     () => ({
       user,
       isAuthenticated: user !== null,
+      isAdmin: user?.role === 'admin',
       loading,
       login,
       register,

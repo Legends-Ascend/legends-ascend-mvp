@@ -72,3 +72,22 @@ export const registerRateLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
 });
+
+/**
+ * Rate limiter for admin endpoints
+ * Prevent abuse of admin API: max 100 requests per IP per 15 minutes
+ * Per US-051 requirements
+ */
+export const adminRateLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: process.env.NODE_ENV === 'test' ? 1000 : 100,
+  message: {
+    success: false,
+    error: {
+      code: 'RATE_LIMIT_EXCEEDED',
+      message: 'Too many admin requests. Please try again later.',
+    },
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});

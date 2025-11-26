@@ -34,11 +34,14 @@ describe('AuthContext', () => {
     const mockUser = {
       id: '123',
       email: 'test@example.com',
+      role: 'user' as const,
       created_at: '2025-11-18T00:00:00Z',
     };
 
     localStorage.setItem('authToken', 'test-token');
     localStorage.setItem('user', JSON.stringify(mockUser));
+
+    vi.spyOn(authService, 'verifyToken').mockResolvedValue(mockUser);
 
     const { result } = renderHook(() => useAuth(), { wrapper });
 
@@ -54,6 +57,7 @@ describe('AuthContext', () => {
     const mockUser = {
       id: '123',
       email: 'test@example.com',
+      role: 'user' as const,
       created_at: '2025-11-18T00:00:00Z',
     };
 
@@ -83,6 +87,7 @@ describe('AuthContext', () => {
     const mockUser = {
       id: '456',
       email: 'newuser@example.com',
+      role: 'user' as const,
       created_at: '2025-11-18T00:00:00Z',
     };
 
@@ -112,6 +117,7 @@ describe('AuthContext', () => {
     const mockUser = {
       id: '123',
       email: 'test@example.com',
+      role: 'user' as const,
       created_at: '2025-11-18T00:00:00Z',
     };
 
