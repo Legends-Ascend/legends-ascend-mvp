@@ -7,10 +7,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { AdminDashboard } from '../AdminDashboard';
-import * as useAuthHook from '../hooks/useAuth';
+import * as useAuthHook from '../../hooks/useAuth';
 
 // Mock useAuth hook
-vi.mock('../hooks/useAuth', () => ({
+vi.mock('../../hooks/useAuth', () => ({
   useAuth: vi.fn(),
 }));
 
@@ -104,8 +104,8 @@ describe('AdminDashboard', () => {
 
       render(<AdminDashboard />);
 
-      expect(screen.getByText(/admin/i)).toBeInTheDocument();
-      expect(screen.getByText(/Legends Ascend/i)).toBeInTheDocument();
+      expect(screen.getByText('Admin Dashboard')).toBeInTheDocument();
+      expect(screen.getByText(/⚽ Legends Ascend/i)).toBeInTheDocument();
     });
   });
 
@@ -228,7 +228,7 @@ describe('AdminDashboard', () => {
 
       render(<AdminDashboard />);
 
-      expect(screen.getByText(/Legends Ascend/i)).toBeInTheDocument();
+      expect(screen.getByText(/⚽ Legends Ascend/i)).toBeInTheDocument();
     });
 
     it('should display Admin badge', () => {
