@@ -12,6 +12,8 @@ import { RegisterPage } from './components/auth/RegisterPage';
 import { LogoutButton } from './components/auth/LogoutButton';
 import { useAuth } from './hooks/useAuth';
 import { Dashboard } from './components/dashboard/Dashboard';
+import { AdminDashboard } from './pages/AdminDashboard';
+import { AdminRouteGuard } from './components/admin/AdminRouteGuard';
 import type { GameView } from './components/dashboard/Dashboard';
 
 const AppContainer = styled.div`
@@ -90,7 +92,7 @@ const Main = styled.main`
   min-height: calc(100vh - 100px);
 `;
 
-type View = 'landing' | 'privacy' | 'login' | 'register' | 'players' | 'lineup' | 'simulator' | 'leaderboard' | 'dashboard';
+type View = 'landing' | 'privacy' | 'login' | 'register' | 'players' | 'lineup' | 'simulator' | 'leaderboard' | 'dashboard' | 'admin';
 
 function App() {
   const [currentView, setCurrentView] = useState<View>('landing');
@@ -112,6 +114,9 @@ function App() {
       setCurrentView('login');
     } else if (path === '/register') {
       setCurrentView('register');
+    } else if (path === '/admin' || path.startsWith('/admin/')) {
+      // Admin routes (US-051)
+      setCurrentView('admin');
     } else if (path === '/game') {
       setCurrentView('dashboard');
       setDashboardView('lineup');
@@ -139,6 +144,12 @@ function App() {
         return <LoginPage />;
       case 'register':
         return <RegisterPage />;
+      case 'admin':
+        return (
+          <AdminRouteGuard>
+            <AdminDashboard />
+          </AdminRouteGuard>
+        );
       case 'dashboard':
         return <Dashboard initialView={dashboardView} />;
       case 'players':
@@ -157,6 +168,11 @@ function App() {
   // Show loading state while auth is initializing
   if (loading) {
     return null;
+  }
+
+  // Admin route handling - render without game RouteGuard
+  if (currentView === 'admin') {
+    return renderView();
   }
 
   // If showing dashboard (new navigation), render the Dashboard component directly

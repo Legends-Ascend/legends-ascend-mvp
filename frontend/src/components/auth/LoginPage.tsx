@@ -2,6 +2,7 @@
  * Login Page Component
  * Following BRANDING_GUIDELINE.md and ACCESSIBILITY_REQUIREMENTS.md
  * Implements US-045 FR-1
+ * Updated for US-051 admin login support
  */
 
 import { useState, useEffect, type FormEvent } from 'react';
@@ -261,8 +262,7 @@ export function LoginPage() {
         localStorage.removeItem(REMEMBER_USERNAME_KEY);
       }
       
-      // Redirect to dashboard after successful login
-      window.location.href = '/game/lineup';
+      // Redirect is now handled in AuthContext based on user role (US-051)
     } catch (error) {
       setErrors({
         form: error instanceof Error ? error.message : 'Login failed',
@@ -294,15 +294,16 @@ export function LoginPage() {
           )}
 
           <FormGroup>
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">Email or Username</Label>
             <Input
               id="email"
-              type="email"
+              type="text"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               disabled={isSubmitting}
               aria-describedby={errors.email ? 'email-error' : undefined}
               aria-invalid={!!errors.email}
+              placeholder="Enter email or admin username"
             />
             {errors.email && (
               <ErrorMessage id="email-error" role="alert">
