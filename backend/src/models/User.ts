@@ -41,9 +41,20 @@ export type CreateUser = z.infer<typeof CreateUserSchema>;
  * Admin users can log in with username 'supersaiyan'
  * Regular users log in with email
  */
+const USERNAME_REGEX = /^[a-zA-Z0-9._-]{3,30}$/;
+
 export const LoginSchema = z.object({
-  email: z.string().min(1, 'Email or username is required'),
-  password: z.string().min(1, 'Password is required'),
+  email: z
+    .string()
+    .trim()
+    .refine(
+      (val) =>
+        val.includes('@')
+          ? z.string().email().safeParse(val).success
+          : USERNAME_REGEX.test(val),
+      { message: 'Invalid email or username format' }
+    ),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
 });
 
 export type LoginInput = z.infer<typeof LoginSchema>;
