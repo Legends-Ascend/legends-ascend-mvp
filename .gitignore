@@ -150,6 +150,12 @@ junit.xml
 api/pnpm-lock.yaml
 backend/pnpm-lock.yaml
 
+# npm lock files (project uses pnpm)
+package-lock.json
+backend/package-lock.json
+frontend/package-lock.json
+api/package-lock.json
+
 # API compiled files (TypeScript sources are in api/, compiled output should not be committed)
 api/*.js
 api/*.js.map
