@@ -1,6 +1,7 @@
 import { Pool } from 'pg';
 import dotenv from 'dotenv';
 import bcrypt from 'bcrypt';
+import { ADMIN_USERNAME, ADMIN_PASSWORD, SALT_ROUNDS } from './adminConstants';
 
 dotenv.config();
 
@@ -250,10 +251,6 @@ export const initializeDatabase = async () => {
  */
 async function seedAdminAccount(): Promise<void> {
   try {
-    const ADMIN_USERNAME = 'supersaiyan';
-    const ADMIN_PASSWORD = 'wh4t15myd35t1ny!';
-    const SALT_ROUNDS = 10;
-
     // Check if admin already exists
     const existing = await query(
       'SELECT id FROM users WHERE username = $1',
@@ -278,9 +275,13 @@ async function seedAdminAccount(): Promise<void> {
 
     console.log('Admin account created successfully');
   } catch (error) {
-    console.error('Error seeding admin account:', error);
+    // Log detailed error but don't throw to prevent deployment failures
+    // Admin account can be manually created later if automatic seeding fails
+    console.error('ERROR: Failed to seed admin account during database initialization');
+    console.error('Error details:', error);
+    console.warn('WARNING: Admin account may need to be created manually');
+    console.warn(`Run: npm run seed -- or manually create user with username="${ADMIN_USERNAME}"`);
     // Don't throw - allow app to continue even if admin seed fails
-    // This prevents deployment failures but logs the error
   }
 }
 
