@@ -1,5 +1,7 @@
 import { Pool } from 'pg';
 import dotenv from 'dotenv';
+import bcrypt from 'bcrypt';
+import { ADMIN_USERNAME, ADMIN_PASSWORD, SALT_ROUNDS } from './adminConstants';
 
 dotenv.config();
 
@@ -233,10 +235,54 @@ export const initializeDatabase = async () => {
     `);
 
     console.log('Database tables initialized successfully');
+
+    // Seed admin account after database initialization (US-051)
+    await seedAdminAccount();
   } catch (error) {
     console.error('Error initializing database:', error);
     throw error;
   }
 };
+
+/**
+ * Seed admin account if it doesn't exist
+ * Per US-051 FR-1, FR-2, FR-3
+ * Called automatically during database initialization
+ */
+async function seedAdminAccount(): Promise<void> {
+  try {
+    // Check if admin already exists
+    const existing = await query(
+      'SELECT id FROM users WHERE username = $1',
+      [ADMIN_USERNAME]
+    );
+
+    if (existing.rows.length > 0) {
+      console.log('Admin account already exists, skipping seed');
+      return;
+    }
+
+    // Hash password with bcrypt (10 salt rounds per security requirements)
+    const passwordHash = await bcrypt.hash(ADMIN_PASSWORD, SALT_ROUNDS);
+
+    // Create admin account with role 'admin'
+    // Admin has a special internal email that cannot be used for login
+    await query(
+      `INSERT INTO users (username, email, password_hash, role) 
+       VALUES ($1, $2, $3, 'admin')`,
+      [ADMIN_USERNAME, `${ADMIN_USERNAME}@admin.legendsascend.local`, passwordHash]
+    );
+
+    console.log('Admin account created successfully');
+  } catch (error) {
+    // Log detailed error but don't throw to prevent deployment failures
+    // Admin account can be manually created later if automatic seeding fails
+    console.error('ERROR: Failed to seed admin account during database initialization');
+    console.error('Error details:', error);
+    console.warn('WARNING: Admin account may need to be created manually');
+    console.warn(`Run: npm run seed -- or manually create user with username="${ADMIN_USERNAME}"`);
+    // Don't throw - allow app to continue even if admin seed fails
+  }
+}
 
 export default pool;
